@@ -1,200 +1,173 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaChartBar, FaCog, FaUser, FaUsers, FaFolder, FaHome, FaUserTie} from 'react-icons/fa';
+import React, { useContext } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { AuthContext } from '../contexts/AuthContext';
 
-const MainLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
-  
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-  
-  return (
-    <LayoutContainer>
-      <Sidebar open={sidebarOpen}>
-        <SidebarHeader>
-          <Logo>Protection Juridique Complémentaire</Logo>
-          <CloseButton onClick={toggleSidebar}>
-            <FaTimes />
-          </CloseButton>
-        </SidebarHeader>
-        
-        <NavMenu>
-          <NavItem isActive={location.pathname === '/'}>
-            <NavLink to="/" end>
-              <FaHome />
-              <span>Tableau de bord</span>
-            </NavLink>
-          </NavItem>
-          
-          <NavItem isActive={location.pathname.includes('/affaires')}>
-            <NavLink to="/affaires">
-              <FaFolder />
-              <span>Affaires</span>
-            </NavLink>
-          </NavItem>
-          
-          <NavItem isActive={location.pathname.includes('/militaires')}>
-            <NavLink to="/militaires">
-              <FaUser />
-              <span>Militaires</span>
-            </NavLink>
-          </NavItem>
-          
-          <NavItem isActive={location.pathname.includes('/beneficiaires')}>
-            <NavLink to="/beneficiaires">
-              <FaUsers />
-              <span>Bénéficiaires</span>
-            </NavLink>
-          </NavItem>
-
-          <NavItem isActive={location.pathname.includes('/avocats')}>
-            <NavLink to="/avocats">
-              <FaUserTie />
-              <span>Avocats</span>
-            </NavLink>
-          </NavItem>
-
-          
-          <NavItem isActive={location.pathname.includes('/statistiques')}>
-            <NavLink to="/statistiques">
-              <FaChartBar />
-              <span>Statistiques</span>
-            </NavLink>
-          </NavItem>
-          
-          <NavItem isActive={location.pathname.includes('/parametres')}>
-            <NavLink to="/parametres">
-              <FaCog />
-              <span>Paramètres</span>
-            </NavLink>
-          </NavItem>
-        </NavMenu>
-      </Sidebar>
-      
-      <MainContent sidebarOpen={sidebarOpen}>
-        <Header>
-          <MenuButton onClick={toggleSidebar}>
-            <FaBars />
-          </MenuButton>
-          
-          <div>
-            {/* Emplacement pour d'autres éléments d'en-tête */}
-          </div>
-        </Header>
-        
-        <ContentContainer>
-          <Outlet />
-        </ContentContainer>
-      </MainContent>
-    </LayoutContainer>
-  );
-};
-
-const LayoutContainer = styled.div`
+const Container = styled.div`
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
 `;
 
-const Sidebar = styled.aside`
-  width: 250px;
-  background-color: #1a237e;
-  color: #fff;
-  transition: all 0.3s;
-  transform: ${({open}) => open ? 'translateX(0)' : 'translateX(-100%)'};
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-`;
-
-const SidebarHeader = styled.div`
+const Header = styled.header`
+  background-color: #003366;
+  color: white;
+  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
-const Logo = styled.div`
-  font-weight: bold;
-  font-size: 18px;
+const AppTitle = styled.h1`
+  margin: 0;
+  font-size: 1.5rem;
 `;
 
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+const Nav = styled.nav`
+  background-color: #f0f0f0;
+  padding: 0.5rem 1rem;
 `;
 
-const NavMenu = styled.ul`
+const NavList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  gap: 1rem;
 `;
 
 const NavItem = styled.li`
   a {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    color: #fff;
+    color: #333;
     text-decoration: none;
-    transition: background-color 0.2s;
+    padding: 0.5rem;
+    font-weight: ${props => props.active ? 'bold' : 'normal'};
+    border-bottom: ${props => props.active ? '2px solid #003366' : 'none'};
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      text-decoration: none;
-    }
-    
-    span {
-      margin-left: 10px;
+      color: #003366;
     }
   }
-  
-  background-color: ${props => props.isActive ? 'rgba(255, 255, 255, 0.2)' : 'transparent'};
 `;
 
-const MainContent = styled.main`
-  flex: 1;
-  margin-left: ${props => props.sidebarOpen ? '250px' : '0'};
-  transition: margin-left 0.3s;
-  width: calc(100% - ${props => props.sidebarOpen ? '250px' : '0'});
-`;
-
-const Header = styled.header`
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 10px 20px;
+const UserSection = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  position: fixed;
-  width: inherit;
-  z-index: 99;
+  gap: 1rem;
 `;
 
-const MenuButton = styled.button`
-  background: none;
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+`;
+
+const UserRole = styled.span`
+  font-size: 0.8rem;
+  background-color: ${props => props.isAdmin ? '#4caf50' : '#3f51b5'};
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 8px;
+`;
+
+const LogoutButton = styled.button`
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
   border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  font-size: 20px;
-  color: #333;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
 `;
 
-const ContentContainer = styled.div`
-  padding: 80px 20px 20px;
-  height: 100%;
-  overflow-y: auto;
+const Content = styled.main`
+  flex: 1;
+  padding: 1rem;
 `;
+
+const Footer = styled.footer`
+  background-color: #f0f0f0;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+`;
+
+const MainLayout = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAdmin } = useContext(AuthContext);
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+  
+  return (
+    <Container>
+      <Header>
+        <AppTitle>Protection Juridique Complémentaire - BRPF</AppTitle>
+        
+        {user && (
+          <UserSection>
+            <UserInfo>
+              <FaUser />
+              <span>{user.nom}</span>
+              <UserRole isAdmin={isAdmin()}>
+                {isAdmin() ? 'Administrateur' : 'Rédacteur'}
+              </UserRole>
+            </UserInfo>
+            
+            <LogoutButton onClick={handleLogout}>
+              <FaSignOutAlt />
+              <span>Déconnexion</span>
+            </LogoutButton>
+          </UserSection>
+        )}
+      </Header>
+      
+      <Nav>
+        <NavList>
+          <NavItem active={location.pathname === '/' || location.pathname === '/dashboard'}>
+            <Link to="/">Tableau de bord</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/affaires')}>
+            <Link to="/affaires">Affaires</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/militaires')}>
+            <Link to="/militaires">Militaires</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/beneficiaires')}>
+            <Link to="/beneficiaires">Bénéficiaires</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/avocats')}>
+            <Link to="/avocats">Avocats</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/statistiques')}>
+            <Link to="/statistiques">Statistiques</Link>
+          </NavItem>
+          <NavItem active={location.pathname.startsWith('/parametres')}>
+            <Link to="/parametres">Paramètres</Link>
+          </NavItem>
+        </NavList>
+      </Nav>
+      
+      <Content>
+        <Outlet />
+      </Content>
+      
+    </Container>
+  );
+};
 
 export default MainLayout;

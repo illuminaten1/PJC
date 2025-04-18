@@ -34,7 +34,8 @@ app.use('/api/parametres', parametresRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/statistiques', statistiquesRoutes);
 app.use('/api/templates', templatesRoutes);
-
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/utilisateurs', require('./routes/utilisateurs'));
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

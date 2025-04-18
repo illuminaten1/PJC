@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt, FaFileExcel } from 'react-icons/fa';
+import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt } from 'react-icons/fa';
 import { statistiquesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
@@ -543,20 +543,6 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const GlobalStatsWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const StatsBlock = styled.div`
-  background: white;
-  border-radius: 4px;
-  padding: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 `;
 
 const BlockTitle = styled.h3`

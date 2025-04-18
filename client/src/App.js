@@ -1,52 +1,71 @@
-import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
+
+// Contextes
 import AppContext from './contexts/AppContext';
+import { AuthProvider } from './contexts/AuthContext';
+
+// Composant de route privée
+import PrivateRoute from './utils/PrivateRoute';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
 
-// Pages
+// Pages publiques
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+
+// Pages privées
 import Dashboard from './pages/Dashboard';
 import Affaires from './pages/Affaires';
-import Avocats from './pages/Avocats';
 import DetailAffaire from './pages/DetailAffaire';
 import Militaires from './pages/Militaires';
 import DetailMilitaire from './pages/DetailMilitaire';
 import Beneficiaires from './pages/Beneficiaires';
 import DetailBeneficiaire from './pages/DetailBeneficiaire';
+import Avocats from './pages/Avocats';
 import Statistiques from './pages/Statistiques';
 import Parametres from './pages/Parametres';
-import NotFound from './pages/NotFound';
-
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
-  
-  const context = {
-    darkMode,
-    toggleDarkMode: () => setDarkMode(!darkMode)
-  };
-  
   return (
-    <AppContext.Provider value={context}>
-      <div className={darkMode ? 'app dark-mode' : 'app'}>
-        <Routes>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="affaires" element={<Affaires />} />
-            <Route path="affaires/:id" element={<DetailAffaire />} />
-            <Route path="militaires" element={<Militaires />} />
-            <Route path="militaires/:id" element={<DetailMilitaire />} />
-            <Route path="beneficiaires" element={<Beneficiaires />} />
-            <Route path="beneficiaires/:id" element={<DetailBeneficiaire />} />
-            <Route path="avocats" element={<Avocats />} />
-            <Route path="statistiques" element={<Statistiques />} />
-            <Route path="parametres" element={<Parametres />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </div>
-    </AppContext.Provider>
+    <Router>
+      <AuthProvider>
+        <AppContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
+          <Routes>
+            {/* Route publique */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* Routes privées (utilisateurs authentifiés) */}
+            <Route element={<PrivateRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/affaires" element={<Affaires />} />
+                <Route path="/affaires/:id" element={<DetailAffaire />} />
+                <Route path="/militaires" element={<Militaires />} />
+                <Route path="/militaires/:id" element={<DetailMilitaire />} />
+                <Route path="/beneficiaires" element={<Beneficiaires />} />
+                <Route path="/beneficiaires/:id" element={<DetailBeneficiaire />} />
+                <Route path="/avocats" element={<Avocats />} />
+                <Route path="/statistiques" element={<Statistiques />} />
+                <Route path="/parametres" element={<Parametres />} />
+              </Route>
+            </Route>
+            
+            {/* Routes privées (admin uniquement)
+            <Route element={<PrivateRoute requireAdmin={true} />}>
+              <Route element={<MainLayout />}>
+              </Route>
+            </Route> */}
+            
+            {/* Redirection et route 404 */}
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </AppContext.Provider>
+      </AuthProvider>
+    </Router>
   );
 }
 

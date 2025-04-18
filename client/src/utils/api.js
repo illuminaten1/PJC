@@ -1,14 +1,57 @@
 import axios from 'axios';
 
-const API_URL = '/api';
-
-// Configuration d'Axios
+// Configuration d'axios pour les requêtes API
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
   }
 });
+
+// Intercepteur pour ajouter le token d'authentification à chaque requête
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['x-auth-token'] = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Intercepteur pour gérer les erreurs d'authentification
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Si le token est expiré ou invalide, déconnecter l'utilisateur
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// API pour l'authentification
+export const authAPI = {
+  login: (username, password) => api.post('/auth/login', { username, password }),
+  verify: () => api.get('/auth/verify'),
+  initAdmin: () => api.post('/auth/init')
+};
+
+// API pour la gestion des utilisateurs
+export const utilisateursAPI = {
+  getAll: () => api.get('/utilisateurs'),
+  getById: (id) => api.get(`/utilisateurs/${id}`),
+  create: (userData) => api.post('/utilisateurs', userData),
+  update: (id, userData) => api.put(`/utilisateurs/${id}`, userData),
+  delete: (id) => api.delete(`/utilisateurs/${id}`),
+  changePassword: (id, password) => api.patch(`/utilisateurs/${id}/password`, { password }),
+  toggleStatus: (id) => api.patch(`/utilisateurs/${id}/toggle-actif`)
+};
 
 // API pour les affaires
 export const affairesAPI = {
@@ -17,30 +60,24 @@ export const affairesAPI = {
   getArborescence: (id) => api.get(`/affaires/${id}/arborescence`),
   create: (data) => api.post('/affaires', data),
   update: (id, data) => api.put(`/affaires/${id}`, data),
-  delete: (id) => api.delete(`/affaires/${id}`),
-  archive: (id, archive) => api.patch(`/affaires/${id}/archive`, { archive })
+  delete: (id, motDePasse) => api.delete(`/affaires/${id}`, { 
+    data: { motDePasse } 
+  }),
+  toggleArchive: (id) => api.patch(`/affaires/${id}/archive`)
 };
 
 // API pour les avocats
 export const avocatsAPI = {
-  getAll: () => axios.get('/api/avocats'),
-  getById: (id) => axios.get(`/api/avocats/${id}`),
-  create: (data) => axios.post('/api/avocats', data),
-  update: (id, data) => axios.put(`/api/avocats/${id}`, data),
-  delete: (id) => axios.delete(`/api/avocats/${id}`),
-  getCabinets: () => axios.get('/api/avocats/utils/cabinets'),
-  getVilles: () => axios.get('/api/avocats/utils/villes'),
-  searchByVille: (ville) => axios.get(`/api/avocats/search/ville/${ville}`)
-};
-
-// API pour les militaires
-export const militairesAPI = {
-  getAll: (params) => api.get('/militaires', { params }),
-  getById: (id) => api.get(`/militaires/${id}`),
-  create: (data) => api.post('/militaires', data),
-  update: (id, data) => api.put(`/militaires/${id}`, data),
-  delete: (id) => api.delete(`/militaires/${id}`)
-  // Pas de fonction d'archivage, car géré uniquement au niveau de l'affaire
+  getAll: (params) => api.get('/avocats', { params }),
+  getById: (id) => api.get(`/avocats/${id}`),
+  getCabinets: () => api.get('/avocats/utils/cabinets'),
+  getVilles: () => api.get('/avocats/utils/villes'),
+  searchByVille: (ville) => api.get(`/avocats/search/ville/${ville}`),
+  create: (data) => api.post('/avocats', data),
+  update: (id, data) => api.put(`/avocats/${id}`, data),
+  delete: (id, motDePasse) => api.delete(`/avocats/${id}`, { 
+    data: { motDePasse } 
+  })
 };
 
 // API pour les bénéficiaires
@@ -49,120 +86,79 @@ export const beneficiairesAPI = {
   getById: (id) => api.get(`/beneficiaires/${id}`),
   create: (data) => api.post('/beneficiaires', data),
   update: (id, data) => api.put(`/beneficiaires/${id}`, data),
-  delete: (id) => api.delete(`/beneficiaires/${id}`),
+  delete: (id, motDePasse) => api.delete(`/beneficiaires/${id}`, { 
+    data: { motDePasse } 
+  }),
   addConvention: (id, data) => api.post(`/beneficiaires/${id}/conventions`, data),
+  updateConvention: (id, conventionId, data) => api.put(`/beneficiaires/${id}/conventions/${conventionId}`, data),
   addPaiement: (id, data) => api.post(`/beneficiaires/${id}/paiements`, data)
 };
 
-// API pour les documents
-export const documentsAPI = {
-  // Générer une convention d'honoraires (avec support PDF et ODT)
-  genererConvention: (beneficiaireId, conventionIndex, format = 'pdf') => 
-    api.post(`/documents/convention/${beneficiaireId}/${conventionIndex}?format=${format}`, {}, 
-      { responseType: 'blob' }),
-  
-  // Générer une fiche de règlement (avec support PDF et ODT)
-  genererReglement: (beneficiaireId, paiementIndex, format = 'pdf') => 
-    api.post(`/documents/reglement/${beneficiaireId}/${paiementIndex}?format=${format}`, {}, 
-      { responseType: 'blob' }),
-  
-  // Générer une fiche d'information
-  genererFicheInformation: (data, format = 'docx') => 
-    api.post('/documents/fiche-information', { ...data, format }, 
-      { responseType: 'blob' }),
-
-  // Générer une fiche de synthèse
-  genererSyntheseAffaire: (affaireId, format = 'pdf') =>
-    api.post(`/documents/synthese-affaire/${affaireId}?format=${format}`, {}, 
-      { responseType: 'blob' })
-  
+// API pour les militaires
+export const militairesAPI = {
+  getAll: (params) => api.get('/militaires', { params }),
+  getById: (id) => api.get(`/militaires/${id}`),
+  create: (data) => api.post('/militaires', data),
+  update: (id, data) => api.put(`/militaires/${id}`, data),
+  delete: (id, motDePasse) => api.delete(`/militaires/${id}`, { 
+    data: { motDePasse } 
+  })
 };
 
-// API pour les statistiques
-export const statistiquesAPI = {
-  getAll: (params) => api.get('/statistiques', { params }),
-  getByAnnee: (annee) => api.get(`/statistiques/annee/${annee}`),
-  getByAffaire: (id) => api.get(`/statistiques/affaire/${id}`),
-  getByMilitaire: (id) => api.get(`/statistiques/militaire/${id}`),
-  getBudgetByAnnee: (annee) => api.get(`/statistiques/budget/${annee}`)
+// API pour la génération de documents
+export const documentsAPI = {
+  genererConvention: (beneficiaireId, conventionId) => 
+    api.post(`/documents/convention/${beneficiaireId}/${conventionId}`, {}, { 
+      responseType: 'blob' 
+    }),
+  genererReglement: (beneficiaireId, paiementId) => 
+    api.post(`/documents/reglement/${beneficiaireId}/${paiementId}`, {}, { 
+      responseType: 'blob' 
+    }),
+  genererFicheInformation: (data) => 
+    api.post(`/documents/fiche-information`, data, { 
+      responseType: 'blob' 
+    })
+};
+
+// API pour les templates
+export const templatesAPI = {
+  getAll: () => api.get('/templates'),
+  getById: (id) => api.get(`/templates/${id}`),
+  create: (data) => api.post('/templates', data),
+  update: (id, data) => api.put(`/templates/${id}`, data),
+  delete: (id) => api.delete(`/templates/${id}`),
+  getStatus: () => api.get('/templates/status'),
+  downloadTemplate: (type) => api.get(`/templates/download/${type}`, { 
+    responseType: 'blob' 
+  }),
+  uploadTemplate: (type, formData) => api.post(`/templates/upload/${type}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
+  restoreTemplate: (type) => api.post(`/templates/restore/${type}`)
 };
 
 // API pour les paramètres
 export const parametresAPI = {
   getAll: () => api.get('/parametres'),
-  getByType: (type) => api.get(`/parametres/${type}`),
-  updateByType: (type, valeurs) => api.post(`/parametres/${type}`, { valeurs }),
-  addValue: (type, valeur) => api.put(`/parametres/${type}`, { valeur }),
+  addValue: (type, valeur) => api.post(`/parametres/${type}`, { valeur }),
   deleteValue: (type, index) => api.delete(`/parametres/${type}/${index}`),
-  // Nouvelle méthode pour le transfert de portefeuille
   transferPortfolio: (sourceRedacteur, targetRedacteur) => 
-    api.post('/parametres/transfert-portefeuille', { 
-      sourceRedacteur, 
-      targetRedacteur 
-    })
-    .catch(error => {
-      console.error('Détails de l\'erreur:', error.response?.data || error.message);
-      throw error;
-    }),
-  // Nouvelle méthode pour obtenir l'historique des transferts
-  getTransferHistory: () => api.get('/parametres/historique-transferts')
+    api.post('/parametres/transfert', { sourceRedacteur, targetRedacteur }),
+  getTransferHistory: () => api.get('/parametres/transfert/historique')
 };
 
-// API pour les templates
-export const templatesAPI = {
-  // Récupérer le statut des templates (personnalisé ou par défaut)
-  getStatus: () => api.get('/templates/status'),
-  
-  // Télécharger un template
-  downloadTemplate: (templateType) => 
-    api.get(`/templates/download/${templateType}`, { 
-      responseType: 'blob' 
-    }),
-  
-  // Uploader un template personnalisé
-  uploadTemplate: (templateType, formData) => 
-    api.post(`/templates/upload/${templateType}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }),
-  
-  // Restaurer un template par défaut
-  restoreTemplate: (templateType) => api.post(`/templates/restore/${templateType}`),
-  
-  // Définir un nouveau template par défaut
-  setDefaultTemplate: (templateType, formData) => 
-    api.post(`/templates/set-default/${templateType}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-};
-
-// API pour les décisions
-export const decisionsAPI = {
-  // Récupérer toutes les décisions d'un bénéficiaire
-  getByBeneficiaire: (beneficiaireId) => {
-    return axios.get(`/api/decisions/beneficiaire/${beneficiaireId}`);
-  },
-  
-  // Créer une nouvelle décision
-  create: (data) => {
-    return axios.post('/api/decisions', data);
-  },
-  
-  // Supprimer une décision
-  delete: (id) => {
-    return axios.delete(`/api/decisions/${id}`);
-  },
-  
-  // Générer un document de décision (PDF ou ODT)
-  genererDocument: (id, format = 'pdf') => {
-    // Utiliser window.open pour déclencher le téléchargement
-    window.open(`/api/decisions/generer/${id}?format=${format}`, '_blank');
-    // Retourner un objet qui simule une promesse résolue
-    return { then: (callback) => callback() };
-  }
+// API pour les statistiques
+export const statistiquesAPI = {
+  getAll: () => api.get('/statistiques'),
+  getByAnnee: (year) => api.get(`/statistiques/annee/${year}`),
+  getByYear: (year) => api.get(`/statistiques/annee/${year}`), // pour la compatibilité
+  getByAffaire: (affaireId) => api.get(`/statistiques/affaire/${affaireId}`),
+  getByMilitaire: (militaireId) => api.get(`/statistiques/militaire/${militaireId}`),
+  getBudget: (year) => api.get(`/statistiques/budget/${year}`),
+  getBudgetByAnnee: (year) => api.get(`/statistiques/budget/${year}`) // pour la compatibilité
 };
 
 export default api;

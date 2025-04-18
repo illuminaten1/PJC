@@ -95,14 +95,6 @@ const Content = styled.main`
   padding: 1rem;
 `;
 
-const Footer = styled.footer`
-  background-color: #f0f0f0;
-  padding: 1rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #666;
-`;
-
 const MainLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();

@@ -27,7 +27,10 @@ export const avocatsAPI = {
   getById: (id) => axios.get(`/api/avocats/${id}`),
   create: (data) => axios.post('/api/avocats', data),
   update: (id, data) => axios.put(`/api/avocats/${id}`, data),
-  delete: (id) => axios.delete(`/api/avocats/${id}`)
+  delete: (id) => axios.delete(`/api/avocats/${id}`),
+  getCabinets: () => axios.get('/api/avocats/utils/cabinets'),
+  getVilles: () => axios.get('/api/avocats/utils/villes'),
+  searchByVille: (ville) => axios.get(`/api/avocats/search/ville/${ville}`)
 };
 
 // API pour les militaires

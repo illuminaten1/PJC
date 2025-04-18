@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaSort, FaSortUp, FaSortDown, FaFilter, FaEye } from 'react-icons/fa';
 import { avocatsAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import AvocatForm from '../components/forms/AvocatForm';
+import AvocatDetail from '../components/specific/AvocatDetail';
 
 const Avocats = () => {
   const [avocats, setAvocats] = useState([]);
@@ -13,10 +14,20 @@ const Avocats = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [editingAvocat, setEditingAvocat] = useState(null);
+  const [selectedAvocat, setSelectedAvocat] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedAvocatId, setSelectedAvocatId] = useState(null);
   const [deleteError, setDeleteError] = useState('');
+  
+  // État pour les filtres
+  const [filters, setFilters] = useState({
+    region: '',
+    specialisationRPC: false,
+    ville: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
   
   // État pour le tri
   const [sortConfig, setSortConfig] = useState({ key: 'nom', direction: 'asc' });
@@ -40,32 +51,94 @@ const Avocats = () => {
     }
   };
 
-  // Effet pour la recherche
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredAvocats(avocats);
-    } else {
-      const term = searchTerm.toLowerCase();
-      const filtered = avocats.filter(avocat => 
-        `${avocat.nom} ${avocat.prenom}`.toLowerCase().includes(term) ||
-        avocat.email.toLowerCase().includes(term)
-      );
-      setFilteredAvocats(filtered);
+  // Extraire toutes les régions uniques des avocats
+  const regions = [...new Set(avocats.filter(a => a.region).map(a => a.region))].sort();
+  
+  // Extraire toutes les villes d'intervention uniques
+  const villesIntervention = avocats.reduce((acc, avocat) => {
+    if (avocat.villesIntervention && Array.isArray(avocat.villesIntervention)) {
+      avocat.villesIntervention.forEach(ville => {
+        if (ville && !acc.includes(ville)) {
+          acc.push(ville);
+        }
+      });
     }
-  }, [searchTerm, avocats]);
+    return acc;
+  }, []).sort();
+
+  // Effet pour la recherche et les filtres
+  useEffect(() => {
+    let result = avocats;
+    
+    // Appliquer la recherche
+    if (searchTerm.trim() !== '') {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(avocat => 
+        `${avocat.nom} ${avocat.prenom}`.toLowerCase().includes(term) ||
+        avocat.email.toLowerCase().includes(term) ||
+        (avocat.cabinet && avocat.cabinet.toLowerCase().includes(term))
+      );
+    }
+    
+    // Appliquer les filtres
+    if (filters.region) {
+      result = result.filter(avocat => avocat.region === filters.region);
+    }
+    
+    if (filters.specialisationRPC) {
+      result = result.filter(avocat => avocat.specialisationRPC);
+    }
+    
+    if (filters.ville) {
+      result = result.filter(avocat => 
+        avocat.villesIntervention && 
+        Array.isArray(avocat.villesIntervention) && 
+        avocat.villesIntervention.includes(filters.ville)
+      );
+    }
+    
+    setFilteredAvocats(result);
+  }, [searchTerm, filters, avocats]);
 
   // Effet pour le tri
   useEffect(() => {
     let sortedAvocats = [...filteredAvocats];
     if (sortConfig.key) {
       sortedAvocats.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
+        // Gestion spéciale pour les champs imbriqués comme adresse.ville
+        if (sortConfig.key.includes('.')) {
+          const keys = sortConfig.key.split('.');
+          let valueA = a;
+          let valueB = b;
+          
+          for (const key of keys) {
+            valueA = valueA?.[key];
+            valueB = valueB?.[key];
+          }
+          
+          if (!valueA) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (!valueB) return sortConfig.direction === 'asc' ? 1 : -1;
+          
+          if (valueA < valueB) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+          }
+          if (valueA > valueB) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        } else {
+          // Tri normal pour les champs simples
+          if (!a[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (!b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+          
+          if (a[sortConfig.key] < b[sortConfig.key]) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+          }
+          if (a[sortConfig.key] > b[sortConfig.key]) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
-        return 0;
       });
     }
     setFilteredAvocats(sortedAvocats);
@@ -85,10 +158,31 @@ const Avocats = () => {
     }
     return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
   };
+  
+  const handleFilterChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+  
+  const resetFilters = () => {
+    setFilters({
+      region: '',
+      specialisationRPC: false,
+      ville: ''
+    });
+  };
 
   const handleOpenModal = (avocat = null) => {
     setEditingAvocat(avocat);
     setModalOpen(true);
+  };
+  
+  const handleOpenDetailModal = (avocat) => {
+    setSelectedAvocat(avocat);
+    setDetailModalOpen(true);
   };
 
   const handleSubmit = async (data) => {
@@ -122,6 +216,15 @@ const Avocats = () => {
     setSelectedAvocatId(avocatId);
     setDeleteModalOpen(true);
   };
+  
+  const getRegionLabel = (region) => {
+    if (!region) return '';
+    if (region.startsWith('Nouvelle-')) return 'N. ' + region.substring(9);
+    if (region.startsWith('Provence-')) return 'PACA';
+    if (region.startsWith('Auvergne-')) return 'Auv. R-A';
+    if (region.startsWith('Bourgogne-')) return 'B. F-C';
+    return region;
+  };
 
   if (loading && avocats.length === 0) {
     return (
@@ -145,19 +248,78 @@ const Avocats = () => {
       />
 
       <ControlsPanel>
-        <SearchBar>
-          <SearchIcon><FaSearch /></SearchIcon>
-          <SearchInput
-            type="text"
-            placeholder="Rechercher un avocat..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </SearchBar>
+        <SearchFilterContainer>
+          <SearchBar>
+            <SearchIcon><FaSearch /></SearchIcon>
+            <SearchInput
+              type="text"
+              placeholder="Rechercher un avocat..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </SearchBar>
+          
+          <FilterToggle onClick={() => setShowFilters(!showFilters)}>
+            <FaFilter />
+            <span>Filtres</span>
+          </FilterToggle>
+        </SearchFilterContainer>
+        
         <ResultCount>
           {filteredAvocats.length} avocat{filteredAvocats.length !== 1 ? 's' : ''} trouvé{filteredAvocats.length !== 1 ? 's' : ''}
         </ResultCount>
       </ControlsPanel>
+      
+      {showFilters && (
+        <FiltersPanel>
+          <FilterGroup>
+            <FilterLabel>Région</FilterLabel>
+            <FilterSelect 
+              name="region" 
+              value={filters.region} 
+              onChange={handleFilterChange}
+            >
+              <option value="">Toutes les régions</option>
+              {regions.map((region, index) => (
+                <option key={index} value={region}>{region}</option>
+              ))}
+            </FilterSelect>
+          </FilterGroup>
+          
+          <FilterGroup>
+            <FilterLabel>Ville d'intervention</FilterLabel>
+            <FilterSelect 
+              name="ville" 
+              value={filters.ville} 
+              onChange={handleFilterChange}
+            >
+              <option value="">Toutes les villes</option>
+              {villesIntervention.map((ville, index) => (
+                <option key={index} value={ville}>{ville}</option>
+              ))}
+            </FilterSelect>
+          </FilterGroup>
+          
+          <FilterGroup inline>
+            <FilterCheckbox>
+              <input
+                type="checkbox"
+                name="specialisationRPC"
+                id="filter-rpc"
+                checked={filters.specialisationRPC}
+                onChange={handleFilterChange}
+              />
+              <FilterLabel htmlFor="filter-rpc" inline>
+                Spécialisation RPC uniquement
+              </FilterLabel>
+            </FilterCheckbox>
+          </FilterGroup>
+          
+          <ResetButton onClick={resetFilters}>
+            Réinitialiser les filtres
+          </ResetButton>
+        </FiltersPanel>
+      )}
 
       {error ? (
         <Error>{error}</Error>
@@ -179,15 +341,27 @@ const Avocats = () => {
                       <SortIcon>{getSortIcon('prenom')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('email')}>
+                  <Th onClick={() => handleSort('cabinet')}>
                     <ThContent>
-                      Email
-                      <SortIcon>{getSortIcon('email')}</SortIcon>
+                      Cabinet
+                      <SortIcon>{getSortIcon('cabinet')}</SortIcon>
+                    </ThContent>
+                  </Th>
+                  <Th onClick={() => handleSort('region')}>
+                    <ThContent>
+                      Région
+                      <SortIcon>{getSortIcon('region')}</SortIcon>
+                    </ThContent>
+                  </Th>
+                  <Th onClick={() => handleSort('villesIntervention')}>
+                    <ThContent>
+                      Villes d'intervention
+                      <SortIcon>{getSortIcon('villesIntervention')}</SortIcon>
                     </ThContent>
                   </Th>
                   <Th onClick={() => handleSort('specialisationRPC')}>
                     <ThContent>
-                      Spécialisation
+                      Spé.
                       <SortIcon>{getSortIcon('specialisationRPC')}</SortIcon>
                     </ThContent>
                   </Th>
@@ -196,29 +370,57 @@ const Avocats = () => {
               </TableHead>
               <TableBody>
                 {filteredAvocats.map((avocat) => (
-                  <tr key={avocat._id}>
+                  <tr 
+                    key={avocat._id}
+                    onClick={() => handleOpenDetailModal(avocat)}
+                    className="clickable-row"
+                  >
                     <Td>{avocat.nom}</Td>
                     <Td>{avocat.prenom}</Td>
+                    <Td>{avocat.cabinet || '-'}</Td>
                     <Td>
-                      {avocat.email ? (
-                        <AvocatEmail href={`mailto:${avocat.email}`}>
-                          {avocat.email}
-                        </AvocatEmail>
+                      {avocat.region ? (
+                        <RegionBadge title={avocat.region}>
+                          {getRegionLabel(avocat.region)}
+                        </RegionBadge>
                       ) : (
-                        'Non spécifié'
+                        '-'
                       )}
                     </Td>
                     <Td>
+                      {avocat.villesIntervention && avocat.villesIntervention.length > 0 ? (
+                        <VillesContainer>
+                          {avocat.villesIntervention.slice(0, 2).map((ville, index) => (
+                            <VilleTag key={index}>{ville}</VilleTag>
+                          ))}
+                          {avocat.villesIntervention.length > 2 && (
+                            <VilleTag className="more">+{avocat.villesIntervention.length - 2}</VilleTag>
+                          )}
+                        </VillesContainer>
+                      ) : '-'}
+                    </Td>                    <Td>
                       {avocat.specialisationRPC && (
                         <RPCTag>RPC</RPCTag>
                       )}
                     </Td>
-                    <TdActions>
-                      <ActionButton onClick={() => handleOpenModal(avocat)} title="Modifier">
+                    <TdActions onClick={(e) => e.stopPropagation()}>
+                      <ActionButton title="Voir le détail" onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDetailModal(avocat);
+                      }}>
+                        <FaEye />
+                      </ActionButton>
+                      <ActionButton onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(avocat);
+                      }} title="Modifier">
                         <FaEdit />
                       </ActionButton>
                       <ActionButton 
-                        onClick={() => openDeleteModal(avocat._id)} 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(avocat._id);
+                        }} 
                         title="Supprimer"
                         className="delete"
                       >
@@ -235,11 +437,12 @@ const Avocats = () => {
         </TableContainer>
       )}
 
+      {/* Modal de formulaire d'ajout/modification */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editingAvocat ? "Modifier un avocat" : "Ajouter un avocat"}
-        size="medium"
+        size="large"
       >
         <AvocatForm 
           onSubmit={handleSubmit}
@@ -247,7 +450,26 @@ const Avocats = () => {
           isEditing={!!editingAvocat}
         />
       </Modal>
+      
+      {/* Modal de détail d'avocat */}
+      <Modal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        title="Détails de l'avocat"
+        size="large"
+      >
+        {selectedAvocat && (
+          <AvocatDetail 
+            avocat={selectedAvocat} 
+            onEditClick={() => {
+              setDetailModalOpen(false);
+              handleOpenModal(selectedAvocat);
+            }}
+          />
+        )}
+      </Modal>
 
+      {/* Modal de confirmation de suppression */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -292,10 +514,21 @@ const ControlsPanel = styled.div`
   }
 `;
 
+const SearchFilterContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-grow: 1;
+  max-width: 700px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
 const SearchBar = styled.div`
   position: relative;
   flex-grow: 1;
-  max-width: 500px;
 `;
 
 const SearchIcon = styled.div`
@@ -306,21 +539,114 @@ const SearchIcon = styled.div`
   color: #757575;
 `;
 
-const ResultCount = styled.div`
-  font-size: 14px;
-  color: #757575;
-`;
-
 const SearchInput = styled.input`
   width: 100%;
   padding: 10px 10px 10px 35px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  height: 100%;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
     border-color: #3f51b5;
+  }
+`;
+
+const ResultCount = styled.div`
+  font-size: 14px;
+  color: #757575;
+`;
+
+const FilterToggle = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  
+  &:hover {
+    background-color: #e0e0e0;
+  }
+`;
+
+const FiltersPanel = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  align-items: flex-end;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const FilterGroup = styled.div`
+  flex: 1;
+  min-width: 200px;
+  
+  ${props => props.inline && `
+    flex: auto;
+    min-width: auto;
+  `}
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const FilterLabel = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  ${props => props.inline && `
+    display: inline;
+    margin-bottom: 0;
+  `}
+`;
+
+const FilterSelect = styled.select`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  
+  &:focus {
+    outline: none;
+    border-color: #3f51b5;
+  }
+`;
+
+const FilterCheckbox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ResetButton = styled.button`
+  background: none;
+  border: none;
+  color: #f44336;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px;
+  
+  &:hover {
+    text-decoration: underline;
   }
 `;
 
@@ -360,7 +686,7 @@ const ThActions = styled.th`
   text-align: center;
   font-weight: 500;
   color: #333;
-  width: 100px;
+  width: 120px;
 `;
 
 const ThContent = styled.div`
@@ -383,6 +709,10 @@ const TableBody = styled.tbody`
     &:hover {
       background-color: #f9f9f9;
     }
+    
+    &.clickable-row {
+      cursor: pointer;
+    }
   }
 `;
 
@@ -400,14 +730,14 @@ const TdActions = styled.td`
   gap: 8px;
 `;
 
-const AvocatEmail = styled.a`
-  font-size: 14px;
-  color: #3f51b5;
-  text-decoration: none;
-  
-  &:hover {
-    text-decoration: underline;
-  }
+const RegionBadge = styled.span`
+  display: inline-block;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
 `;
 
 const RPCTag = styled.span`
@@ -528,6 +858,26 @@ const EmptyMessage = styled.div`
   text-align: center;
   color: #757575;
   background-color: #fff;
+`;
+
+const VillesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+`;
+
+const VilleTag = styled.span`
+  background-color: #e3f2fd;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #1976d2;
+  white-space: nowrap;
+  
+  &.more {
+    background-color: #f5f5f5;
+    color: #757575;
+  }
 `;
 
 export default Avocats;

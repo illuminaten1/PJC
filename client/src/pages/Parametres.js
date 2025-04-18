@@ -11,6 +11,7 @@ const Parametres = () => {
   const [parametres, setParametres] = useState({
     circonstances: [],
     redacteurs: [],
+    signataires: [],
     templateConvention: []
   });
   const [loading, setLoading] = useState(true);
@@ -62,6 +63,32 @@ const Parametres = () => {
     username: '',
     password: ''
   });
+
+  // Ajouter un nouvel état pour les signataires
+  const [signataireInput, setSignataireInput] = useState('');
+
+  // Ajouter la fonction pour gérer l'ajout d'un signataire
+  const handleAddSignataire = async () => {
+    if (!signataireInput.trim()) return;
+    
+    try {
+      await parametresAPI.addValue('signataires', signataireInput);
+      setSignataireInput('');
+      showSuccessMessage('Signataire ajouté avec succès');
+      fetchParametres();
+    } catch (err) {
+      console.error("Erreur lors de l'ajout du signataire", err);
+      setError("Impossible d'ajouter le signataire");
+    }
+  };
+
+  // Ajouter le gestionnaire pour la touche Entrée
+  const handleSignataireKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddSignataire();
+    }
+  };
 
   // Récupérer le contexte d'authentification pour vérifier si l'utilisateur est admin
   const { user, isAdmin } = useContext(AuthContext);
@@ -1014,6 +1041,46 @@ const Parametres = () => {
               </ActionButtonsContainer>
             </ExpandableSection>
           </Section>
+
+          <Section>
+            <ExpandableSection
+              title="Signataires (pour les décisions administratives)"
+              defaultExpanded={true}
+            >
+              <ParametersList>
+                {parametres.signataires && parametres.signataires.map((signataire, index) => (
+                  <ParameterItem key={index}>
+                    <SignataireText>{signataire}</SignataireText>
+                    <DeleteButton onClick={() => openDeleteConfirmation('signataires', index, signataire)}>
+                      <FaTrash />
+                    </DeleteButton>
+                  </ParameterItem>
+                ))}
+              </ParametersList>
+              
+              <AddParameterForm>
+              <AddParameterTextarea
+                value={signataireInput}
+                onChange={(e) => setSignataireInput(e.target.value)}
+                onKeyDown={(e) => {
+                  // Ne pas intercepter Entrée pour permettre les retours à la ligne
+                  if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    handleAddSignataire();
+                  }
+                }}
+                placeholder="Nouveau signataire... (ex: Lieutenant-colonel Robert de la Maiteraie,&#10;chef du bureau des recours et de&#10;la protection fonctionnelle)"
+                rows={4}
+              />
+              <AddParameterNote>Utilisez Ctrl+Entrée pour ajouter le signataire</AddParameterNote>
+              <AddButton onClick={handleAddSignataire}>
+                <FaPlus />
+                <span>Ajouter</span>
+              </AddButton>
+              </AddParameterForm>
+            </ExpandableSection>
+          </Section>
+
         </>
       )}
       
@@ -1903,6 +1970,38 @@ const FormHelpText = styled.div`
   font-size: 12px;
   color: #757575;
   margin-top: 4px;
+`;
+
+const AddParameterTextarea = styled.textarea`
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  
+  &:focus {
+    border-color: #3f51b5;
+  }
+`;
+
+const AddParameterNote = styled.div`
+  font-size: 12px;
+  color: #757575;
+  margin: 4px 0 8px 0;
+  font-style: italic;
+`;
+
+const SignataireText = styled.pre`
+  font-family: inherit;
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 `;
 
 export default Parametres;

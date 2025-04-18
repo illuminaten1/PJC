@@ -115,6 +115,10 @@ export const documentsAPI = {
     api.post(`/documents/reglement/${beneficiaireId}/${paiementId}`, {}, { 
       responseType: 'blob' 
     }),
+  genererDecision: (beneficiaireId, data) => 
+    api.post(`/documents/decision/${beneficiaireId}`, data, { 
+      responseType: 'blob' 
+    }),
   genererFicheInformation: (data) => 
     api.post(`/documents/fiche-information`, data, { 
       responseType: 'blob' 
@@ -147,7 +151,8 @@ export const parametresAPI = {
   deleteValue: (type, index) => api.delete(`/parametres/${type}/${index}`),
   transferPortfolio: (sourceRedacteur, targetRedacteur) => 
     api.post('/parametres/transfert', { sourceRedacteur, targetRedacteur }),
-  getTransferHistory: () => api.get('/parametres/transfert/historique')
+  getTransferHistory: () => api.get('/parametres/transfert/historique'),
+  getByType: (type) => api.get(`/parametres/${type}`)
 };
 
 // API pour les statistiques

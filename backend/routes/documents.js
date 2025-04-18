@@ -270,6 +270,93 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('benefi
   }
 });
 
+// POST - Générer une décision administrative
+router.post('/decision/:beneficiaireId', validateMongoId('beneficiaireId'), async (req, res) => {
+  try {
+    const { beneficiaireId } = req.params;
+    const { numeroDecision, dateDemande, signataire, format = 'pdf' } = req.body;
+    
+    // Vérifier que le format est valide
+    if (format !== 'pdf' && format !== 'odt') {
+      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt' });
+    }
+    
+    // Récupérer le bénéficiaire avec son militaire et l'affaire associée
+    const beneficiaire = await Beneficiaire.findById(beneficiaireId)
+      .populate({
+        path: 'militaire',
+        populate: {
+          path: 'affaire'
+        }
+      });
+    
+    if (!beneficiaire) {
+      return res.status(404).json({ message: 'Bénéficiaire non trouvé' });
+    }
+    
+    if (!beneficiaire.militaire) {
+      return res.status(404).json({ message: 'Militaire non trouvé' });
+    }
+    
+    if (!beneficiaire.militaire.affaire) {
+      return res.status(404).json({ message: 'Affaire non trouvée' });
+    }
+
+    // Préparer les données pour le générateur de document
+    const data = {
+      beneficiaire: {
+        prenom: beneficiaire.prenom,
+        nom: beneficiaire.nom,
+        qualite: beneficiaire.qualite,
+        numeroDecision: numeroDecision || beneficiaire.numeroDecision
+      },
+      militaire: {
+        grade: beneficiaire.militaire.grade,
+        prenom: beneficiaire.militaire.prenom,
+        nom: beneficiaire.militaire.nom,
+        unite: beneficiaire.militaire.unite
+      },
+      affaire: {
+        nom: beneficiaire.militaire.affaire.nom,
+        lieu: beneficiaire.militaire.affaire.lieu,
+        dateFaits: beneficiaire.militaire.affaire.dateFaits,
+        redacteur: beneficiaire.militaire.affaire.redacteur
+      },
+      decision: {
+        numeroDecision: numeroDecision,
+        dateDemande: dateDemande,
+        signataire: signataire
+      },
+      dateDocument: new Date()
+    };
+    
+    // Générer le document dans le format demandé
+    const documentBuffer = await documentGenerator.genererDecisionAdministrative(data, format);
+    
+    // Configuration des en-têtes selon le format
+    let contentType;
+    let fileName = `decision_${numeroDecision || 'sans_numero'}.${format}`;
+    
+    if (format === 'pdf') {
+      contentType = 'application/pdf';
+    } else if (format === 'odt') {
+      contentType = 'application/vnd.oasis.opendocument.text';
+    }
+    
+    // Envoyer le document
+    res.contentType(contentType);
+    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+    res.send(documentBuffer);
+  } catch (error) {
+    console.error("Erreur détaillée lors de la génération de la décision:", error);
+    res.status(500).json({ 
+      message: "Erreur lors de la génération du document", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // POST - Générer une synthèse d'affaire complète
 router.post('/synthese-affaire/:id', validateMongoId('id'), async (req, res) => {
   try {

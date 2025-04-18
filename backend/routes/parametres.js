@@ -142,6 +142,23 @@ router.get('/:type', async (req, res) => {
   }
 });
 
+// GET - Récupérer les paramètres par type
+router.get('/:type', async (req, res) => {
+  try {
+    const { type } = req.params;
+    const parametre = await Parametre.findOne({ type });
+    
+    if (!parametre) {
+      return res.status(200).json([]);  // Retourner un tableau vide si aucun paramètre trouvé
+    }
+    
+    res.status(200).json(parametre.valeurs);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des paramètres:", error);
+    res.status(500).json({ message: "Erreur lors de la récupération des paramètres" });
+  }
+});
+
 // POST - Mettre à jour un type de paramètre
 router.post('/:type', async (req, res) => {
   try {

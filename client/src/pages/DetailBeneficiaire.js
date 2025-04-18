@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes } from 'react-icons/fa';
-import { beneficiairesAPI, avocatsAPI, affairesAPI } from '../utils/api';
+import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaFile } from 'react-icons/fa';
+import { beneficiairesAPI, avocatsAPI, affairesAPI, parametresAPI, documentsAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import BeneficiaireForm from '../components/forms/BeneficiaireForm';
@@ -11,6 +11,7 @@ import PaiementForm from '../components/forms/PaiementForm';
 import ExpandableSection from '../components/common/ExpandableSection';
 import ConventionsTable from '../components/specific/ConventionsTable';
 import PaiementsTable from '../components/specific/PaiementsTable';
+import FormField from '../components/common/FormField';
 import {
   HeaderCard,
   HeaderGrid,
@@ -39,7 +40,62 @@ const DetailBeneficiaire = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [decisionModalOpen, setDecisionModalOpen] = useState(false);
+  const [decisionData, setDecisionData] = useState({
+    numeroDecision: beneficiaire?.numeroDecision || '',
+    dateDemande: '',
+    signataire: ''
+  });
+  const [signataires, setSignataires] = useState([]);
   
+// Fonction pour récupérer la liste des signataires
+useEffect(() => {
+  const fetchSignataires = async () => {
+    try {
+      const response = await parametresAPI.getByType('signataires');
+      setSignataires(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des signataires", error);
+    }
+  };
+  
+  if (decisionModalOpen) {
+    fetchSignataires();
+  }
+}, [decisionModalOpen]);
+
+// Fonction pour générer la décision
+const handleGenerateDecision = async () => {
+  try {
+    const response = await documentsAPI.genererDecision(id, decisionData);
+    
+    // Créer un URL pour le blob et ouvrir dans un nouvel onglet
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `decision_${decisionData.numeroDecision || 'sans-numero'}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Mettre à jour le bénéficiaire si le numéro de décision a changé
+    if (decisionData.numeroDecision && decisionData.numeroDecision !== beneficiaire.numeroDecision) {
+      await beneficiairesAPI.update(id, {
+        ...beneficiaire,
+        numeroDecision: decisionData.numeroDecision,
+        dateDecision: new Date()
+      });
+      fetchBeneficiaire(); // Rafraîchir les données
+    }
+    
+    // Fermer le modal
+    setDecisionModalOpen(false);
+  } catch (error) {
+    console.error("Erreur lors de la génération de la décision", error);
+    // Gérer l'erreur (afficher un message, etc.)
+  }
+};
+
   useEffect(() => {
     fetchBeneficiaire();
     fetchAvocats();
@@ -247,6 +303,11 @@ const DetailBeneficiaire = () => {
               <ButtonText>Modifier</ButtonText>
             </ActionButton>
             
+            <ActionButton onClick={() => setDecisionModalOpen(true)} title="Générer une décision administrative">
+              <FaFile />
+              <ButtonText>Décision</ButtonText>
+            </ActionButton>
+
             <ActionButton 
               onClick={() => setDeleteModalOpen(true)} 
               title="Supprimer le bénéficiaire"
@@ -594,6 +655,86 @@ const DetailBeneficiaire = () => {
           {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
+
+      {/* Modal de génération de décision administrative */}
+      <Modal
+        isOpen={decisionModalOpen}
+        onClose={() => setDecisionModalOpen(false)}
+        title="Générer une décision administrative"
+        size="medium"
+      >
+        <Form>
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="numeroDecision">Numéro de décision</Label>
+              <Input
+                id="numeroDecision"
+                type="text"
+                value={decisionData.numeroDecision}
+                onChange={(e) => setDecisionData({...decisionData, numeroDecision: e.target.value})}
+                placeholder="Numéro de décision"
+              />
+            </FormGroup>
+          </FormRow>
+
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="dateDemande">Date de la demande</Label>
+              <Input
+                id="dateDemande"
+                type="date"
+                value={decisionData.dateDemande}
+                onChange={(e) => setDecisionData({...decisionData, dateDemande: e.target.value})}
+                required
+              />
+            </FormGroup>
+          </FormRow>
+
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="signataire">Signataire</Label>
+              <Select
+                id="signataire"
+                value={decisionData.signataire}
+                onChange={(e) => setDecisionData({...decisionData, signataire: e.target.value})}
+                required
+              >
+                <option value="">Sélectionner un signataire</option>
+                {signataires.map((signataire, index) => (
+                  <option key={index} value={signataire}>
+                    {signataire.split('\n')[0]}
+                  </option>
+                ))}
+              </Select>
+              
+              {decisionData.signataire && (
+                <SignatairePreview>
+                  {decisionData.signataire}
+                </SignatairePreview>
+              )}
+            </FormGroup>
+          </FormRow>
+
+          <HelpText>
+            <InfoIcon>ℹ️</InfoIcon>
+            La décision administrative reprendra les informations du bénéficiaire, du militaire et de l'affaire.
+          </HelpText>
+
+          <ButtonGroup>
+            <CancelButton type="button" onClick={() => setDecisionModalOpen(false)}>
+              Annuler
+            </CancelButton>
+            <SubmitButton 
+              type="button" 
+              onClick={handleGenerateDecision}
+              disabled={!decisionData.dateDemande || !decisionData.signataire}
+            >
+              Générer la décision
+            </SubmitButton>
+          </ButtonGroup>
+        </Form>
+      </Modal>
+
     </Container>
   );
 };
@@ -1099,6 +1240,112 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 16px;
+  width: 100%;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: #3f51b5;
+  }
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: #3f51b5;
+  }
+`;
+
+const SignatairePreview = styled.pre`
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+`;
+
+const HelpText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  color: #0d47a1;
+  font-size: 14px;
+`;
+
+const InfoIcon = styled.span`
+  font-size: 16px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const FormRow = styled.div`
+  display: flex;
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+`;
+
+const SubmitButton = styled.button`
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #303f9f;
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 export default DetailBeneficiaire;

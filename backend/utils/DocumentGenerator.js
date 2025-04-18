@@ -524,3 +524,73 @@ const formatDateLong = (date) => {
     return 'N/A';
   }
 };
+
+/**
+ * Génère une décision administrative dans le format demandé
+ * @param {Object} data - Données pour la décision
+ * @param {String} format - Format de sortie ('pdf' ou 'odt')
+ * @returns {Promise<Buffer>} - Document généré
+ */
+exports.genererDecisionAdministrative = async (data, format = 'pdf') => {
+  try {
+    // Préparer les données pour Carbone
+    const dataForTemplate = {
+      beneficiaire: {
+        prenom: data.beneficiaire.prenom || 'N/A',
+        nom: (data.beneficiaire.nom || 'N/A').toUpperCase(),
+        qualite: data.beneficiaire.qualite || 'N/A',
+        numeroDecision: data.decision.numeroDecision || 'N/A'
+      },
+      militaire: {
+        grade: data.militaire.grade || 'N/A',
+        prenom: data.militaire.prenom || 'N/A',
+        nom: (data.militaire.nom || 'N/A').toUpperCase(),
+        unite: data.militaire.unite || 'N/A'
+      },
+      affaire: {
+        nom: data.affaire.nom || 'N/A',
+        lieu: data.affaire.lieu || 'N/A',
+        dateFaits: formatDate(data.affaire.dateFaits),
+        redacteur: data.affaire.redacteur || 'N/A'
+      },
+      decision: {
+        numeroDecision: data.decision.numeroDecision || 'N/A',
+        dateDemande: formatDate(data.decision.dateDemande),
+        signataire: data.decision.signataire || 'N/A'
+      },
+      dateDocument: formatDateLong(new Date())
+    };
+
+    // Vérifier si le template personnalisé existe
+    const templatePath = path.join(__dirname, '../templates/decision_template.odt');
+    const defaultTemplatePath = path.join(__dirname, '../templates/default_decision_template.odt');
+    
+    let actualTemplatePath;
+    
+    if (fs.existsSync(templatePath)) {
+      actualTemplatePath = templatePath;
+    } else if (fs.existsSync(defaultTemplatePath)) {
+      actualTemplatePath = defaultTemplatePath;
+    } else {
+      throw new Error("Aucun template de décision administrative n'est disponible");
+    }
+    
+    return new Promise((resolve, reject) => {
+      // Générer le document avec Carbone (format selon le paramètre)
+      const options = {
+        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : null
+      };
+      
+      carbone.render(actualTemplatePath, dataForTemplate, options, function(err, result) {
+        if (err) {
+          console.error(`Erreur lors de la génération du document ${format}:`, err);
+          return reject(err);
+        }
+        resolve(result);
+      });
+    });
+  } catch (error) {
+    console.error("Erreur lors de la génération de la décision administrative:", error);
+    throw error;
+  }
+};

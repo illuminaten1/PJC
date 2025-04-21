@@ -13,6 +13,7 @@ PJC/
 │   │   ├── affaire.js         # Modèle des affaires
 │   │   ├── avocat.js          # Modèle des avocats (enrichi avec infos géographiques et contacts)
 │   │   ├── beneficiaire.js    # Modèle des bénéficiaires
+│   │   ├── fichier.js         # Modèle des fichiers (PDF, ODT, EML)
 │   │   ├── militaire.js       # Modèle des militaires
 │   │   ├── parametre.js       # Modèle des paramètres
 │   │   ├── transfertHistorique.js # Modèle pour l'historique des transferts
@@ -24,6 +25,7 @@ PJC/
 │   │   ├── avocats.js         # Gestion des avocats avec nouvelles routes (utils/cabinets, utils/villes)
 │   │   ├── beneficiaires.js   # Gestion des bénéficiaires (avec populate avocats)
 │   │   ├── documents.js       # Génération de documents
+│   │   ├── fichiers.js        # Gestion des fichiers (upload, download, preview)
 │   │   ├── militaires.js      # Gestion des militaires (avec populate avocats pour bénéficiaires)
 │   │   ├── parametres.js      # Gestion des paramètres
 │   │   ├── statistiques.js    # Calcul et fourniture des statistiques
@@ -73,6 +75,7 @@ PJC/
         │       ├── AvocatDetail.js      # Affichage détaillé d'un avocat (nouveau)
         │       ├── ConventionsTable.js  # Tableau des conventions
         │       ├── DashboardSummary.js  # Résumé du tableau de bord
+        │       ├── DocumentsSection.js  # Gestion et prévisualisation des fichiers
         │       ├── PaiementsTable.js    # Tableau des paiements
         │       ├── StatistiquesBudget.js # Budget des statistiques
         │       └── UtilisateursTable.js  # Tableau des utilisateurs
@@ -114,6 +117,7 @@ PJC/
 
 - **Frontend** : React, styled-components, react-router-dom, axios, Chart.js, react-markdown, react-simplemde-editor
 - **Backend** : Node.js, Express.js, MongoDB/Mongoose
+- **Stockage de fichiers** : MongoDB GridFS
 - **Génération de documents** : Carbone, libreoffice
 - **Authentification** : JWT (JSON Web Token)
 
@@ -202,6 +206,21 @@ Avocats désignés pour les bénéficiaires
 - siretRidet (identifiant fiscal)
 - commentaires (notes sur l'avocat)
 - dateCreation
+
+### Fichiers (nouveau)
+
+Fichiers associés aux bénéficiaires (PDF, ODT, EML)
+
+**Champs**:
+
+- filename (nom du fichier dans GridFS)
+- originalname (nom original du fichier)
+- contentType (type MIME du fichier)
+- size (taille en octets)
+- uploadDate (date d'upload)
+- beneficiaire (référence au bénéficiaire)
+- description (description optionnelle)
+- fileId (référence à l'ID stocké dans GridFS)
 
 ### Conventions
 
@@ -296,6 +315,15 @@ Configuration des listes utilisées dans l'application
 - **PUT /api/beneficiaires/:id/conventions/:conventionId** - Modifier une convention
 - **POST /api/beneficiaires/:id/paiements** - Ajouter un paiement
 
+### Fichiers (nouveau)
+
+- **POST /api/fichiers/:beneficiaireId** - Télécharger un fichier pour un bénéficiaire
+- **GET /api/fichiers/beneficiaire/:beneficiaireId** - Récupérer tous les fichiers d'un bénéficiaire
+- **GET /api/fichiers/preview/:id** - Prévisualiser un fichier
+- **GET /api/fichiers/download/:id** - Télécharger un fichier
+- **DELETE /api/fichiers/:id** - Supprimer un fichier
+- **PATCH /api/fichiers/:id/description** - Mettre à jour la description d'un fichier
+
 ### Militaires
 
 - **GET /api/militaires** - Liste des militaires avec filtres
@@ -336,6 +364,15 @@ Configuration des listes utilisées dans l'application
 - **Rôles d'utilisateurs** - Distinction entre administrateur et rédacteur
 - **Gestion des utilisateurs** - Interface d'administration pour gérer les comptes
 - **Sécurité** - Protection des fonctionnalités sensibles (gestion des utilisateurs)
+
+### Gestion des fichiers (nouvelle fonctionnalité)
+
+- **Stockage avec MongoDB GridFS** - Stockage de fichiers volumineux directement dans MongoDB
+- **Upload de fichiers** - Support pour PDF, ODT et EML avec drag & drop
+- **Prévisualisation intégrée** - Affichage des PDF directement dans l'application
+- **Téléchargement de fichiers** - Accès direct aux fichiers stockés
+- **Gestion des descriptions** - Possibilité d'ajouter et de modifier les descriptions des fichiers
+- **Interface intuitive** - Interface d'upload et de gestion des fichiers par bénéficiaire
 
 ### Modifications des modèles de données
 

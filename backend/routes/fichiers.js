@@ -1,0 +1,331 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const multer = require('multer');
+const { GridFsStorage } = require('multer-gridfs-storage');
+const authMiddleware = require('../middleware/auth');
+const Fichier = require('../models/fichier');
+
+// Création du storage engine pour multer avec GridFS
+const storage = new GridFsStorage({
+  url: process.env.MONGODB_URI || 'mongodb://localhost:27017/protection-juridique',
+  options: { 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true 
+  },
+  file: (req, file) => {
+    const acceptedMimeTypes = [
+      'application/pdf', 
+      'application/vnd.oasis.opendocument.text', 
+      'message/rfc822',
+      'application/odt',
+      'message/eml'
+    ];
+    
+    if (!acceptedMimeTypes.includes(file.mimetype)) {
+      return Promise.reject(
+        new Error('Type de fichier non accepté. Seuls les fichiers PDF, ODT et EML sont autorisés.')
+      );
+    }
+    
+    const filename = `${Date.now()}-${file.originalname}`;
+    
+    return {
+      bucketName: 'uploads',
+      filename: filename,
+      metadata: {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size
+      }
+    };
+  }
+});
+
+// Middleware multer configuré avec GridFS storage
+const upload = multer({ storage });
+
+// Route de test simple sans authentification
+router.get('/test', (req, res) => {
+  res.json({ message: 'La route de test fonctionne!' });
+});
+
+// Route de débogage sans authentification
+router.get('/debug-public', async (req, res) => {
+  try {
+    // Compter les fichiers et les chunks dans chaque collection
+    const filesCount = await mongoose.connection.db.collection('uploads.files').countDocuments();
+    const chunksCount = await mongoose.connection.db.collection('uploads.chunks').countDocuments();
+    const fichierCount = await Fichier.countDocuments();
+    
+    // Liste simplifiée des 5 derniers fichiers
+    const recentFiles = await mongoose.connection.db.collection('uploads.files')
+      .find({})
+      .sort({ uploadDate: -1 })
+      .limit(5)
+      .toArray();
+
+    // Liste simplifiée des métadonnées
+    const fichiers = await Fichier.find({})
+      .sort({ uploadDate: -1 })
+      .limit(5);
+    
+    res.json({
+      counters: {
+        'uploads.files': filesCount,
+        'uploads.chunks': chunksCount,
+        'fichiers': fichierCount
+      },
+      recentFiles: recentFiles.map(f => ({ 
+        _id: f._id, 
+        filename: f.filename, 
+        contentType: f.contentType,
+        uploadDate: f.uploadDate 
+      })),
+      fichiers: fichiers.map(f => ({ 
+        _id: f._id, 
+        fileId: f.fileId, 
+        originalname: f.originalname
+      })),
+      message: 'Si ces nombres ne correspondent pas, il y a peut-être des fichiers orphelins'
+    });
+  } catch (error) {
+    console.error('Erreur lors du débogage:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route pour télécharger un fichier
+router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Aucun fichier téléchargé' });
+    }
+    
+    console.log('File info:', req.file);
+    
+    // S'assurer que l'ID est bien un ObjectId valide
+    let fileId;
+    try {
+      fileId = new mongoose.Types.ObjectId(req.file.id);
+    } catch (err) {
+      console.error('Erreur de conversion d\'ObjectId:', err);
+      return res.status(500).json({ message: 'Erreur de format d\'ID', error: err.message });
+    }
+    
+    // Vérifier que le fichier existe dans la collection uploads.files
+    const fileExists = await mongoose.connection.db.collection('uploads.files').findOne({
+      _id: fileId
+    });
+    
+    if (!fileExists) {
+      return res.status(500).json({ message: 'Erreur: Le fichier n\'a pas été correctement enregistré dans GridFS' });
+    }
+    
+    // Créer une entrée de métadonnées
+    const fichier = new Fichier({
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      contentType: req.file.contentType || req.file.mimetype,
+      size: req.file.size,
+      beneficiaire: req.params.beneficiaireId,
+      description: req.body.description || '',
+      fileId: fileId
+    });
+    
+    await fichier.save();
+    res.json(fichier);
+  } catch (error) {
+    console.error('Erreur détaillée lors du téléchargement du fichier:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors du téléchargement du fichier', 
+      error: error.message,
+      stack: error.stack // Pour le débogage uniquement, à retirer en production
+    });
+  }
+});
+
+// Route pour récupérer tous les fichiers d'un bénéficiaire
+router.get('/beneficiaire/:beneficiaireId', authMiddleware, async (req, res) => {
+  try {
+    console.log('Récupération des fichiers pour le bénéficiaire:', req.params.beneficiaireId);
+    const fichiers = await Fichier.find({ beneficiaire: req.params.beneficiaireId })
+                                  .sort({ uploadDate: -1 });
+    console.log(`Nombre de fichiers trouvés: ${fichiers.length}`);
+    res.json(fichiers);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des fichiers', error: error.message });
+  }
+});
+
+// Route pour prévisualiser un fichier - sans authentification
+router.get('/preview/:id', async (req, res) => {
+  try {
+    const fichier = await Fichier.findById(req.params.id);
+    if (!fichier) {
+      return res.status(404).json({ message: 'Fichier non trouvé' });
+    }
+    
+    // Utiliser GridFSBucket directement pour le streaming
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+      bucketName: 'uploads'
+    });
+    
+    // Configurer les en-têtes
+    res.set('Content-Type', fichier.contentType);
+    
+    // Vérifier que le fichier existe dans GridFS
+    const file = await mongoose.connection.db.collection('uploads.files').findOne({
+      _id: new mongoose.Types.ObjectId(fichier.fileId)
+    });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'Contenu du fichier non trouvé' });
+    }
+    
+    // Stream le fichier directement
+    bucket.openDownloadStream(new mongoose.Types.ObjectId(fichier.fileId)).pipe(res);
+    
+  } catch (error) {
+    console.error('Erreur lors de la prévisualisation:', error);
+    res.status(500).json({ message: 'Erreur de prévisualisation', error: error.message });
+  }
+});
+
+// Route pour télécharger un fichier - sans authentification
+router.get('/download/:id', async (req, res) => {
+  try {
+    const fichier = await Fichier.findById(req.params.id);
+    if (!fichier) {
+      return res.status(404).json({ message: 'Fichier non trouvé' });
+    }
+    
+    // Utiliser GridFSBucket directement pour le streaming
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+      bucketName: 'uploads'
+    });
+    
+    // Configurer les en-têtes
+    res.set({
+      'Content-Type': fichier.contentType,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(fichier.originalname)}"`,
+    });
+    
+    // Vérifier que le fichier existe dans GridFS
+    const file = await mongoose.connection.db.collection('uploads.files').findOne({
+      _id: new mongoose.Types.ObjectId(fichier.fileId)
+    });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'Contenu du fichier non trouvé' });
+    }
+    
+    // Stream le fichier directement
+    bucket.openDownloadStream(new mongoose.Types.ObjectId(fichier.fileId)).pipe(res);
+    
+  } catch (error) {
+    console.error('Erreur lors du téléchargement:', error);
+    res.status(500).json({ message: 'Erreur de téléchargement', error: error.message });
+  }
+});
+
+// Route pour mettre à jour la description d'un fichier
+router.patch('/:id/description', authMiddleware, async (req, res) => {
+  try {
+    const { description } = req.body;
+    
+    if (description === undefined) {
+      return res.status(400).json({ message: 'La description est requise' });
+    }
+    
+    const fichier = await Fichier.findById(req.params.id);
+    if (!fichier) {
+      return res.status(404).json({ message: 'Fichier non trouvé' });
+    }
+    
+    fichier.description = description;
+    await fichier.save();
+    
+    res.json({ message: 'Description mise à jour avec succès', fichier });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la description:', error);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour de la description', error: error.message });
+  }
+});
+
+// Route pour supprimer un fichier
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    console.log('Suppression demandée pour ID:', req.params.id);
+    
+    const fichier = await Fichier.findById(req.params.id);
+    if (!fichier) {
+      return res.status(404).json({ message: 'Fichier non trouvé' });
+    }
+    
+    console.log('Fichier trouvé, fileId:', fichier.fileId);
+    
+    try {
+      // Supprimer les chunks
+      const chunksDeleted = await mongoose.connection.db.collection('uploads.chunks').deleteMany({
+        files_id: new mongoose.Types.ObjectId(fichier.fileId)
+      });
+      
+      console.log(`Chunks supprimés: ${chunksDeleted.deletedCount}`);
+      
+      // Supprimer le fichier
+      const fileDeleted = await mongoose.connection.db.collection('uploads.files').deleteOne({
+        _id: new mongoose.Types.ObjectId(fichier.fileId)
+      });
+      
+      console.log(`Fichier supprimé: ${fileDeleted.deletedCount}`);
+      
+      if (fileDeleted.deletedCount === 0) {
+        console.log('Aucun fichier GridFS trouvé, possible que le fichier ait déjà été supprimé');
+      }
+    } catch (gridfsError) {
+      console.error('Erreur lors de la suppression des données GridFS:', gridfsError);
+      // Continuer quand même pour supprimer les métadonnées
+    }
+    
+    // Supprimer les métadonnées
+    await Fichier.deleteOne({ _id: req.params.id });
+    console.log('Métadonnées du fichier supprimées avec succès');
+    
+    res.json({ message: 'Fichier supprimé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du fichier:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression du fichier', error: error.message });
+  }
+});
+
+// Route de nettoyage - supprime les fichiers orphelins
+router.get('/clean-orphans', async (req, res) => {
+  try {
+    console.log('Nettoyage des fichiers orphelins...');
+    const fichiers = await Fichier.find({});
+    let orphansCount = 0;
+    
+    for (const fichier of fichiers) {
+      const fileExists = await mongoose.connection.db.collection('uploads.files').findOne({
+        _id: new mongoose.Types.ObjectId(fichier.fileId)
+      });
+      
+      if (!fileExists) {
+        console.log(`Fichier orphelin trouvé: ${fichier._id} (fileId: ${fichier.fileId})`);
+        await Fichier.deleteOne({ _id: fichier._id });
+        orphansCount++;
+      }
+    }
+    
+    res.json({
+      message: `Nettoyage terminé. ${orphansCount} références orphelines supprimées.`
+    });
+  } catch (error) {
+    console.error('Erreur lors du nettoyage:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;

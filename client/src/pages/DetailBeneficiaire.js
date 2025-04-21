@@ -11,6 +11,7 @@ import PaiementForm from '../components/forms/PaiementForm';
 import ExpandableSection from '../components/common/ExpandableSection';
 import ConventionsTable from '../components/specific/ConventionsTable';
 import PaiementsTable from '../components/specific/PaiementsTable';
+import DocumentsSection from '../components/specific/DocumentsSection';
 import {
   HeaderCard,
   HeaderGrid,
@@ -436,7 +437,9 @@ const DetailBeneficiaire = () => {
           />
         </ExpandableSection>
       </TabsSection>
-      
+
+      <DocumentsSection beneficiaireId={id} />
+            
       {/* Modal de modification */}
       <Modal
         isOpen={editModalOpen}

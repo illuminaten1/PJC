@@ -12,6 +12,7 @@ const parametresRoutes = require('./routes/parametres');
 const documentsRoutes = require('./routes/documents');
 const statistiquesRoutes = require('./routes/statistiques');
 const templatesRoutes = require('./routes/templates');
+const fichiersRoutes = require('./routes/fichiers');
 
 const app = express();
 
@@ -36,6 +37,8 @@ app.use('/api/statistiques', statistiquesRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/utilisateurs', require('./routes/utilisateurs'));
+app.use('/api/fichiers', require('./routes/fichiers'));
+
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

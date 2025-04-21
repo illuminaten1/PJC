@@ -161,4 +161,17 @@ export const statistiquesAPI = {
   getBudgetByAnnee: (year) => api.get(`/statistiques/budget/${year}`) // pour la compatibilité
 };
 
+// API pour les fichiers
+export const fichiersAPI = {
+  upload: (beneficiaireId, formData) => api.post(`/fichiers/${beneficiaireId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
+  getByBeneficiaire: (beneficiaireId) => api.get(`/fichiers/beneficiaire/${beneficiaireId}`),
+  delete: (id) => api.delete(`/fichiers/${id}`),
+  updateDescription: (id, description) => api.patch(`/fichiers/${id}/description`, { description }),
+  // Les routes de prévisualisation et téléchargement seront utilisées directement via des URL
+};
+
 export default api;

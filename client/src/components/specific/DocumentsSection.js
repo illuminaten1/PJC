@@ -6,6 +6,7 @@ import { fr } from 'date-fns/locale';
 import ExpandableSection from '../common/ExpandableSection';
 import Modal from '../common/Modal';
 import api, { fichiersAPI } from '../../utils/api';
+import EmailPreview from './EmailPreview';
 
 const FileUploadArea = styled.div`
   border: 2px dashed #ccc;
@@ -397,6 +398,8 @@ const DocumentsSection = ({ beneficiaireId }) => {
                 title={`Aperçu de ${selectedFile.originalname}`}
                 style={{ border: 'none' }}
               />
+            ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
+              <EmailPreview fileId={selectedFile._id} />
             ) : selectedFile.contentType === 'application/vnd.oasis.opendocument.text' || selectedFile.contentType === 'application/odt' ? (
               <div style={{ padding: '20px', textAlign: 'center' }}>
                 <FaFileAlt style={{ fontSize: '48px', color: '#3498db', marginBottom: '20px' }} />
@@ -406,20 +409,6 @@ const DocumentsSection = ({ beneficiaireId }) => {
                   <button 
                     onClick={() => handleDownload(selectedFile._id)}
                     style={{ padding: '10px 15px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    <FaDownload style={{ marginRight: '5px' }} /> Télécharger le fichier
-                  </button>
-                </p>
-              </div>
-            ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                <FaEnvelope style={{ fontSize: '48px', color: '#2ecc71', marginBottom: '20px' }} />
-                <h3>Aperçu Email</h3>
-                <p>La prévisualisation des fichiers EML n'est pas disponible directement dans le navigateur.</p>
-                <p>
-                  <button 
-                    onClick={() => handleDownload(selectedFile._id)}
-                    style={{ padding: '10px 15px', background: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                   >
                     <FaDownload style={{ marginRight: '5px' }} /> Télécharger le fichier
                   </button>

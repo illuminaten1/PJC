@@ -172,6 +172,12 @@ export const fichiersAPI = {
   delete: (id) => api.delete(`/fichiers/${id}`),
   updateDescription: (id, description) => api.patch(`/fichiers/${id}/description`, { description }),
   // Les routes de prévisualisation et téléchargement seront utilisées directement via des URL
+  // Nouvelles méthodes pour les emails
+  getEmailPreview: (id) => api.get(`/fichiers/preview-email/${id}`),
+  getEmailAttachment: (fileId, attachmentId) => ({
+    // Ici, nous renvoyons simplement l'URL car la requête sera faite directement via le navigateur
+    url: `${api.defaults.baseURL}/fichiers/email-attachment/${fileId}/${attachmentId}`
+  })
 };
 
 export default api;

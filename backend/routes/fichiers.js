@@ -328,4 +328,201 @@ router.get('/clean-orphans', async (req, res) => {
   }
 });
 
+// Route pour prévisualiser un email - sans authentification
+router.get('/preview-email/:id', async (req, res) => {
+  try {
+    const fichier = await Fichier.findById(req.params.id);
+    if (!fichier) {
+      return res.status(404).json({ message: 'Fichier non trouvé' });
+    }
+    
+    // Vérifier que c'est bien un email
+    if (fichier.contentType !== 'message/rfc822' && fichier.contentType !== 'message/eml') {
+      return res.status(400).json({ message: 'Ce fichier n\'est pas un email' });
+    }
+    
+    // Utiliser GridFSBucket pour obtenir le contenu du fichier
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+      bucketName: 'uploads'
+    });
+    
+    // Vérifier que le fichier existe dans GridFS
+    const file = await mongoose.connection.db.collection('uploads.files').findOne({
+      _id: new mongoose.Types.ObjectId(fichier.fileId)
+    });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'Contenu du fichier non trouvé' });
+    }
+    
+    // Récupérer le contenu complet du fichier
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+      const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(fichier.fileId));
+      
+      downloadStream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+      
+      downloadStream.on('error', (error) => {
+        console.error('Erreur lors de la lecture du fichier:', error);
+        reject(error);
+      });
+      
+      downloadStream.on('end', async () => {
+        try {
+          // Concaténer tous les chunks en un seul buffer
+          const emailBuffer = Buffer.concat(chunks);
+          
+          // Importer mailparser
+          const { simpleParser } = require('mailparser');
+          
+          // Parser l'email
+          const parsedEmail = await simpleParser(emailBuffer);
+          
+          // Préparer la réponse
+          const emailData = {
+            subject: parsedEmail.subject || 'Sans objet',
+            from: parsedEmail.from ? parsedEmail.from.text : 'Expéditeur inconnu',
+            to: parsedEmail.to ? parsedEmail.to.text : 'Destinataire inconnu',
+            cc: parsedEmail.cc ? parsedEmail.cc.text : '',
+            date: parsedEmail.date ? parsedEmail.date.toISOString() : new Date().toISOString(),
+            html: parsedEmail.html || '',
+            text: parsedEmail.text || '',
+            hasHtml: !!parsedEmail.html,
+            attachments: []
+          };
+          
+          // Traiter les pièces jointes
+          if (parsedEmail.attachments && parsedEmail.attachments.length > 0) {
+            // Stocker les métadonnées des pièces jointes
+            emailData.attachments = parsedEmail.attachments.map(attachment => ({
+              filename: attachment.filename,
+              contentType: attachment.contentType,
+              contentDisposition: attachment.contentDisposition,
+              size: attachment.size,
+              // Générer un ID unique pour cette pièce jointe
+              id: `${req.params.id}_${Buffer.from(attachment.filename).toString('base64')}`
+            }));
+            
+            // Stocker temporairement les pièces jointes en mémoire pour récupération ultérieure
+            // Attention: dans une application de production, vous voudriez plutôt les stocker dans GridFS
+            if (!global.emailAttachments) {
+              global.emailAttachments = new Map();
+            }
+            
+            // Stocker les pièces jointes avec une clé unique basée sur l'ID du fichier
+            // Avec un TTL (Time To Live) de 30 minutes
+            const attachmentMap = new Map();
+            parsedEmail.attachments.forEach(attachment => {
+              const attachmentId = `${req.params.id}_${Buffer.from(attachment.filename).toString('base64')}`;
+              attachmentMap.set(attachmentId, {
+                data: attachment.content,
+                contentType: attachment.contentType,
+                filename: attachment.filename,
+                expires: Date.now() + 30 * 60 * 1000 // 30 minutes
+              });
+            });
+            
+            global.emailAttachments.set(req.params.id, {
+              attachments: attachmentMap,
+              expires: Date.now() + 30 * 60 * 1000 // 30 minutes
+            });
+          }
+          
+          // Si l'email n'a pas de HTML, convertir le texte en HTML
+          if (!emailData.html && emailData.text) {
+            emailData.html = emailData.text
+              .replace(/\n/g, '<br>')
+              .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+            emailData.hasHtml = true;
+          }
+          
+          // Répondre avec les données de l'email
+          res.json(emailData);
+        } catch (parseError) {
+          console.error('Erreur lors du parsing de l\'email:', parseError);
+          res.status(500).json({ 
+            message: 'Erreur lors du parsing de l\'email', 
+            error: parseError.message
+          });
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Erreur lors de la prévisualisation de l\'email:', error);
+    res.status(500).json({ message: 'Erreur de prévisualisation', error: error.message });
+  }
+});
+
+// Route pour récupérer une pièce jointe d'un email - sans authentification
+router.get('/email-attachment/:fileId/:attachmentId', async (req, res) => {
+  try {
+    const { fileId, attachmentId } = req.params;
+    
+    // Vérifier si les pièces jointes sont en mémoire
+    if (!global.emailAttachments || !global.emailAttachments.has(fileId)) {
+      return res.status(404).json({ message: 'Pièce jointe non trouvée ou expirée' });
+    }
+    
+    const emailAttachmentsData = global.emailAttachments.get(fileId);
+    
+    // Vérifier si l'entrée a expiré
+    if (emailAttachmentsData.expires < Date.now()) {
+      global.emailAttachments.delete(fileId);
+      return res.status(404).json({ message: 'Les pièces jointes ont expiré, veuillez rafraîchir l\'email' });
+    }
+    
+    // Récupérer la pièce jointe spécifique
+    if (!emailAttachmentsData.attachments.has(attachmentId)) {
+      return res.status(404).json({ message: 'Pièce jointe spécifique non trouvée' });
+    }
+    
+    const attachment = emailAttachmentsData.attachments.get(attachmentId);
+    
+    // Vérifier si la pièce jointe a expiré
+    if (attachment.expires < Date.now()) {
+      emailAttachmentsData.attachments.delete(attachmentId);
+      return res.status(404).json({ message: 'Cette pièce jointe a expiré' });
+    }
+    
+    // Configurer les en-têtes
+    res.set({
+      'Content-Type': attachment.contentType,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(attachment.filename)}"`,
+    });
+    
+    // Envoyer les données de la pièce jointe
+    res.send(attachment.data);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la pièce jointe:', error);
+    res.status(500).json({ message: 'Erreur de récupération', error: error.message });
+  }
+});
+
+// Nettoyage périodique des pièces jointes en mémoire (toutes les 10 minutes)
+setInterval(() => {
+  if (global.emailAttachments) {
+    const now = Date.now();
+    for (const [fileId, emailAttachmentsData] of global.emailAttachments.entries()) {
+      if (emailAttachmentsData.expires < now) {
+        global.emailAttachments.delete(fileId);
+      } else {
+        // Vérifier chaque pièce jointe individuellement
+        for (const [attachmentId, attachment] of emailAttachmentsData.attachments.entries()) {
+          if (attachment.expires < now) {
+            emailAttachmentsData.attachments.delete(attachmentId);
+          }
+        }
+        
+        // Si toutes les pièces jointes ont été supprimées, supprimer l'entrée entière
+        if (emailAttachmentsData.attachments.size === 0) {
+          global.emailAttachments.delete(fileId);
+        }
+      }
+    }
+  }
+}, 10 * 60 * 1000); // 10 minutes
+
 module.exports = router;

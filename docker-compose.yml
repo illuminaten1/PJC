@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: pjc-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    networks:
+      - pjc-network
+
+  backend:
+    build: ./backend
+    container_name: pjc-backend
+    restart: always
+    ports:
+      - "5002:5002"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/protection-juridique?authSource=admin
+      - JWT_SECRET=pjc_secret_key
+      - PORT=5002
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/templates:/app/templates
+      - ./backend/temp:/app/temp
+    networks:
+      - pjc-network
+
+  frontend:
+    build: ./client
+    container_name: pjc-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5002/api
+    networks:
+      - pjc-network
+
+networks:
+  pjc-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

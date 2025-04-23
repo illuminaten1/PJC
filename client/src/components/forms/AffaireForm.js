@@ -21,10 +21,15 @@ const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   useEffect(() => {
     const fetchRedacteurs = async () => {
       try {
-        const response = await parametresAPI.getByType('redacteurs');
-        setRedacteurs(response.data);
+        const response = await parametresAPI.getAll();
+        if (response.data && response.data.redacteurs) {
+          setRedacteurs(response.data.redacteurs);
+        } else {
+          setRedacteurs([]);
+        }
       } catch (error) {
         console.error("Erreur lors de la récupération des rédacteurs", error);
+        setRedacteurs([]);
       }
     };
     

@@ -143,6 +143,7 @@ export const templatesAPI = {
 // API pour les paramètres
 export const parametresAPI = {
   getAll: () => api.get('/parametres'),
+  getByType: (type) => api.get(`/parametres/${type}`),
   addValue: (type, valeur) => api.post(`/parametres/${type}`, { valeur }),
   deleteValue: (type, index) => api.delete(`/parametres/${type}/${index}`),
   transferPortfolio: (sourceRedacteur, targetRedacteur) => 

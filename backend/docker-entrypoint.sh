@@ -20,8 +20,9 @@ else
         libnspr4 \
         libnss3
     
-    # Aller dans le répertoire où se trouve le fichier tar.gz
+    # Aller dans le répertoire et télécharger LibreOffice
     cd /app
+    wget https://downloadarchive.documentfoundation.org/libreoffice/old/7.5.1.1/deb/x86_64/LibreOffice_7.5.1.1_Linux_x86-64_deb.tar.gz
     
     # Extraire LibreOffice
     echo "Extraction de LibreOffice..."

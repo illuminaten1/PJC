@@ -1,61 +1,18 @@
 #!/bin/bash
 echo "Vérification de l'installation de LibreOffice..."
-
-# Vérifier si LibreOffice est déjà installé
 if command -v soffice >/dev/null 2>&1; then
-    echo "✅ LibreOffice est déjà installé: $(which soffice)"
-    soffice --version
+    echo "✅ LibreOffice est correctement installé: $(which soffice)"
+    # Tester si LibreOffice fonctionne correctement
+    soffice --version || echo "⚠️ LibreOffice est installé mais ne démarre pas correctement"
 else
-    echo "⏳ Installation de LibreOffice en cours..."
-    
-    # Installer les dépendances requises si nécessaire
-    apt-get update && apt-get install -y \
-        libxinerama1 \
-        libfontconfig1 \
-        libdbus-glib-1-2 \
-        libcairo2 \
-        libcups2 \
-        libglu1-mesa \
-        libsm6 \
-        libnspr4 \
-        libnss3
-    
-    # Aller dans le répertoire et télécharger LibreOffice
-    cd /app
-    wget https://downloadarchive.documentfoundation.org/libreoffice/old/7.5.1.1/deb/x86_64/LibreOffice_7.5.1.1_Linux_x86-64_deb.tar.gz
-    
-    # Extraire LibreOffice
-    echo "Extraction de LibreOffice..."
-    tar -zxvf LibreOffice_7.5.1.1_Linux_x86-64_deb.tar.gz
-    
-    # Trouver le répertoire extrait
-    LIBREOFFICE_DIR=$(find . -maxdepth 1 -type d -name "LibreOffice*" | head -n 1)
-    echo "Répertoire détecté: $LIBREOFFICE_DIR"
-    
-    # Installer les paquets .deb
-    cd "$LIBREOFFICE_DIR/DEBS"
-    echo "Installation des paquets .deb..."
-    dpkg -i *.deb || apt-get -f install -y
-    
-    # Vérification de l'installation
-    if command -v soffice >/dev/null 2>&1; then
-        echo "✅ LibreOffice installé avec succès: $(which soffice)"
-        soffice --version
-    else
-        echo "❌ L'installation de LibreOffice a échoué, recherche de soffice..."
-        SOFFICE_PATH=$(find /opt -name soffice -type f 2>/dev/null | head -1)
-        
-        if [ -n "$SOFFICE_PATH" ]; then
-            echo "✅ LibreOffice trouvé à: $SOFFICE_PATH"
-            ln -sf $SOFFICE_PATH /usr/local/bin/soffice
-        else
-            echo "❌ LibreOffice introuvable!"
-        fi
+    echo "❌ LibreOffice n'est pas installé ou n'est pas dans le PATH!"
+    # Rechercher LibreOffice dans les emplacements courants
+    SOFFICE_PATH=$(find /opt -name soffice -type f 2>/dev/null | head -1)
+    if [ -n "$SOFFICE_PATH" ]; then
+        echo "✅ LibreOffice trouvé à: $SOFFICE_PATH"
+        ln -sf $SOFFICE_PATH /usr/local/bin/soffice
+        echo "Lien symbolique créé vers $SOFFICE_PATH"
     fi
-    
-    # Nettoyer
-    cd /app
-    rm -rf "$LIBREOFFICE_DIR"
 fi
 
 # Définir le chemin vers LibreOffice pour Carbone.js

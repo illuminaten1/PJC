@@ -142,44 +142,13 @@ router.get('/:type', async (req, res) => {
   }
 });
 
-// POST - Mettre à jour un type de paramètre
+// POST - Ajouter une valeur à un type de paramètre
 router.post('/:type', async (req, res) => {
   try {
     const { type } = req.params;
-    const { valeurs } = req.body;
-    
-    // Vérifier que le type est valide
-    if (!['circonstances', 'redacteurs', 'templateConvention'].includes(type)) {
-      return res.status(400).json({ message: 'Type de paramètre invalide' });
-    }
-    
-    // Vérifier que les valeurs sont au bon format
-    if (!Array.isArray(valeurs)) {
-      return res.status(400).json({ message: 'Les valeurs doivent être un tableau' });
-    }
-    
-    // Mettre à jour ou créer le paramètre
-    const parametre = await Parametre.findOneAndUpdate(
-      { type },
-      { 
-        type,
-        valeurs,
-        derniereMiseAJour: new Date()
-      },
-      { new: true, upsert: true }
-    );
-    
-    res.json(parametre.valeurs);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// PUT - Ajouter une valeur à un type de paramètre
-router.put('/:type', async (req, res) => {
-  try {
-    const { type } = req.params;
     const { valeur } = req.body;
+    
+    console.log('Route POST /:type appelée avec:', { type, valeur });
     
     // Vérifier que le type est valide
     if (!['circonstances', 'redacteurs', 'templateConvention'].includes(type)) {
@@ -215,7 +184,8 @@ router.put('/:type', async (req, res) => {
     
     res.json(parametre.valeurs);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Erreur dans la route POST /:type:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 

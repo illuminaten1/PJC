@@ -16,7 +16,9 @@ else
         libcairo2 \
         libcups2 \
         libglu1-mesa \
-        libsm6
+        libsm6 \
+        libnspr4 \
+        libnss3
     
     # Aller dans le répertoire où se trouve le fichier tar.gz
     cd /app

@@ -82,11 +82,12 @@ const DetailAffaire = () => {
   
   const handleArchiveToggle = async () => {
     try {
-      const newStatus = !affaire.archive;
-      await affairesAPI.archive(id, newStatus);
+      // Pas besoin de passer le nouveau statut, l'API fait le toggle
+      await affairesAPI.toggleArchive(id);
+      // Mettre à jour l'état local avec le nouveau statut
       setAffaire(prev => ({
         ...prev,
-        archive: newStatus
+        archive: !prev.archive
       }));
     } catch (err) {
       console.error("Erreur lors de l'archivage/désarchivage de l'affaire", err);

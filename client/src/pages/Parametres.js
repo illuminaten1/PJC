@@ -291,11 +291,9 @@ const handleTransferPortfolio = async () => {
     console.log("Avant showSuccessMessage");
     showSuccessMessage(`Portefeuille transféré avec succès de "${sourceRedacteur}" à "${targetRedacteur}". ${affairesModifiees} affaires modifiées.`);
     console.log("Après showSuccessMessage, message:", successMessage);
-    
-    // Ajouter un délai avant de fermer le modal
-    setTimeout(() => {
-      setTransferModalOpen(false);
-    }, 500);
+   
+    // Faire défiler vers le haut de la page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
     console.error("Erreur lors du transfert de portefeuille", err);
     setError("Impossible de transférer le portefeuille. Veuillez réessayer.");

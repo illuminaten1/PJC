@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
 import { parametresAPI } from '../../utils/api';
@@ -289,13 +290,23 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
       </FormRow>
 
       {/* Option pour créer également comme bénéficiaire */}
-      <FormField
-        label="Créer également comme bénéficiaire (seul un militaire blessé peut être bénéficiaire, en cas de décès ce sont ses ayants-droit qui le sont)"
-        name="creerBeneficiaire"
-        type="checkbox"
-        checked={militaire.creerBeneficiaire}
-        onChange={handleChange}
-      />
+      <ToggleField>
+        <ToggleIcon 
+          checked={militaire.creerBeneficiaire}
+          onClick={() => setMilitaire(prev => ({
+            ...prev,
+            creerBeneficiaire: !prev.creerBeneficiaire
+          }))}
+        >
+          {militaire.creerBeneficiaire ? <FaToggleOn /> : <FaToggleOff />}
+        </ToggleIcon>
+        <label onClick={() => setMilitaire(prev => ({
+          ...prev,
+          creerBeneficiaire: !prev.creerBeneficiaire
+        }))}>
+          Créer également comme bénéficiaire (seul un militaire blessé peut être bénéficiaire, en cas de décès ce sont ses ayants-droit qui le sont)
+        </label>
+      </ToggleField>
       
       {/* Afficher ces champs conditionnellement lorsque creerBeneficiaire est coché */}
       {militaire.creerBeneficiaire && (
@@ -385,6 +396,25 @@ const SubmitButton = styled.button`
   &:hover {
     background-color: #303f9f;
   }
+`;
+
+const ToggleField = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  
+  label {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+`;
+
+const ToggleIcon = styled.span`
+  font-size: 24px;
+  color: ${props => props.checked ? '#3f51b5' : '#aaaaaa'};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 `;
 
 export default MilitaireForm;

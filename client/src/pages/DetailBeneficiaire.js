@@ -445,7 +445,7 @@ const DetailBeneficiaire = () => {
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         title="Modifier le bénéficiaire"
-        size="medium"
+        size="small"
       >
         <BeneficiaireForm 
           onSubmit={handleEditBeneficiaire}

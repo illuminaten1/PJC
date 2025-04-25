@@ -211,8 +211,14 @@ const Parametres = () => {
   };
   
   const showSuccessMessage = (message) => {
+    console.log("Fonction showSuccessMessage appelée avec message:", message);
     setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(''), 3000);
+    
+    // Augmenter considérablement la durée d'affichage
+    setTimeout(() => {
+      console.log("setTimeout exécuté, suppression du message");
+      setSuccessMessage('');
+    }, 10000); // 10 secondes au lieu de 3 ou 5
   };
 
   // Gestionnaires pour la touche Entrée

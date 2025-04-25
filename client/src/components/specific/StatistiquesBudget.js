@@ -136,9 +136,9 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
         <thead>
           <tr>
             <th>Mois</th>
-            <th>Montant engagé</th>
+            <th>Montant engagé HT</th>
             <th>Nombre de conventions</th>
-            <th>Montant payé</th>
+            <th>Montant payé TTC</th>
             <th>Nombre de paiements</th>
           </tr>
         </thead>
@@ -146,9 +146,9 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
           {statistiques.parMois.map((mois, index) => (
             <tr key={index}>
               <td>{mois.nomMois}</td>
-              <td>{mois.gage.montant.toLocaleString('fr-FR')} €</td>
+              <td>{mois.gage.montant.toLocaleString('fr-FR')} € HT</td>
               <td>{mois.gage.nombre}</td>
-              <td>{mois.paye.montant.toLocaleString('fr-FR')} €</td>
+              <td>{mois.paye.montant.toLocaleString('fr-FR')} € TTC</td>
               <td>{mois.paye.nombre}</td>
             </tr>
           ))}

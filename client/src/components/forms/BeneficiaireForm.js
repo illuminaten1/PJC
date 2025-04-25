@@ -14,14 +14,17 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
   };
 
   const [beneficiaire, setBeneficiaire] = useState({
+    // On étale d'abord les propriétés de initialData
+    ...initialData,
+    // Ensuite, on écrase avec les valeurs formatées ou les valeurs par défaut
     prenom: initialData.prenom || '',
     nom: initialData.nom || '',
     qualite: initialData.qualite || 'Militaire',
     militaire: initialData.militaire || militaireId || '',
     numeroDecision: initialData.numeroDecision || '',
-    dateDecision: formatDateForInput(initialData.dateDecision) || '',
-    avocats: Array.isArray(initialData.avocats) ? initialData.avocats : [],
-    ...initialData
+    // Format correct pour l'input de type date (YYYY-MM-DD)
+    dateDecision: formatDateForInput(initialData.dateDecision),
+    avocats: Array.isArray(initialData.avocats) ? initialData.avocats : []
   });
   
   const [errors, setErrors] = useState({});

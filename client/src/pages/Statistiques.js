@@ -195,8 +195,8 @@ const Statistiques = () => {
               <thead>
                 <tr>
                   <Th>Année</Th>
-                  <Th>Montant gagé HT</Th>
-                  <Th>Montant gagé TTC</Th>
+                  <Th>Montant total gagé HT</Th>
+                  <Th>Montant total gagé TTC</Th>
                 </tr>
               </thead>
               <tbody>
@@ -224,7 +224,7 @@ const Statistiques = () => {
                 <tr>
                   <Th>Année</Th>
                   <Th>Nombre de règlements</Th>
-                  <Th>Montant ordonné TTC</Th>
+                  <Th>Montant total ordonné TTC</Th>
                 </tr>
               </thead>
               <tbody>
@@ -570,6 +570,11 @@ const TableHeader = styled.th`
   padding: 8px 12px;
   font-weight: 500;
   border-bottom: 2px solid #e0e0e0;
+  text-align: left; // Aligner par défaut à gauche
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center; // Centrer les colonnes numériques
+  }
 `;
 
 const TableRow = styled.tr`
@@ -582,6 +587,11 @@ const TableDataCell = styled.td`
   padding: 8px 12px;
   color: #333;
   border-bottom: 1px solid #e0e0e0;
+  text-align: left; // Aligner par défaut à gauche
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center; // Centrer les colonnes numériques
+  }
 `;
 
 const TablesRow = styled.div`

@@ -294,6 +294,10 @@ const handleTransferPortfolio = async () => {
    
     // Faire défiler vers le haut de la page
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Fermer le modal
+    setTransferModalOpen(false);
+    
   } catch (err) {
     console.error("Erreur lors du transfert de portefeuille", err);
     setError("Impossible de transférer le portefeuille. Veuillez réessayer.");

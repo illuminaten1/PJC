@@ -146,9 +146,9 @@ export const parametresAPI = {
   getByType: (type) => api.get(`/parametres/${type}`),
   addValue: (type, valeur) => api.post(`/parametres/${type}`, { valeur }),
   deleteValue: (type, index) => api.delete(`/parametres/${type}/${index}`),
-  transferPortfolio: (sourceRedacteur, targetRedacteur) => 
-    api.post('/parametres/transfert', { sourceRedacteur, targetRedacteur }),
-  getTransferHistory: () => api.get('/parametres/transfert/historique')
+  transferPortfolio: (sourceRedacteur, targetRedacteur) =>
+    api.post('/parametres/transfert-portefeuille', { sourceRedacteur, targetRedacteur }),
+  getTransferHistory: () => api.get('/parametres/historique-transferts')
 };
 
 // API pour les statistiques

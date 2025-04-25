@@ -5,13 +5,13 @@ import { parametresAPI } from '../../utils/api';
 
 const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   const [affaire, setAffaire] = useState({
+    ...initialData,
     nom: initialData.nom || '',
     description: initialData.description || '',
     lieu: initialData.lieu || '',
     dateFaits: initialData.dateFaits ? new Date(initialData.dateFaits).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-    redacteur: initialData.redacteur || '',
+    redacteur: initialData.redacteur || ''
     // Note: Le champ notes est géré séparément sur la page de détail
-    ...initialData
   });
   
   const [errors, setErrors] = useState({});

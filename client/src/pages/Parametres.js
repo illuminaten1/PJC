@@ -273,12 +273,9 @@ const Parametres = () => {
       // Appel à l'API pour effectuer le transfert
       const response = await parametresAPI.transferPortfolio(sourceRedacteur, targetRedacteur);
       
-      // Ajouter un console.log pour déboguer la structure de la réponse
-      console.log('Réponse du transfert:', response);
-      
-      // Accéder à affairesModifiees correctement selon la structure de la réponse
-      const affairesModifiees = response.affairesModifiees;
-      
+      // Accéder correctement aux données
+      const affairesModifiees = response.data?.affairesModifiees || 0;
+            
       showSuccessMessage(`Portefeuille transféré avec succès de "${sourceRedacteur}" à "${targetRedacteur}". ${affairesModifiees} affaires modifiées.`);
       setTransferModalOpen(false);
     } catch (err) {

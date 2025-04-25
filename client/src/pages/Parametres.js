@@ -75,6 +75,11 @@ const Parametres = () => {
       fetchUtilisateurs();
     }
   }, [isAdmin]);
+
+  // Hook pour déboguer les changements de successMessage pour les transferts de portefeuille
+  useEffect(() => {
+    console.log("successMessage a changé:", successMessage);
+  }, [successMessage]);
   
   const fetchParametres = async () => {
     setLoading(true);
@@ -260,31 +265,38 @@ const Parametres = () => {
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   };
 
-  // Effectuer le transfert de portefeuille
-  const handleTransferPortfolio = async () => {
-    if (!sourceRedacteur || !targetRedacteur || sourceRedacteur === targetRedacteur) {
-      setError("Veuillez sélectionner deux rédacteurs différents pour le transfert");
-      return;
-    }
+// Effectuer le transfert de portefeuille
+const handleTransferPortfolio = async () => {
+  if (!sourceRedacteur || !targetRedacteur || sourceRedacteur === targetRedacteur) {
+    setError("Veuillez sélectionner deux rédacteurs différents pour le transfert");
+    return;
+  }
+  
+  setTransferInProgress(true);
+  
+  try {
+    console.log("Démarrage du transfert de portefeuille");
+    const response = await parametresAPI.transferPortfolio(sourceRedacteur, targetRedacteur);
+    console.log("Réponse reçue:", response);
     
-    setTransferInProgress(true);
+    const affairesModifiees = response.data?.affairesModifiees || 0;
+    console.log("Affaires modifiées:", affairesModifiees);
     
-    try {
-      // Appel à l'API pour effectuer le transfert
-      const response = await parametresAPI.transferPortfolio(sourceRedacteur, targetRedacteur);
-      
-      // Accéder correctement aux données
-      const affairesModifiees = response.data?.affairesModifiees || 0;
-            
-      showSuccessMessage(`Portefeuille transféré avec succès de "${sourceRedacteur}" à "${targetRedacteur}". ${affairesModifiees} affaires modifiées.`);
+    console.log("Avant showSuccessMessage");
+    showSuccessMessage(`Portefeuille transféré avec succès de "${sourceRedacteur}" à "${targetRedacteur}". ${affairesModifiees} affaires modifiées.`);
+    console.log("Après showSuccessMessage, message:", successMessage);
+    
+    // Ajouter un délai avant de fermer le modal
+    setTimeout(() => {
       setTransferModalOpen(false);
-    } catch (err) {
-      console.error("Erreur lors du transfert de portefeuille", err);
-      setError("Impossible de transférer le portefeuille. Veuillez réessayer.");
-    } finally {
-      setTransferInProgress(false);
-    }
-  };
+    }, 500);
+  } catch (err) {
+    console.error("Erreur lors du transfert de portefeuille", err);
+    setError("Impossible de transférer le portefeuille. Veuillez réessayer.");
+  } finally {
+    setTransferInProgress(false);
+  }
+};
   
   // Télécharger un template
   const handleDownloadTemplate = async (templateType) => {

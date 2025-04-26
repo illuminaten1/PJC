@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaCopy, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
 import { beneficiairesAPI, avocatsAPI, affairesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
@@ -634,35 +634,15 @@ const DetailBeneficiaire = () => {
         size="large"
       >
         {selectedAvocatDetail && (
-          <div style={{ padding: '20px' }}>
-            {/* En-tête */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e0e0e0', paddingBottom: '15px' }}>
-              <h2 style={{ margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span>Maître {selectedAvocatDetail.prenom} {selectedAvocatDetail.nom}</span>
-                {selectedAvocatDetail.specialisationRPC && 
-                  <span style={{ display: 'inline-block', backgroundColor: '#ff5722', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '14px', fontWeight: 'bold' }}>RPC</span>
-                }
-              </h2>
-              <button 
-                onClick={() => {
-                  // Copier les coordonnées (code similaire à celui d'AvocatDetail)
-                  const coordonnees = `Maître ${selectedAvocatDetail.prenom} ${selectedAvocatDetail.nom}\n${selectedAvocatDetail.email || ''}`;
-                  navigator.clipboard.writeText(coordonnees);
-                  alert('Coordonnées copiées dans le presse-papier');
-                }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#3f51b5', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 16px', fontWeight: '500', cursor: 'pointer' }}
-              >
-                <FaCopy />
-                <span>Copier les coordonnées</span>
-              </button>
-            </div>
-            
-            {/* Reste du contenu - réutilise le composant AvocatDetail sans ses boutons */}
-            <AvocatDetail 
-              avocat={selectedAvocatDetail} 
-              onEditClick={null} // Cette prop ne sera pas utilisée
-            />
-          </div>
+          <AvocatDetail 
+            avocat={selectedAvocatDetail} 
+            onEditClick={() => {
+              setAvocatDetailModalOpen(false);
+              // Si vous souhaitez ouvrir le modal d'édition à la place :
+              // setEditModalOpen(true); 
+              // setEditingAvocat(selectedAvocatDetail);
+            }}
+          />
         )}
       </Modal>
     </Container>

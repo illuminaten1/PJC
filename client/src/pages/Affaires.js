@@ -261,14 +261,7 @@ const Affaires = () => {
           data={affaires}
           onRowClick={handleRowClick}
           searchPlaceholder="Rechercher une affaire..."
-          initialState={{
-            sortBy: [
-              {
-                id: 'nom',
-                desc: false
-              }
-            ]
-          }}
+          initialState={{ sortBy: [{ id: 'nom', desc: false }] }}
         />
       )}
       

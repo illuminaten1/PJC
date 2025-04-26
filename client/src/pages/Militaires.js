@@ -63,6 +63,13 @@ const Militaires = () => {
       console.error("Erreur lors de la récupération des rédacteurs", err);
     }
   };
+
+  const resetFilters = () => {
+    setFilterAffaire('');
+    setFilterRedacteur('');
+    setFilterArchive('false');
+    setSearchTerm('');
+  };
   
   const handleRowClick = (militaire) => {
     navigate(`/militaires/${militaire._id}`);
@@ -155,6 +162,11 @@ const Militaires = () => {
             <option value="true">Archivés</option>
             <option value="">Tous</option>
           </Select>
+
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+            Réinitialiser
+          </ResetButton>
+
         </FiltersGroup>
       </FiltersContainer>
       
@@ -265,6 +277,23 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ResetButton = styled.button`
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #d32f2f;
+  }
 `;
 
 export default Militaires;

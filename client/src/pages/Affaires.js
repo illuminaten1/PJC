@@ -118,6 +118,13 @@ const Affaires = () => {
       // Gérer l'erreur
     }
   };
+
+  const resetFilters = () => {
+    setFilterYear('');
+    setFilterRedacteur('');
+    setFilterArchived('false');
+    setSearchTerm('');
+  };
   
   const handleRowClick = (affaire) => {
     navigate(`/affaires/${affaire._id}`);
@@ -248,6 +255,11 @@ const Affaires = () => {
             <option value="true">Archivées</option>
             <option value="">Toutes</option>
           </Select>
+
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+            Réinitialiser
+          </ResetButton>
+
         </FiltersGroup>
       </FiltersContainer>
       
@@ -408,6 +420,23 @@ const CounterDivider = styled.div`
   width: 1px;
   height: 30px;
   background-color: #e0e0e0;
+`;
+
+const ResetButton = styled.button`
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #d32f2f;
+  }
 `;
 
 export default Affaires;

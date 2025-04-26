@@ -3,7 +3,14 @@ import { useTable, useSortBy, useGlobalFilter, usePagination } from 'react-table
 import styled from 'styled-components';
 import { FaSort, FaSortUp, FaSortDown, FaSearch, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 
-const DataTable = ({ columns, data, onRowClick, searchPlaceholder = "Rechercher...", pageSize = 10 }) => {
+const DataTable = ({ 
+  columns, 
+  data, 
+  onRowClick, 
+  searchPlaceholder = "Rechercher...", 
+  pageSize = 10,
+  initialState = {} 
+}) => {
   const columnsMemo = useMemo(() => columns, [columns]);
   const dataMemo = useMemo(() => data, [data]);
   
@@ -26,7 +33,12 @@ const DataTable = ({ columns, data, onRowClick, searchPlaceholder = "Rechercher.
     { 
       columns: columnsMemo, 
       data: dataMemo,
-      initialState: { pageIndex: 0, pageSize }
+      // Fusionner l'initialState par défaut avec celui fourni en props
+      initialState: { 
+        pageIndex: 0, 
+        pageSize,
+        ...initialState 
+      }
     },
     useGlobalFilter,
     useSortBy,
@@ -51,7 +63,10 @@ const DataTable = ({ columns, data, onRowClick, searchPlaceholder = "Rechercher.
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                <th 
+                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  className={column.isSorted ? 'sorted' : ''}
+                >
                   <div>
                     {column.render('Header')}
                     <SortIcon>
@@ -68,20 +83,28 @@ const DataTable = ({ columns, data, onRowClick, searchPlaceholder = "Rechercher.
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map(row => {
-            prepareRow(row);
-            return (
-              <tr 
-                {...row.getRowProps()}
-                onClick={() => onRowClick && onRowClick(row.original)}
-                className={onRowClick ? 'clickable' : ''}
-              >
-                {row.cells.map(cell => (
-                  <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                ))}
-              </tr>
-            );
-          })}
+          {page.length > 0 ? (
+            page.map(row => {
+              prepareRow(row);
+              return (
+                <tr 
+                  {...row.getRowProps()}
+                  onClick={() => onRowClick && onRowClick(row.original)}
+                  className={onRowClick ? 'clickable' : ''}
+                >
+                  {row.cells.map(cell => (
+                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                  ))}
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td colSpan={columns.length} style={{ textAlign: 'center', padding: '20px' }}>
+                Aucune donnée trouvée
+              </td>
+            </tr>
+          )}
         </tbody>
       </StyledTable>
       
@@ -152,6 +175,10 @@ const StyledTable = styled.table`
     background-color: #f5f5f5;
     font-weight: 500;
     color: #333;
+    
+    &.sorted {
+      background-color: #e8eaf6;
+    }
     
     div {
       display: flex;

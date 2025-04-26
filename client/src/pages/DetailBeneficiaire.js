@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
 import { beneficiairesAPI, avocatsAPI, affairesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
@@ -374,8 +374,8 @@ const DetailBeneficiaire = () => {
             </TabActionButton>
           }
         >
-          {beneficiaire.avocats && beneficiaire.avocats.length > 0 ? (
-            <AvocatsGrid>
+        {beneficiaire.avocats && beneficiaire.avocats.length > 0 ? (
+          <AvocatsGrid>
             {beneficiaire.avocats.map((avocat, index) => (
               <AvocatCard key={index}>
                 <AvocatHeader>
@@ -390,16 +390,31 @@ const DetailBeneficiaire = () => {
                 <AvocatContent>
                   {avocat.email && (
                     <AvocatEmail href={`mailto:${avocat.email}`}>
-                      {avocat.email}
+                      <FaEnvelope style={{ fontSize: '12px' }} /> {avocat.email}
                     </AvocatEmail>
+                  )}
+                  {avocat.telephonePublic1 && (
+                    <AvocatPhone href={`tel:${avocat.telephonePublic1}`}>
+                      <FaPhone /> {avocat.telephonePublic1}
+                    </AvocatPhone>
+                  )}
+                  {avocat.telephonePublic2 && (
+                    <AvocatPhone href={`tel:${avocat.telephonePublic2}`}>
+                      <FaPhone /> {avocat.telephonePublic2}
+                    </AvocatPhone>
+                  )}
+                  {avocat.telephonePrive && (
+                    <AvocatPhone href={`tel:${avocat.telephonePrive}`} isPrivate={true}>
+                      <FaPhone /> {avocat.telephonePrive} <PrivateTag>privé</PrivateTag>
+                    </AvocatPhone>
                   )}
                 </AvocatContent>
               </AvocatCard>
             ))}
           </AvocatsGrid>
-          ) : (
-            <EmptyMessage>Aucun avocat désigné</EmptyMessage>
-          )}
+        ) : (
+          <EmptyMessage>Aucun avocat désigné</EmptyMessage>
+        )}
         </ExpandableSection>
         
         <ExpandableSection
@@ -783,6 +798,36 @@ const AvocatContent = styled.div`
   margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const AvocatPhone = styled.a`
+  font-size: 14px;
+  color: ${props => props.isPrivate ? '#f44336' : '#3f51b5'};
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  svg {
+    font-size: 12px;
+  }
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const PrivateTag = styled.span`
+  font-size: 10px;
+  color: #f44336;
+  background-color: #ffebee;
+  padding: 2px 4px;
+  border-radius: 2px;
+  margin-left: 4px;
+  font-weight: 500;
 `;
 
 const AvocatHeader = styled.div`

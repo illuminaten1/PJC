@@ -153,6 +153,12 @@ const Affaires = () => {
       Cell: ({ value }) => {
         if (!value) return '-';
         return new Date(value).toLocaleDateString('fr-FR');
+      },
+      // Ajoutez un sortType personnalisé pour les dates
+      sortType: (rowA, rowB, columnId) => {
+        const dateA = rowA.original.dateFaits ? new Date(rowA.original.dateFaits).getTime() : 0;
+        const dateB = rowB.original.dateFaits ? new Date(rowB.original.dateFaits).getTime() : 0;
+        return dateA - dateB;
       }
     },
     {
@@ -166,6 +172,12 @@ const Affaires = () => {
     {
       Header: 'Rédacteur',
       accessor: 'redacteur',
+      // Ajoutez un sortType personnalisé pour le redacteur
+      sortType: (rowA, rowB, columnId) => {
+        const redacteurA = rowA.original.redacteur || '';
+        const redacteurB = rowB.original.redacteur || '';
+        return redacteurA.localeCompare(redacteurB);
+      }
     },
     {
       Header: 'Archive',
@@ -246,6 +258,14 @@ const Affaires = () => {
           data={affaires}
           onRowClick={handleRowClick}
           searchPlaceholder="Rechercher une affaire..."
+          initialState={{
+            sortBy: [
+              {
+                id: 'nom',
+                desc: false
+              }
+            ]
+          }}
         />
       )}
       

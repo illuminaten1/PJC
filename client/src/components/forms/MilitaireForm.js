@@ -290,26 +290,28 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
       </FormRow>
 
       {/* Option pour créer également comme bénéficiaire */}
-      <ToggleField>
-        <ToggleIcon 
-          checked={militaire.creerBeneficiaire}
-          onClick={() => setMilitaire(prev => ({
+      {!isEditing && (
+        <ToggleField>
+          <ToggleIcon 
+            checked={militaire.creerBeneficiaire}
+            onClick={() => setMilitaire(prev => ({
+              ...prev,
+              creerBeneficiaire: !prev.creerBeneficiaire
+            }))}
+          >
+            {militaire.creerBeneficiaire ? <FaToggleOn /> : <FaToggleOff />}
+          </ToggleIcon>
+          <label onClick={() => setMilitaire(prev => ({
             ...prev,
             creerBeneficiaire: !prev.creerBeneficiaire
-          }))}
-        >
-          {militaire.creerBeneficiaire ? <FaToggleOn /> : <FaToggleOff />}
-        </ToggleIcon>
-        <label onClick={() => setMilitaire(prev => ({
-          ...prev,
-          creerBeneficiaire: !prev.creerBeneficiaire
-        }))}>
-          Créer également comme bénéficiaire (seul un militaire blessé peut être bénéficiaire, en cas de décès ce sont ses ayants-droit qui le sont)
-        </label>
-      </ToggleField>
-      
-      {/* Afficher ces champs conditionnellement lorsque creerBeneficiaire est coché */}
-      {militaire.creerBeneficiaire && (
+          }))}>
+            Créer également comme bénéficiaire (seul un militaire blessé peut être bénéficiaire, en cas de décès ce sont ses ayants-droit qui le sont)
+          </label>
+        </ToggleField>
+      )}
+
+      {/* Afficher ces champs conditionnellement lorsque creerBeneficiaire est coché et qu'on est en création */}
+      {militaire.creerBeneficiaire && !isEditing && (
         <FormRow>
           <FormField
             label="Numéro de décision du bénéficiaire"

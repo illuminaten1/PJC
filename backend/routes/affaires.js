@@ -16,7 +16,7 @@ const validateObjectId = (req, res, next) => {
 // GET - Récupérer toutes les affaires avec filtres
 router.get('/', async (req, res) => {
   try {
-    const { search, year, archived } = req.query;
+    const { search, year, archived, redacteur } = req.query;
     let query = {};
     
     // Filtre par recherche textuelle
@@ -36,6 +36,11 @@ router.get('/', async (req, res) => {
     // Filtre par statut d'archivage
     if (archived !== undefined) {
       query.archive = archived === 'true';
+    }
+    
+    // Filtre par rédacteur (ajout de cette partie)
+    if (redacteur) {
+      query.redacteur = redacteur;
     }
     
     const affaires = await Affaire.find(query).sort({ dateCreation: -1 });

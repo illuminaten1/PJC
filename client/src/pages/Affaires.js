@@ -61,8 +61,8 @@ const Affaires = () => {
       if (searchTerm) params.search = searchTerm;
       if (filterYear) params.year = filterYear;
       if (filterArchived !== '') params.archived = filterArchived;
-      if (filterRedacteur) params.redacteur = filterRedacteur;
-      
+      if (filterRedacteur) params.redacteur = filterRedacteur; // Ajout de cette ligne
+  
       // Récupérer les affaires filtrées
       const response = await affairesAPI.getAll(params);
       setAffaires(response.data);

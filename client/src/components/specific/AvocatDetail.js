@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaEdit, FaCopy, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBuilding, FaIdCard } from 'react-icons/fa';
 
-const AvocatDetail = ({ avocat, onEditClick }) => {
+const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
   // Fonction pour copier les coordonnées dans le presse-papier
   const copyCoordinates = () => {
     // Format: Maître Prénom NOM, Adresse postale, Téléphone(s) public(s), Adresse mail
@@ -67,10 +67,13 @@ const AvocatDetail = ({ avocat, onEditClick }) => {
             <FaCopy />
             <span>Copier les coordonnées</span>
           </Button>
-          <Button onClick={onEditClick} title="Modifier">
-            <FaEdit />
-            <span>Modifier</span>
-          </Button>
+        {/* Rendre le bouton modifier conditionnel (réutilisé dans DetailBeneficiaire.js)*/}
+        {showEditButton && (
+            <Button onClick={onEditClick} title="Modifier">
+              <FaEdit />
+              <span>Modifier</span>
+            </Button>
+          )}
         </ActionButtons>
       </HeaderSection>
       

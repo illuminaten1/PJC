@@ -636,12 +636,8 @@ const DetailBeneficiaire = () => {
         {selectedAvocatDetail && (
           <AvocatDetail 
             avocat={selectedAvocatDetail} 
-            onEditClick={() => {
-              setAvocatDetailModalOpen(false);
-              // Si vous souhaitez ouvrir le modal d'édition à la place :
-              // setEditModalOpen(true); 
-              // setEditingAvocat(selectedAvocatDetail);
-            }}
+            onEditClick={() => {}}
+            showEditButton={false} // Désactiver l'affichage du bouton Modifier
           />
         )}
       </Modal>

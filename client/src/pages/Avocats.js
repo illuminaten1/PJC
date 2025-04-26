@@ -25,15 +25,22 @@ const Avocats = () => {
   const [filters, setFilters] = useState({
     region: '',
     specialisationRPC: false,
-    ville: ''
+    ville: '',
+    cabinet: '' // Nouveau filtre pour cabinet
   });
-  const [showFilters, setShowFilters] = useState(false);
+  
+  // Modifier pour afficher les filtres par défaut
+  const [showFilters, setShowFilters] = useState(true);
+  
+  // États pour les listes de filtres
+  const [cabinets, setCabinets] = useState([]); // State pour les cabinets
   
   // État pour le tri
   const [sortConfig, setSortConfig] = useState({ key: 'nom', direction: 'asc' });
 
   useEffect(() => {
     fetchAvocats();
+    fetchCabinets(); // Fonction pour récupérer les cabinets
   }, []);
 
   const fetchAvocats = async () => {
@@ -48,6 +55,16 @@ const Avocats = () => {
       setError("Impossible de charger la liste des avocats");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fonction pour récupérer la liste des cabinets
+  const fetchCabinets = async () => {
+    try {
+      const response = await avocatsAPI.getCabinets();
+      setCabinets(response.data);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des cabinets", err);
     }
   };
 
@@ -94,6 +111,13 @@ const Avocats = () => {
         avocat.villesIntervention && 
         Array.isArray(avocat.villesIntervention) && 
         avocat.villesIntervention.includes(filters.ville)
+      );
+    }
+    
+    // Filtre par cabinet
+    if (filters.cabinet) {
+      result = result.filter(avocat => 
+        avocat.cabinet === filters.cabinet
       );
     }
     
@@ -171,7 +195,8 @@ const Avocats = () => {
     setFilters({
       region: '',
       specialisationRPC: false,
-      ville: ''
+      ville: '',
+      cabinet: '' // Réinitialiser le filtre cabinet
     });
   };
 
@@ -261,7 +286,7 @@ const Avocats = () => {
           
           <FilterToggle onClick={() => setShowFilters(!showFilters)}>
             <FaFilter />
-            <span>Filtres</span>
+            <span>{showFilters ? 'Masquer les filtres' : 'Afficher les filtres'}</span>
           </FilterToggle>
         </SearchFilterContainer>
         
@@ -286,6 +311,21 @@ const Avocats = () => {
             </FilterSelect>
           </FilterGroup>
           
+          {/* Filtre pour cabinet */}
+          <FilterGroup>
+            <FilterLabel>Cabinet</FilterLabel>
+            <FilterSelect 
+              name="cabinet" 
+              value={filters.cabinet} 
+              onChange={handleFilterChange}
+            >
+              <option value="">Tous les cabinets</option>
+              {cabinets.map((cabinet, index) => (
+                <option key={index} value={cabinet}>{cabinet}</option>
+              ))}
+            </FilterSelect>
+          </FilterGroup>
+          
           <FilterGroup>
             <FilterLabel>Ville d'intervention</FilterLabel>
             <FilterSelect 
@@ -300,8 +340,10 @@ const Avocats = () => {
             </FilterSelect>
           </FilterGroup>
           
-          <FilterGroup inline>
-            <FilterCheckbox>
+          {/* Mise à jour pour mieux aligner le bouton RPC */}
+          <FilterGroup>
+            <FilterLabel>Spécialisation</FilterLabel>
+            <FilterCheckboxContainer>
               <input
                 type="checkbox"
                 name="specialisationRPC"
@@ -309,10 +351,10 @@ const Avocats = () => {
                 checked={filters.specialisationRPC}
                 onChange={handleFilterChange}
               />
-              <FilterLabel htmlFor="filter-rpc" inline>
+              <FilterCheckboxLabel htmlFor="filter-rpc">
                 Spécialisation RPC uniquement
-              </FilterLabel>
-            </FilterCheckbox>
+              </FilterCheckboxLabel>
+            </FilterCheckboxContainer>
           </FilterGroup>
           
           <ResetButton onClick={resetFilters}>
@@ -595,11 +637,6 @@ const FilterGroup = styled.div`
   flex: 1;
   min-width: 200px;
   
-  ${props => props.inline && `
-    flex: auto;
-    min-width: auto;
-  `}
-  
   @media (max-width: 768px) {
     width: 100%;
   }
@@ -610,11 +647,6 @@ const FilterLabel = styled.label`
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  
-  ${props => props.inline && `
-    display: inline;
-    margin-bottom: 0;
-  `}
 `;
 
 const FilterSelect = styled.select`
@@ -624,6 +656,7 @@ const FilterSelect = styled.select`
   border-radius: 4px;
   font-size: 14px;
   background-color: white;
+  height: 40px; /* Hauteur fixe pour aligner avec la case à cocher */
   
   &:focus {
     outline: none;
@@ -631,10 +664,20 @@ const FilterSelect = styled.select`
   }
 `;
 
-const FilterCheckbox = styled.div`
+// Nouveaux styles pour aligner la case à cocher RPC
+const FilterCheckboxContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  height: 40px; /* Même hauteur que les select */
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 10px;
+`;
+
+const FilterCheckboxLabel = styled.label`
+  margin-left: 8px;
+  font-size: 14px;
 `;
 
 const ResetButton = styled.button`
@@ -644,9 +687,16 @@ const ResetButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   padding: 10px;
+  align-self: flex-end;
+  margin-bottom: 8px;
   
   &:hover {
     text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    align-self: flex-start;
+    margin-top: 10px;
   }
 `;
 

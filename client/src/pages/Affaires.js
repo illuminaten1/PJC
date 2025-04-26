@@ -8,6 +8,28 @@ import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import AffaireForm from '../components/forms/AffaireForm';
 
+// Composant pour afficher les compteurs d'affaires
+const AffairesCounter = ({ total, actives, archived }) => {
+  return (
+    <CounterContainer>
+      <CounterItem>
+        <CounterValue>{total}</CounterValue>
+        <CounterLabel>Total</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{actives}</CounterValue>
+        <CounterLabel>Actives</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{archived}</CounterValue>
+        <CounterLabel>Archivées</CounterLabel>
+      </CounterItem>
+    </CounterContainer>
+  );
+};
+
 const Affaires = () => {
   const [affaires, setAffaires] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +41,11 @@ const Affaires = () => {
   const [filterRedacteur, setFilterRedacteur] = useState('');
   const [redacteurs, setRedacteurs] = useState([]);
   
+  // Nouveaux états pour les compteurs
+  const [totalAffaires, setTotalAffaires] = useState(0);
+  const [activesAffaires, setActivesAffaires] = useState(0);
+  const [archivedAffaires, setArchivedAffaires] = useState(0);
+  
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -29,15 +56,32 @@ const Affaires = () => {
   const fetchAffaires = async () => {
     setLoading(true);
     try {
+      // Préparer les paramètres pour la requête filtrée
       const params = {};
-      
       if (searchTerm) params.search = searchTerm;
       if (filterYear) params.year = filterYear;
       if (filterArchived !== '') params.archived = filterArchived;
       if (filterRedacteur) params.redacteur = filterRedacteur;
       
+      // Récupérer les affaires filtrées
       const response = await affairesAPI.getAll(params);
       setAffaires(response.data);
+      
+      // Si aucun filtre n'est appliqué, utilisez directement cette réponse pour les compteurs
+      if (!searchTerm && !filterYear && filterArchived === '' && !filterRedacteur) {
+        const allAffaires = response.data;
+        setTotalAffaires(allAffaires.length);
+        setActivesAffaires(allAffaires.filter(a => !a.archive).length);
+        setArchivedAffaires(allAffaires.filter(a => a.archive).length);
+      } else {
+        // Sinon, faites une requête supplémentaire pour les statistiques globales
+        const statsResponse = await affairesAPI.getAll({});
+        const allAffaires = statsResponse.data;
+        setTotalAffaires(allAffaires.length);
+        setActivesAffaires(allAffaires.filter(a => !a.archive).length);
+        setArchivedAffaires(allAffaires.filter(a => a.archive).length);
+      }
+      
       setError(null);
     } catch (err) {
       console.error("Erreur lors de la récupération des affaires", err);
@@ -145,6 +189,13 @@ const Affaires = () => {
             <span>Nouvelle affaire</span>
           </ActionButton>
         }
+      />
+      
+      {/* Ajout du compteur d'affaires ici */}
+      <AffairesCounter 
+        total={totalAffaires} 
+        actives={activesAffaires} 
+        archived={archivedAffaires} 
       />
       
       <FiltersContainer>
@@ -305,6 +356,42 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+// Styles pour le compteur d'affaires
+const CounterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+`;
+
+const CounterItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;
+`;
+
+const CounterValue = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  color: #3f51b5;
+`;
+
+const CounterLabel = styled.div`
+  font-size: 12px;
+  color: #757575;
+  margin-top: 4px;
+`;
+
+const CounterDivider = styled.div`
+  width: 1px;
+  height: 30px;
+  background-color: #e0e0e0;
 `;
 
 export default Affaires;

@@ -357,8 +357,8 @@ const Avocats = () => {
             </FilterCheckboxContainer>
           </FilterGroup>
           
-          <ResetButton onClick={resetFilters}>
-            Réinitialiser les filtres
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+            Réinitialiser
           </ResetButton>
         </FiltersPanel>
       )}
@@ -681,22 +681,19 @@ const FilterCheckboxLabel = styled.label`
 `;
 
 const ResetButton = styled.button`
-  background: none;
+  background-color: #f44336;
+  color: white;
   border: none;
-  color: #f44336;
-  cursor: pointer;
+  border-radius: 4px;
+  padding: 8px 12px;
   font-size: 14px;
-  padding: 10px;
-  align-self: flex-end;
-  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
   
   &:hover {
-    text-decoration: underline;
-  }
-  
-  @media (max-width: 768px) {
-    align-self: flex-start;
-    margin-top: 10px;
+    background-color: #d32f2f;
   }
 `;
 

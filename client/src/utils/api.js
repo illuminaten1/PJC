@@ -60,10 +60,8 @@ export const affairesAPI = {
   getArborescence: (id) => api.get(`/affaires/${id}/arborescence`),
   create: (data) => api.post('/affaires', data),
   update: (id, data) => api.put(`/affaires/${id}`, data),
-  delete: (id, motDePasse) => api.delete(`/affaires/${id}`, { 
-    data: { motDePasse } 
-  }),
-  toggleArchive: (id) => api.patch(`/affaires/${id}/archive`)
+  delete: (id) => api.delete(`/affaires/${id}`),
+  archive: (id, archive) => api.patch(`/affaires/${id}/archive`, { archive })
 };
 
 // API pour les avocats

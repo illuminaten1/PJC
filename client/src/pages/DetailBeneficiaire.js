@@ -12,6 +12,7 @@ import ExpandableSection from '../components/common/ExpandableSection';
 import ConventionsTable from '../components/specific/ConventionsTable';
 import PaiementsTable from '../components/specific/PaiementsTable';
 import DocumentsSection from '../components/specific/DocumentsSection';
+import AvocatDetail from '../components/specific/AvocatDetail';
 import {
   HeaderCard,
   HeaderGrid,
@@ -40,6 +41,8 @@ const DetailBeneficiaire = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [avocatDetailModalOpen, setAvocatDetailModalOpen] = useState(false);
+  const [selectedAvocatDetail, setSelectedAvocatDetail] = useState(null);
   
   useEffect(() => {
     fetchBeneficiaire();
@@ -185,6 +188,11 @@ const DetailBeneficiaire = () => {
       console.error("Erreur lors de la mise à jour des avocats", err);
       alert("Une erreur est survenue lors de la mise à jour des avocats");
     }
+  };
+
+  const handleOpenAvocatDetail = (avocat) => {
+    setSelectedAvocatDetail(avocat);
+    setAvocatDetailModalOpen(true);
   };
   
   const navigateToMilitaire = (militaireId) => {
@@ -381,7 +389,12 @@ const DetailBeneficiaire = () => {
                 <AvocatHeader>
                   <FaUserTie />
                   <div>
-                    <AvocatName>Me {avocat.prenom} {avocat.nom}</AvocatName>
+                  <AvocatName 
+                    onClick={() => handleOpenAvocatDetail(avocat)} 
+                    style={{ cursor: 'pointer', color: '#3f51b5' }}
+                  >
+                    Me {avocat.prenom} {avocat.nom}
+                  </AvocatName>
                     {hasRPCSpecialization(avocat) && (
                       <SpecializationTag>RPC</SpecializationTag>
                     )}
@@ -611,6 +624,26 @@ const DetailBeneficiaire = () => {
           
           {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
+      </Modal>
+
+      {/* Modal de détail d'avocat */}
+      <Modal
+        isOpen={avocatDetailModalOpen}
+        onClose={() => setAvocatDetailModalOpen(false)}
+        title="Détails de l'avocat"
+        size="large"
+      >
+        {selectedAvocatDetail && (
+          <AvocatDetail 
+            avocat={selectedAvocatDetail} 
+            onEditClick={() => {
+              setAvocatDetailModalOpen(false);
+              // Si vous souhaitez ouvrir le modal d'édition à la place :
+              // setEditModalOpen(true); 
+              // setEditingAvocat(selectedAvocatDetail);
+            }}
+          />
+        )}
       </Modal>
     </Container>
   );

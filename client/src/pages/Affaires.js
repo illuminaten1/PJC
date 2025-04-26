@@ -172,11 +172,14 @@ const Affaires = () => {
     {
       Header: 'Rédacteur',
       accessor: 'redacteur',
-      // Ajoutez un sortType personnalisé pour le redacteur
-      sortType: (rowA, rowB, columnId) => {
+      // Une fonction de tri personnalisée pour garantir un tri alphabétique correct
+      sortType: (rowA, rowB) => {
+        // Extraire les valeurs à comparer
         const redacteurA = rowA.original.redacteur || '';
         const redacteurB = rowB.original.redacteur || '';
-        return redacteurA.localeCompare(redacteurB);
+        
+        // Effectuer une comparaison alphabétique standard
+        return redacteurA.localeCompare(redacteurB, 'fr', { sensitivity: 'base' });
       }
     },
     {

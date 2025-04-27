@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
-import { beneficiairesAPI, avocatsAPI, affairesAPI } from '../utils/api';
+import { FaEdit, FaTrash, FaPlus, FaUserTie, FaSearch, FaTimes, FaEnvelope, FaPhone, FaFileExcel } from 'react-icons/fa';
+import { beneficiairesAPI, avocatsAPI, affairesAPI, exportAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import BeneficiaireForm from '../components/forms/BeneficiaireForm';

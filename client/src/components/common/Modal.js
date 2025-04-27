@@ -2,7 +2,17 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { FaTimes } from 'react-icons/fa';
 
-const Modal = ({ isOpen, onClose, title, children, size = 'medium', actions = null }) => {
+const Modal = ({ 
+  isOpen, 
+  onClose, 
+  title, 
+  children, 
+  size = 'medium', 
+  actions = null,
+  headerContent = null,
+  noPadding = false,
+  isPreview = false
+}) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -28,12 +38,15 @@ const Modal = ({ isOpen, onClose, title, children, size = 'medium', actions = nu
       <ModalContainer size={size}>
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
+          {headerContent && <HeaderActions>{headerContent}</HeaderActions>}
           <CloseButton onClick={onClose}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
         
-        <ModalContent>{children}</ModalContent>
+        <ModalContent noPadding={noPadding} isPreview={isPreview}>
+          {children}
+        </ModalContent>
         
         {actions && <ModalActions>{actions}</ModalActions>}
       </ModalContainer>
@@ -62,6 +75,7 @@ const getModalWidth = (size) => {
     case 'large':
       return '800px';
     case 'full':
+    case 'fullscreen':
       return '95%';
     case 'medium':
     default:
@@ -78,6 +92,7 @@ const ModalContainer = styled.div`
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Empêche le contenu de déborder du modal */
 `;
 
 const ModalHeader = styled.div`
@@ -86,12 +101,21 @@ const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0; /* Empêche l'en-tête de rétrécir */
 `;
 
 const ModalTitle = styled.h2`
   margin: 0;
   font-size: 18px;
   font-weight: 500;
+  flex: 1; /* Permet au titre de prendre l'espace disponible */
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 15px;
 `;
 
 const CloseButton = styled.button`
@@ -110,9 +134,23 @@ const CloseButton = styled.button`
 `;
 
 const ModalContent = styled.div`
-  padding: 20px;
+  padding: ${props => props.noPadding ? '0' : '20px'};
   overflow-y: auto;
   flex: 1;
+  
+  /* Styles spécifiques pour les prévisualisations */
+  ${props => props.isPreview && `
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    
+    /* Pour s'assurer que les containers enfants prennent toute la hauteur */
+    & > div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  `}
 `;
 
 const ModalActions = styled.div`
@@ -121,6 +159,7 @@ const ModalActions = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  flex-shrink: 0; /* Empêche le pied de page de rétrécir */
 `;
 
 export default Modal;

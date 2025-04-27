@@ -10,7 +10,7 @@ const auth = require('../middleware/auth');
  * @desc    Exporte les bénéficiaires au format Excel
  * @access  Private
  */
-router.get('/beneficiaires', auth, async (req, res) => {
+router.get('/beneficiaires', async (req, res) => {
   try {
     // Récupération des bénéficiaires avec toutes les données associées
     const beneficiaires = await Beneficiaire.find(req.query)
@@ -160,7 +160,7 @@ router.get('/beneficiaires', auth, async (req, res) => {
  * @desc    Exporte un bénéficiaire spécifique au format Excel
  * @access  Private
  */
-router.get('/beneficiaires/:id', auth, async (req, res) => {
+router.get('/beneficiaires/:id', async (req, res) => {
   try {
     const { id } = req.params;
     

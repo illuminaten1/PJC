@@ -78,10 +78,18 @@ const ActionButton = styled.button`
 
 const PreviewContainer = styled.div`
   width: 100%;
-  height: 80vh;
-  margin-top: 10px;
-  border: 1px solid #ddd;
-  overflow: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  
+  iframe {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
 `;
 
 const EmptyState = styled.div`
@@ -379,34 +387,41 @@ const DocumentsSection = ({ beneficiaireId }) => {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           title={selectedFile.originalname}
-          size="full"
+          size="fullscreen"  // utiliser fullscreen pour une meilleure prévisualisation
           headerContent={
             <div style={{ display: 'flex', gap: '10px' }}>
-              <ActionButton onClick={() => handleDownload(selectedFile._id)} title="Télécharger">
+              <ActionButton onClick={(e) => handleDownload(selectedFile._id, e)} title="Télécharger">
                 <FaDownload /> Télécharger
               </ActionButton>
             </div>
           }
+          noPadding={true}  // Supprimer le padding pour la prévisualisation
+          isPreview={true}  // Indiquer que c'est une prévisualisation
         >
           <PreviewContainer>
             {selectedFile.contentType === 'application/pdf' ? (
               <iframe
                 src={`/api/fichiers/preview/${selectedFile._id}`}
-                width="100%"
-                height="100%"
                 title={`Aperçu de ${selectedFile.originalname}`}
-                style={{ border: 'none' }}
               />
             ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
               <EmailPreview fileId={selectedFile._id} />
             ) : selectedFile.contentType === 'application/vnd.oasis.opendocument.text' || selectedFile.contentType === 'application/odt' ? (
-              <div style={{ padding: '20px', textAlign: 'center' }}>
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%'
+              }}>
                 <FaFileAlt style={{ fontSize: '48px', color: '#3498db', marginBottom: '20px' }} />
                 <h3>Aperçu ODT</h3>
                 <p>La prévisualisation des fichiers ODT n'est pas disponible directement dans le navigateur.</p>
                 <p>
                   <button 
-                    onClick={() => handleDownload(selectedFile._id)}
+                    onClick={(e) => handleDownload(selectedFile._id, e)}
                     style={{ padding: '10px 15px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                   >
                     <FaDownload style={{ marginRight: '5px' }} /> Télécharger le fichier

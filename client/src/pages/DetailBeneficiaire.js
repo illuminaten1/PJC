@@ -21,6 +21,7 @@ import {
   HeaderValue,
   ArchiveNote
 } from '../components/common/HeaderComponents';
+import ExportButton from '../components/common/ExportButton';
 
 const DetailBeneficiaire = () => {
   const { id } = useParams();
@@ -245,28 +246,34 @@ const DetailBeneficiaire = () => {
   
   return (
     <Container>
-      <PageHeader 
-        title={`${beneficiaire.prenom} ${beneficiaire.nom}`}
-        subtitle={`Bénéficiaire ${beneficiaire.qualite} - ${beneficiaire.numeroDecision ? `Décision n°${beneficiaire.numeroDecision}` : 'Sans numéro de décision'}`}
-        backButton
-        actionButton={
-          <ActionButtons>
-            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire">
-              <FaEdit />
-              <ButtonText>Modifier</ButtonText>
-            </ActionButton>
-            
-            <ActionButton 
-              onClick={() => setDeleteModalOpen(true)} 
-              title="Supprimer le bénéficiaire"
-              className="delete"
-            >
-              <FaTrash />
-              <ButtonText>Supprimer</ButtonText>
-            </ActionButton>
-          </ActionButtons>
-        }
-      />
+    <PageHeader 
+      title={`${beneficiaire.prenom} ${beneficiaire.nom}`}
+      subtitle={`Bénéficiaire ${beneficiaire.qualite} - ${beneficiaire.numeroDecision ? `Décision n°${beneficiaire.numeroDecision}` : 'Sans numéro de décision'}`}
+      backButton
+      actionButton={
+        <ActionButtons>
+          {/* Utilisation de la propriété beneficiaireId au lieu de params */}
+          <ExportButton 
+            beneficiaireId={id} 
+            label="Exporter"
+            tooltipText="Exporter les détails de ce bénéficiaire au format Excel"
+          />
+          <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire">
+            <FaEdit />
+            <ButtonText>Modifier</ButtonText>
+          </ActionButton>
+          
+          <ActionButton 
+            onClick={() => setDeleteModalOpen(true)} 
+            title="Supprimer le bénéficiaire"
+            className="delete"
+          >
+            <FaTrash />
+            <ButtonText>Supprimer</ButtonText>
+          </ActionButton>
+        </ActionButtons>
+      }
+    />
       
       <HeaderCard>
         <HeaderGrid>

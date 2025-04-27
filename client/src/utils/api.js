@@ -182,4 +182,74 @@ export const fichiersAPI = {
   })
 };
 
+// API pour les exports
+export const exportAPI = {
+  // Télécharger tous les bénéficiaires en format Excel
+  exportBeneficiaires: (params = {}) => {
+    // Construire l'URL avec les paramètres de requête
+    const queryParams = new URLSearchParams(params).toString();
+    const url = `/api/export/beneficiaires${queryParams ? `?${queryParams}` : ''}`;
+    
+    // Effectuer une requête GET avec responseType blob pour gérer le téléchargement du fichier
+    return api.get(url, { 
+      responseType: 'blob' 
+    }).then(response => {
+      // Créer un objet URL pour le blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      
+      // Créer un élément a temporaire pour déclencher le téléchargement
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Obtenir la date au format DD-MM-YYYY pour le nom du fichier
+      const date = new Date();
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+      
+      // Définir le nom du fichier
+      link.setAttribute('download', `beneficiaires_${formattedDate}.xlsx`);
+      
+      // Ajouter le lien au document, cliquer dessus, puis le supprimer
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Retourner l'URL pour une utilisation ultérieure si nécessaire
+      return url;
+    });
+  },
+  
+  // Télécharger un bénéficiaire spécifique en format Excel
+  exportBeneficiaireById: (id) => {
+    if (!id) {
+      return Promise.reject(new Error('ID du bénéficiaire requis'));
+    }
+    
+    return api.get(`/api/export/beneficiaires/${id}`, { 
+      responseType: 'blob' 
+    }).then(response => {
+      // Créer un objet URL pour le blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      
+      // Créer un élément a temporaire pour déclencher le téléchargement
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Obtenir la date au format DD-MM-YYYY pour le nom du fichier
+      const date = new Date();
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+      
+      // Définir le nom du fichier
+      link.setAttribute('download', `beneficiaire_detail_${formattedDate}.xlsx`);
+      
+      // Ajouter le lien au document, cliquer dessus, puis le supprimer
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Retourner l'URL pour une utilisation ultérieure si nécessaire
+      return url;
+    });
+  }
+};
+
 export default api;

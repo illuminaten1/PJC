@@ -5,6 +5,7 @@ import { FaFilter, FaUserTie } from 'react-icons/fa';
 import { beneficiairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
+import ExportButton from '../components/common/ExportButton';
 
 const Beneficiaires = () => {
   const [beneficiaires, setBeneficiaires] = useState([]);
@@ -367,7 +368,7 @@ const StatusTag = styled.span`
   ` : ''}
 `;
 
-// Nouveaux composants stylisés pour les dates de décision
+// Composants stylisés pour les dates de décision
 const DecisionContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -379,7 +380,7 @@ const DecisionDate = styled.span`
   margin-top: 2px;
 `;
 
-// Nouveaux composants stylisés pour les avocats
+// Composants stylisés pour les avocats
 const AvocatsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -457,6 +458,11 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ActionButtonsContainer = styled.div`
+  display: flex;
+  gap: 12px;
 `;
 
 export default Beneficiaires;

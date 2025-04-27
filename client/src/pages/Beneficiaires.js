@@ -191,6 +191,19 @@ const Beneficiaires = () => {
       <PageHeader 
         title="Bénéficiaires" 
         subtitle="Gestion des bénéficiaires de la protection juridique complémentaire"
+        actionButton={
+          <ActionButtonsContainer>
+            <ExportButton 
+              params={{
+                search: searchTerm,
+                qualite: filterQualite,
+                redacteur: filterRedacteur,
+                archive: filterArchive
+              }} 
+              tooltipText="Exporter les bénéficiaires filtrés au format Excel"
+            />
+          </ActionButtonsContainer>
+        }
       />
       
       <FiltersContainer>

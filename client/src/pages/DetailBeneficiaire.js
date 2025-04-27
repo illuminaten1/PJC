@@ -246,34 +246,34 @@ const DetailBeneficiaire = () => {
   
   return (
     <Container>
-    <PageHeader 
-      title={`${beneficiaire.prenom} ${beneficiaire.nom}`}
-      subtitle={`Bénéficiaire ${beneficiaire.qualite} - ${beneficiaire.numeroDecision ? `Décision n°${beneficiaire.numeroDecision}` : 'Sans numéro de décision'}`}
-      backButton
-      actionButton={
-        <ActionButtons>
-          {/* Utilisation de la propriété beneficiaireId au lieu de params */}
-          <ExportButton 
-            beneficiaireId={id} 
-            label="Exporter"
-            tooltipText="Exporter les détails de ce bénéficiaire au format Excel"
-          />
-          <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire">
-            <FaEdit />
-            <ButtonText>Modifier</ButtonText>
-          </ActionButton>
-          
-          <ActionButton 
-            onClick={() => setDeleteModalOpen(true)} 
-            title="Supprimer le bénéficiaire"
-            className="delete"
-          >
-            <FaTrash />
-            <ButtonText>Supprimer</ButtonText>
-          </ActionButton>
-        </ActionButtons>
-      }
-    />
+      <PageHeader 
+        title={`${beneficiaire.prenom} ${beneficiaire.nom}`}
+        subtitle={`Bénéficiaire ${beneficiaire.qualite} - ${beneficiaire.numeroDecision ? `Décision n°${beneficiaire.numeroDecision}` : 'Sans numéro de décision'}`}
+        backButton
+        actionButton={
+          <ActionButtons>
+            {/* Bouton d'export personnalisé avec le même style que les autres boutons */}
+            <ActionButton onClick={() => exportAPI.exportBeneficiaireById(id)} title="Exporter les détails au format Excel">
+              <FaFileExcel />
+              <ButtonText>Exporter</ButtonText>
+            </ActionButton>
+            
+            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire">
+              <FaEdit />
+              <ButtonText>Modifier</ButtonText>
+            </ActionButton>
+            
+            <ActionButton 
+              onClick={() => setDeleteModalOpen(true)} 
+              title="Supprimer le bénéficiaire"
+              className="delete"
+            >
+              <FaTrash />
+              <ButtonText>Supprimer</ButtonText>
+            </ActionButton>
+          </ActionButtons>
+        }
+      />
       
       <HeaderCard>
         <HeaderGrid>
@@ -1183,6 +1183,29 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const StyledExportButton = styled(ExportButton)`
+  background-color: #fff;
+  color: #3f51b5;
+  border: 1px solid #3f51b5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #3f51b5;
+    color: #fff;
+  }
+  
+  svg {
+    margin-right: 6px;
+  }
 `;
 
 export default DetailBeneficiaire;

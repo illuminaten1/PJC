@@ -186,6 +186,15 @@ const Beneficiaires = () => {
     },
   ], []);
   
+  const exportFilters = useMemo(() => {
+    const filters = {};
+    if (searchTerm) filters.search = searchTerm;
+    if (filterQualite) filters.qualite = filterQualite;
+    if (filterRedacteur) filters.redacteur = filterRedacteur;
+    if (filterArchive !== '') filters.archive = filterArchive;
+    return filters;
+  }, [searchTerm, filterQualite, filterRedacteur, filterArchive]);  
+
   return (
     <Container>
       <PageHeader 
@@ -194,12 +203,7 @@ const Beneficiaires = () => {
         actionButton={
           <ActionButtonsContainer>
             <ExportButton 
-              params={{
-                search: searchTerm,
-                qualite: filterQualite,
-                redacteur: filterRedacteur,
-                archive: filterArchive
-              }} 
+              params={exportFilters} 
               tooltipText="Exporter les bénéficiaires filtrés au format Excel"
             />
           </ActionButtonsContainer>

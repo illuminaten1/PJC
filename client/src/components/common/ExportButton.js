@@ -1,4 +1,4 @@
-// components/common/ExportButton.js - version mise à jour
+// components/common/ExportButton.js - Mise à jour pour permettre la personnalisation du style
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaFileExcel, FaSpinner } from 'react-icons/fa';
@@ -6,10 +6,11 @@ import { exportAPI } from '../../utils/api';
 
 const ExportButton = ({ 
   params = {}, 
-  beneficiaireId = null, // Nouvelle prop pour l'ID du bénéficiaire
+  beneficiaireId = null,
   className,
   label = "Exporter Excel",
-  tooltipText = "Exporter les données au format Excel" 
+  tooltipText = "Exporter les données au format Excel",
+  ...props // Ajout de props pour permettre la transmission de propriétés supplémentaires
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -40,9 +41,21 @@ const ExportButton = ({
     }
   };
   
+  // Si le bouton est utilisé avec className, on ne crée pas de ButtonContainer et on passe tous les props
+  if (className) {
+    return (
+      <div className={className} onClick={handleExport} disabled={loading} title={tooltipText} {...props}>
+        {loading ? <FaSpinner className="spinner" /> : <FaFileExcel />}
+        <span>{loading ? 'Exportation...' : label}</span>
+        {error && <ErrorTooltip>{error}</ErrorTooltip>}
+      </div>
+    );
+  }
+  
+  // Version par défaut (comme avant)
   return (
-    <ButtonContainer className={className}>
-      <ExportButtonStyled onClick={handleExport} disabled={loading} title={tooltipText}>
+    <ButtonContainer>
+      <ExportButtonStyled onClick={handleExport} disabled={loading} title={tooltipText} {...props}>
         {loading ? (
           <SpinnerIcon />
         ) : (
@@ -56,7 +69,7 @@ const ExportButton = ({
   );
 };
 
-// Styles
+// Styles (inchangés)
 const ButtonContainer = styled.div`
   position: relative;
 `;
@@ -128,6 +141,20 @@ const ErrorMessage = styled.div`
     border-right: 6px solid transparent;
     border-bottom: 6px solid #f44336;
   }
+`;
+
+// Tooltip d'erreur pour la version avec classe personnalisée
+const ErrorTooltip = styled.div`
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 200px;
+  background-color: #f44336;
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 100;
 `;
 
 export default ExportButton;

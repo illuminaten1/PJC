@@ -251,8 +251,7 @@ const DocumentsSection = ({ beneficiaireId }) => {
     console.log("Téléchargement du fichier ID:", fileId);
     if (e) e.stopPropagation(); // Vérifiez si e existe avant d'appeler stopPropagation
     try {
-      // Utiliser directement l'URL absolue
-      window.open(`http://localhost:5002/api/fichiers/download/${fileId}`, '_blank');
+      window.open(`/api/fichiers/download/${fileId}`, '_blank');
     } catch (err) {
       console.error('Erreur lors du téléchargement:', err);
       setError('Impossible de télécharger le fichier');
@@ -392,7 +391,7 @@ const DocumentsSection = ({ beneficiaireId }) => {
           <PreviewContainer>
             {selectedFile.contentType === 'application/pdf' ? (
               <iframe
-                src={`http://localhost:5002/api/fichiers/preview/${selectedFile._id}`}
+                src={`/api/fichiers/preview/${selectedFile._id}`}
                 width="100%"
                 height="100%"
                 title={`Aperçu de ${selectedFile.originalname}`}

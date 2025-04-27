@@ -399,13 +399,28 @@ const DocumentsSection = ({ beneficiaireId }) => {
           isPreview={true}  // Indiquer que c'est une prévisualisation
         >
           <PreviewContainer>
-            {selectedFile.contentType === 'application/pdf' ? (
+          {selectedFile.contentType === 'application/pdf' ? (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              position: 'relative',
+              flex: 1
+            }}>
               <iframe
                 src={`/api/fichiers/preview/${selectedFile._id}`}
                 title={`Aperçu de ${selectedFile.originalname}`}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
               />
-            ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
-              <EmailPreview fileId={selectedFile._id} />
+            </div>
+          ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
+            <EmailPreview fileId={selectedFile._id} />
             ) : selectedFile.contentType === 'application/vnd.oasis.opendocument.text' || selectedFile.contentType === 'application/odt' ? (
               <div style={{ 
                 padding: '20px', 

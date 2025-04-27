@@ -34,8 +34,8 @@ const Modal = ({
   };
   
   return (
-    <Backdrop onClick={handleBackdropClick}>
-      <ModalContainer size={size}>
+    <Backdrop onClick={handleBackdropClick} size={size}>
+      <ModalContainer size={size} isPreview={isPreview}>
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
           {headerContent && <HeaderActions>{headerContent}</HeaderActions>}
@@ -65,7 +65,7 @@ const Backdrop = styled.div`
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  padding: ${props => (props.size === 'full' || props.size === 'fullscreen') ? '10px' : '20px'};
 `;
 
 const getModalWidth = (size) => {
@@ -89,10 +89,11 @@ const ModalContainer = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-width: ${props => getModalWidth(props.size)};
   width: 100%;
-  max-height: 90vh;
+  max-height: ${props => (props.size === 'full' || props.size === 'fullscreen') ? '95vh' : '90vh'};
+  height: ${props => (props.size === 'full' || props.size === 'fullscreen') && props.isPreview ? '95vh' : 'auto'};
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Empêche le contenu de déborder du modal */
+  overflow: hidden;
 `;
 
 const ModalHeader = styled.div`

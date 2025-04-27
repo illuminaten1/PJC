@@ -379,7 +379,7 @@ const DocumentsSection = ({ beneficiaireId }) => {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           title={selectedFile.originalname}
-          size="fullscreen"
+          size="full"
           headerContent={
             <div style={{ display: 'flex', gap: '10px' }}>
               <ActionButton onClick={() => handleDownload(selectedFile._id)} title="Télécharger">

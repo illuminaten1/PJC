@@ -139,7 +139,7 @@ const EmailPreview = ({ fileId }) => {
     const fetchEmailData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5002/api/fichiers/preview-email/${fileId}`);
+        const response = await fetch(`/api/fichiers/preview-email/${fileId}`);
         
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -162,7 +162,7 @@ const EmailPreview = ({ fileId }) => {
   }, [fileId]);
   
   const handleAttachmentDownload = (attachmentId, filename) => {
-    const url = `http://localhost:5002/api/fichiers/email-attachment/${fileId}/${attachmentId}`;
+    const url = `/api/fichiers/email-attachment/${fileId}/${attachmentId}`;
     
     // Créer un lien temporaire pour le téléchargement
     const tempLink = document.createElement('a');

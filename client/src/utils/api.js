@@ -177,8 +177,8 @@ export const fichiersAPI = {
   // Nouvelles méthodes pour les emails
   getEmailPreview: (id) => api.get(`/fichiers/preview-email/${id}`),
   getEmailAttachment: (fileId, attachmentId) => ({
-    // Ici, nous renvoyons simplement l'URL car la requête sera faite directement via le navigateur
-    url: `${api.defaults.baseURL}/fichiers/email-attachment/${fileId}/${attachmentId}`
+    // Utiliser un chemin relatif
+    url: `/api/fichiers/email-attachment/${fileId}/${attachmentId}`
   })
 };
 

@@ -186,13 +186,26 @@ export const fichiersAPI = {
 export const exportAPI = {
   // Télécharger tous les bénéficiaires en format Excel
   exportBeneficiaires: (params = {}) => {
-    // Construire l'URL avec les paramètres de requête
-    const queryParams = new URLSearchParams(params).toString();
-    const url = `/api/export/beneficiaires${queryParams ? `?${queryParams}` : ''}`;
+    // Récupérer le token JWT du localStorage
+    const token = localStorage.getItem('token');
+    
+    // Ajouter le token aux paramètres de la requête et autres paramètres
+    const allParams = {
+      ...params,
+      token: token  // Ajouter le token comme paramètre de requête
+    };
+    
+    // Construire l'URL avec les paramètres
+    const queryParams = new URLSearchParams(allParams).toString();
+    const url = `/api/export/beneficiaires?${queryParams}`;
     
     // Effectuer une requête GET avec responseType blob pour gérer le téléchargement du fichier
     return api.get(url, { 
-      responseType: 'blob' 
+      responseType: 'blob',
+      // Omettre les en-têtes d'authentification car nous utilisons le token en paramètre d'URL
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }).then(response => {
       // Créer un objet URL pour le blob
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -224,8 +237,18 @@ export const exportAPI = {
       return Promise.reject(new Error('ID du bénéficiaire requis'));
     }
     
-    return api.get(`/api/export/beneficiaires/${id}`, { 
-      responseType: 'blob' 
+    // Récupérer le token JWT du localStorage
+    const token = localStorage.getItem('token');
+    
+    // Construire l'URL avec l'ID et le token en paramètre
+    const url = `/api/export/beneficiaires/${id}?token=${token}`;
+    
+    return api.get(url, { 
+      responseType: 'blob',
+      // Omettre les en-têtes d'authentification car nous utilisons le token en paramètre d'URL
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }).then(response => {
       // Créer un objet URL pour le blob
       const url = window.URL.createObjectURL(new Blob([response.data]));

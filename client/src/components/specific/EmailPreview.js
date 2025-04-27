@@ -12,12 +12,14 @@ const EmailPreviewContainer = styled.div`
   background-color: #f9f9f9;
   border-radius: 4px;
   overflow: hidden;
+  flex: 1;
 `;
 
 const EmailHeader = styled.div`
   background-color: #fff;
   padding: 15px;
   border-bottom: 1px solid #eee;
+  flex-shrink: 0;
 `;
 
 const EmailSubject = styled.h2`
@@ -44,13 +46,14 @@ const EmailMetaValue = styled.div`
 `;
 
 const EmailBody = styled.div`
-  flex-grow: 1;
+  flex: 1;
   padding: 15px;
   background-color: #fff;
   margin: 15px;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: auto;
+  min-height: 0; /* Important pour que flex fonctionne correctement */
 `;
 
 const EmailAttachments = styled.div`
@@ -59,6 +62,7 @@ const EmailAttachments = styled.div`
   margin: 0 15px 15px 15px;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 `;
 
 const AttachmentTitle = styled.h3`
@@ -77,6 +81,8 @@ const AttachmentList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  max-height: 120px; /* Limiter la hauteur pour les emails avec beaucoup de pièces jointes */
+  overflow-y: auto;
 `;
 
 const AttachmentItem = styled.div`

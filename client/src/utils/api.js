@@ -116,7 +116,10 @@ export const documentsAPI = {
   genererFicheInformation: (data) => 
     api.post(`/documents/fiche-information`, data, { 
       responseType: 'blob' 
-    })
+    }),
+  genererSyntheseAffaire: (affaireId, format = 'pdf') =>
+    api.post(`/documents/synthese-affaire/${affaireId}?format=${format}`, {}, 
+      { responseType: 'blob' })
 };
 
 // API pour les templates

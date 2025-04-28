@@ -116,10 +116,7 @@ export const documentsAPI = {
   genererFicheInformation: (data) => 
     api.post(`/documents/fiche-information`, data, { 
       responseType: 'blob' 
-    }),
-  genererSyntheseAffaire: (affaireId, format = 'pdf') =>
-    api.post(`/documents/synthese-affaire/${affaireId}?format=${format}`, {}, 
-      { responseType: 'blob' })
+    })
 };
 
 // API pour les templates
@@ -177,9 +174,24 @@ export const fichiersAPI = {
   // Nouvelles méthodes pour les emails
   getEmailPreview: (id) => api.get(`/fichiers/preview-email/${id}`),
   getEmailAttachment: (fileId, attachmentId) => ({
-    // Utiliser un chemin relatif
-    url: `/api/fichiers/email-attachment/${fileId}/${attachmentId}`
+    // Ici, nous renvoyons simplement l'URL car la requête sera faite directement via le navigateur
+    url: `${api.defaults.baseURL}/fichiers/email-attachment/${fileId}/${attachmentId}`
   })
+};
+
+// API pour les exports
+export const exportAPI = {
+  // Méthode pour obtenir l'URL d'export avec le token
+  getBeneficiairesExcelUrl: () => {
+    const token = localStorage.getItem('token');
+    return `/api/export/beneficiaires?token=${token}`;
+  },
+  
+  // Méthode alternative si vous préférez utiliser une fonction JavaScript pour déclencher l'export
+  exportBeneficiairesExcel: () => {
+    const token = localStorage.getItem('token');
+    window.location.href = `/api/export/beneficiaires?token=${token}`;
+  }
 };
 
 export default api;

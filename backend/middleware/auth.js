@@ -11,8 +11,10 @@ const JWT_SECRET = 'pjc_secret_key';
  */
 const authMiddleware = (req, res, next) => {
   try {
-    // Récupérer le token depuis les headers
-    const token = req.header('x-auth-token');
+    // Récupérer le token depuis les headers ou depuis les paramètres de requête
+    const tokenHeader = req.header('x-auth-token');
+    const tokenQuery = req.query.token;
+    const token = tokenHeader || tokenQuery;
     
     // Si pas de token, refuser l'accès
     if (!token) {

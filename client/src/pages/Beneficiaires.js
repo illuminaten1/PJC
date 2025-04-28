@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { FaFilter, FaUserTie } from 'react-icons/fa';
+import { FaFilter, FaUserTie, FaFileExcel } from 'react-icons/fa';
 import { beneficiairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
@@ -17,6 +17,7 @@ const Beneficiaires = () => {
   const [filterDecision, setFilterDecision] = useState('');
   const [filterAvocat, setFilterAvocat] = useState('');
   const [redacteurs, setRedacteurs] = useState([]);
+  const [exportLoading, setExportLoading] = useState(false);
   
   const navigate = useNavigate();
   
@@ -130,6 +131,41 @@ const Beneficiaires = () => {
     return formatDate(withFMGDate[0].dateValidationFMG);
   };
   
+  // Fonction pour exporter les données en Excel
+  const handleExportExcel = () => {
+    setExportLoading(true);
+    try {
+      // Récupérer le token d'authentification
+      const token = localStorage.getItem('token');
+      
+      // Rediriger vers l'URL d'export avec le token
+      window.location.href = `/api/export/beneficiaires?token=${token}`;
+      
+      // Réinitialiser l'état après un délai pour permettre le téléchargement
+      setTimeout(() => {
+        setExportLoading(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Erreur lors de l'export Excel", err);
+      setExportLoading(false);
+    }
+  };
+  
+  // Bouton d'export Excel
+  const exportButton = (
+    <ExportButton 
+      onClick={handleExportExcel} 
+      disabled={exportLoading}
+      title="Exporter la liste complète en Excel (XLSX)"
+    >
+      {exportLoading ? 'Export en cours...' : (
+        <>
+          <FaFileExcel /> Exporter Excel
+        </>
+      )}
+    </ExportButton>
+  );
+  
   const columns = useMemo(() => [
     {
       Header: 'Prénom',
@@ -190,6 +226,7 @@ const Beneficiaires = () => {
       <PageHeader 
         title="Bénéficiaires" 
         subtitle="Gestion des bénéficiaires de la protection juridique complémentaire"
+        actionButton={exportButton}
       />
       
       <FiltersContainer>
@@ -410,20 +447,6 @@ const AvocatContent = styled.div`
   }
 `;
 
-const RPCIndicator = styled.span`
-  background-color: #ff5722;
-  color: white;
-  font-size: 8px;
-  font-weight: bold;
-  padding: 2px 4px;
-  border-radius: 3px;
-  margin-left: 6px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 const ResetButton = styled.button`
   background-color: #f44336;
   color: white;
@@ -438,6 +461,36 @@ const ResetButton = styled.button`
   
   &:hover {
     background-color: #d32f2f;
+  }
+`;
+
+// Nouveau composant pour le bouton d'export Excel
+const ExportButton = styled.button`
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #388e3c;
+  }
+  
+  &:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
+  }
+  
+  svg {
+    font-size: 16px;
   }
 `;
 

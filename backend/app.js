@@ -13,6 +13,7 @@ const documentsRoutes = require('./routes/documents');
 const statistiquesRoutes = require('./routes/statistiques');
 const templatesRoutes = require('./routes/templates');
 const fichiersRoutes = require('./routes/fichiers');
+const exportRoutes = require('./routes/export'); // Nouvelle route d'export Excel
 
 const app = express();
 
@@ -38,7 +39,7 @@ app.use('/api/templates', templatesRoutes);
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/utilisateurs', require('./routes/utilisateurs'));
 app.use('/api/fichiers', require('./routes/fichiers'));
-
+app.use('/api/export', exportRoutes); // Ajout de la route d'export Excel
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
@@ -65,7 +66,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Vérifier les permissions des dossiers au démarrage
-
 const checkDirectoryPermissions = () => {
   const dirs = ['templates', 'temp'];
   

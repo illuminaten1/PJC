@@ -5,11 +5,11 @@ const { faker } = require('@faker-js/faker/locale/fr');
 require('dotenv').config();
 
 // Importer les modèles
-const Avocat = require('./models/avocat');
-const Affaire = require('./models/affaire');
-const Militaire = require('./models/militaire');
-const Beneficiaire = require('./models/beneficiaire');
-const Parametre = require('./models/parametre');
+const Avocat = require('../models/avocat');
+const Affaire = require('../models/affaire');
+const Militaire = require('../models/militaire');
+const Beneficiaire = require('../models/beneficiaire');
+const Parametre = require('../models/parametre');
 
 // Configuration de la connexion MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/protection-juridique', {

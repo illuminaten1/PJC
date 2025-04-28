@@ -36,6 +36,11 @@ mkdir -p /app/temp
 chmod -R 777 /app/templates
 chmod -R 777 /app/temp
 
+# Initialisation des données fictives si nécessaire
+echo "Vérification et initialisation des données..."
+node scripts/init-data.js
+echo "Vérification et initialisation des données terminées."
+
 # Démarrage de l'application
 echo "Démarrage du serveur Node.js"
 node app.js

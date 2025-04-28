@@ -1,127 +1,221 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTable, useSortBy, useGlobalFilter, usePagination } from 'react-table';
 import styled from 'styled-components';
-import { FaSort, FaSortUp, FaSortDown, FaSearch, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { FaSearch, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 
-const DataTable = ({ 
-  columns, 
-  data, 
-  onRowClick, 
-  searchPlaceholder = "Rechercher...", 
-  pageSize = 10,
-  initialState = {} 
+const DataTable = ({
+  columns,
+  data,
+  onRowClick,
+  searchPlaceholder = "Rechercher...",
+  initialState = {}
 }) => {
-  const columnsMemo = useMemo(() => columns, [columns]);
-  const dataMemo = useMemo(() => data, [data]);
+  const [searchValue, setSearchValue] = useState('');
+  const [globalFilterTimeout, setGlobalFilterTimeout] = useState(null);
   
+  // État pour la sélection du nombre de lignes (ajout de l'option "Tout")
+  const [pageSize, setPageSize] = useState(initialState.pageSize || 10);
+  const [showAll, setShowAll] = useState(false);
+
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    prepareRow,
     page,
+    prepareRow,
+    setGlobalFilter,
+    state: { globalFilter, pageIndex },
+    gotoPage,
+    previousPage,
+    nextPage,
     canPreviousPage,
     canNextPage,
-    pageOptions,
     pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setGlobalFilter,
-    state: { pageIndex, globalFilter }
+    setPageSize: setReactTablePageSize,
+    pageOptions,
   } = useTable(
-    { 
-      columns: columnsMemo, 
-      data: dataMemo,
-      // Fusionner l'initialState par défaut avec celui fourni en props
+    {
+      columns,
+      data,
       initialState: { 
-        pageIndex: 0, 
-        pageSize,
-        ...initialState 
-      }
+        ...initialState,
+        pageSize: showAll ? data.length : pageSize
+      },
+      autoResetGlobalFilter: false,
+      disablePagination: showAll,
+      autoResetPage: false,
     },
     useGlobalFilter,
     useSortBy,
     usePagination
   );
-  
+
+  // Mettre à jour la taille de page dans react-table quand pageSize ou showAll change
+  useEffect(() => {
+    if (showAll) {
+      setReactTablePageSize(data.length);
+    } else {
+      setReactTablePageSize(pageSize);
+    }
+  }, [pageSize, showAll, data.length, setReactTablePageSize]);
+
+  // Gérer la recherche avec debounce
+  useEffect(() => {
+    if (globalFilterTimeout) {
+      clearTimeout(globalFilterTimeout);
+    }
+    
+    const timeoutId = setTimeout(() => {
+      setGlobalFilter(searchValue || undefined);
+    }, 300);
+    
+    setGlobalFilterTimeout(timeoutId);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [searchValue, setGlobalFilter]);
+
+  // Gérer le changement de l'affichage de toutes les lignes
+  const handlePageSizeChange = (e) => {
+    const value = e.target.value;
+    if (value === 'all') {
+      setShowAll(true);
+    } else {
+      setShowAll(false);
+      setPageSize(Number(value));
+    }
+    gotoPage(0);
+  };
+
   return (
     <TableContainer>
-      <TableHeader>
-        <SearchContainer>
+      <SearchContainer>
+        <SearchIconWrapper>
           <FaSearch />
-          <input
-            value={globalFilter || ''}
-            onChange={e => setGlobalFilter(e.target.value)}
-            placeholder={searchPlaceholder}
-          />
-        </SearchContainer>
-      </TableHeader>
+        </SearchIconWrapper>
+        <SearchInput
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder={searchPlaceholder}
+        />
+      </SearchContainer>
       
-      <StyledTable {...getTableProps()}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th 
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  className={column.isSorted ? 'sorted' : ''}
-                >
-                  <div>
-                    {column.render('Header')}
-                    <SortIcon>
-                      {column.isSorted ? (
-                        column.isSortedDesc ? <FaSortDown /> : <FaSortUp />
-                      ) : (
-                        <FaSort />
-                      )}
-                    </SortIcon>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {page.length > 0 ? (
-            page.map(row => {
+      <TableWrapper>
+        <StyledTable {...getTableProps()}>
+          <thead>
+            {headerGroups.map(headerGroup => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map(column => (
+                  <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                    <HeaderContent>
+                      {column.render('Header')}
+                      <SortIcon>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? <FaSortDown />
+                            : <FaSortUp />
+                          : <FaSort />}
+                      </SortIcon>
+                    </HeaderContent>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {page.map((row, i) => {
               prepareRow(row);
               return (
-                <tr 
+                <tr
                   {...row.getRowProps()}
                   onClick={() => onRowClick && onRowClick(row.original)}
-                  className={onRowClick ? 'clickable' : ''}
+                  className="clickable-row"
                 >
                   {row.cells.map(cell => (
-                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                    <td {...cell.getCellProps()}>
+                      {cell.render('Cell')}
+                    </td>
                   ))}
                 </tr>
               );
-            })
-          ) : (
-            <tr>
-              <td colSpan={columns.length} style={{ textAlign: 'center', padding: '20px' }}>
-                Aucune donnée trouvée
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </StyledTable>
+            })}
+          </tbody>
+        </StyledTable>
+      </TableWrapper>
       
-      {pageCount > 1 && (
-        <Pagination>
-          <PaginationButton onClick={() => previousPage()} disabled={!canPreviousPage}>
-            <FaAngleLeft />
-          </PaginationButton>
+      {!showAll && pageCount > 1 && (
+        <PaginationContainer>
+          <PageSizeSelector>
+            <span>Lignes par page:</span>
+            <Select value={showAll ? 'all' : pageSize} onChange={handlePageSizeChange}>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">Tout</option>
+            </Select>
+          </PageSizeSelector>
           
-          <PageInfo>
-            Page <strong>{pageIndex + 1}</strong> sur {pageOptions.length}
-          </PageInfo>
+          <PaginationInfo>
+            Page {pageIndex + 1} sur {pageOptions.length} 
+            {!showAll && ` (${data.length} lignes au total)`}
+          </PaginationInfo>
           
-          <PaginationButton onClick={() => nextPage()} disabled={!canNextPage}>
-            <FaAngleRight />
-          </PaginationButton>
-        </Pagination>
+          <PaginationButtons>
+            <PaginationButton
+              onClick={() => gotoPage(0)}
+              disabled={!canPreviousPage}
+              title="Première page"
+            >
+              <FaAngleDoubleLeft />
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => previousPage()}
+              disabled={!canPreviousPage}
+              title="Page précédente"
+            >
+              <FaChevronLeft />
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => nextPage()}
+              disabled={!canNextPage}
+              title="Page suivante"
+            >
+              <FaChevronRight />
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => gotoPage(pageCount - 1)}
+              disabled={!canNextPage}
+              title="Dernière page"
+            >
+              <FaAngleDoubleRight />
+            </PaginationButton>
+          </PaginationButtons>
+        </PaginationContainer>
+      )}
+
+      {showAll && (
+        <PaginationContainer>
+          <PageSizeSelector>
+            <span>Lignes par page:</span>
+            <Select value="all" onChange={handlePageSizeChange}>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">Tout</option>
+            </Select>
+          </PageSizeSelector>
+          
+          <PaginationInfo>
+            Affichage de toutes les {data.length} lignes
+          </PaginationInfo>
+          
+          <div style={{ width: '120px' }}></div> {/* Espace pour équilibrer le layout */}
+        </PaginationContainer>
       )}
     </TableContainer>
   );
@@ -134,31 +228,38 @@ const TableContainer = styled.div`
   overflow: hidden;
 `;
 
-const TableHeader = styled.div`
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #eee;
-`;
-
 const SearchContainer = styled.div`
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border-radius: 4px;
-  padding: 8px 12px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  position: relative;
+`;
+
+const SearchIconWrapper = styled.div`
+  position: absolute;
+  left: 26px;
+  color: #757575;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 8px 16px 8px 36px;
   border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
   
-  svg {
-    color: #757575;
-    margin-right: 8px;
+  &:focus {
+    border-color: #3f51b5;
   }
-  
-  input {
-    border: none;
-    flex: 1;
-    outline: none;
-    font-size: 14px;
-  }
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  max-height: 70vh;
+  overflow-y: auto;
 `;
 
 const StyledTable = styled.table`
@@ -172,68 +273,105 @@ const StyledTable = styled.table`
   }
   
   th {
-    background-color: #f5f5f5;
-    font-weight: 500;
+    background-color: #f9f9f9;
+    font-weight: 600;
     color: #333;
-    
-    &.sorted {
-      background-color: #e8eaf6;
-    }
-    
-    div {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   
-  tr.clickable {
+  tbody tr {
     cursor: pointer;
+    transition: background-color 0.2s;
     
     &:hover {
-      background-color: rgba(63, 81, 181, 0.05);
+      background-color: #f5f5f5;
+    }
+    
+    &:last-child td {
+      border-bottom: none;
+    }
+    
+    &.clickable-row {
+      cursor: pointer;
     }
   }
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const SortIcon = styled.span`
+  margin-left: 8px;
   display: flex;
   align-items: center;
-  color: #999;
-  font-size: 14px;
+  font-size: 12px;
+  color: #757575;
 `;
 
-const Pagination = styled.div`
+const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 16px;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #f9f9f9;
   border-top: 1px solid #eee;
-  gap: 16px;
+`;
+
+const PageSizeSelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #757575;
+`;
+
+const Select = styled.select`
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  
+  &:focus {
+    border-color: #3f51b5;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  font-size: 14px;
+  color: #757575;
+`;
+
+const PaginationButtons = styled.div`
+  display: flex;
+  gap: 4px;
 `;
 
 const PaginationButton = styled.button`
   background: none;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 6px 10px;
+  padding: 4px 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  color: #333;
+  
+  &:hover:not(:disabled) {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+  }
   
   &:disabled {
-    opacity: 0.5;
+    color: #ccc;
     cursor: not-allowed;
   }
-  
-  &:not(:disabled):hover {
-    background-color: #f5f5f5;
-  }
-`;
-
-const PageInfo = styled.div`
-  font-size: 14px;
 `;
 
 export default DataTable;

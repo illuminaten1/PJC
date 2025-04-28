@@ -377,10 +377,6 @@ const Statistiques = () => {
   );
 };
 
-const Container = styled.div`
-  padding: 20px;
-`;
-
 const Section = styled.section`
   margin-bottom: 30px;
   background-color: #fff;
@@ -512,21 +508,6 @@ const StatDetail = styled.div`
   color: #757575;
 `;
 
-const ChartsSection = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-`;
-
-const ChartCard = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  height: 400px;
-`;
-
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
@@ -557,65 +538,10 @@ const BlockTitle = styled.h3`
   letter-spacing: 0.5px;
 `;
 
-const ResponsiveTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  table-layout: fixed;
-`;
-
-const TableHeader = styled.th`
-  background-color: #f5f5f5;
-  color: #333;
-  padding: 8px 12px;
-  font-weight: 500;
-  border-bottom: 2px solid #e0e0e0;
-  text-align: left; // Aligner par défaut à gauche
-  
-  &:nth-child(2), &:nth-child(3) {
-    text-align: center; // Centrer les colonnes numériques
-  }
-`;
-
 const TableRow = styled.tr`
   &:nth-child(even) {
     background-color: rgba(63, 81, 181, 0.05);
   }
-`;
-
-const TableDataCell = styled.td`
-  padding: 8px 12px;
-  color: #333;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: left; // Aligner par défaut à gauche
-  
-  &:nth-child(2), &:nth-child(3) {
-    text-align: center; // Centrer les colonnes numériques
-  }
-`;
-
-const TablesRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-  
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const TableCard = styled.div`
-  background: white;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
 `;
 
 const TableTitle = styled.div`
@@ -627,23 +553,6 @@ const TableTitle = styled.div`
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-`;
-
-const CompactTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  table-layout: fixed;
-`;
-
-const Th = styled.th`
-  background-color: #f5f5f5;
-  color: #333;
-  padding: 6px 4px;
-  font-weight: 500;
-  font-size: 12px;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
 `;
 
 const Tr = styled.tr`
@@ -668,12 +577,118 @@ const YearCell = styled.td`
   text-align: center;
 `;
 
+const TablesRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const TableCard = styled.div`
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;  // Pour contenir les débordements internes
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  width: 100%;  // Assurer que la carte prend toute la largeur disponible
+`;
+
+const CompactTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: auto;  // Changé de 'fixed' à 'auto' pour s'adapter au contenu
+`;
+
+const Th = styled.th`
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 6px 4px;
+  font-weight: 500;
+  font-size: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;  // Ajouter des points de suspension si le texte est trop long
+`;
+
 const Td = styled.td`
   padding: 6px 4px;
   color: #333;
   border-bottom: 1px solid #e0e0e0;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;  // Changé de 'nowrap' à 'normal' pour permettre le retour à la ligne
+  overflow: hidden;
+  text-overflow: ellipsis;  // Ajouter des points de suspension si le texte est trop long
+`;
+
+// Pour les tableaux de la section des répartitions
+const ChartsSection = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));  // Réduire la largeur minimale
+  gap: 20px;
+  margin-bottom: 24px;
+`;
+
+const ChartCard = styled.div`
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: auto;  // Changé de '400px' fixe à 'auto' pour s'adapter au contenu
+  min-height: 400px;  // Garder une hauteur minimale
+  overflow: hidden;  // Contenir les débordements
+`;
+
+const ResponsiveTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: auto;  // Changé de 'fixed' à 'auto'
+`;
+
+const TableHeader = styled.th`
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 8px 12px;
+  font-weight: 500;
+  border-bottom: 2px solid #e0e0e0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center;
+  }
+`;
+
+const TableDataCell = styled.td`
+  padding: 8px 12px;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  white-space: normal;  // Permettre le retour à la ligne
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center;
+  }
+`;
+
+const Container = styled.div`
+  padding: 20px;
+  max-width: 100%;  // Assurer que le conteneur ne dépasse pas la largeur de la page
+  overflow-x: hidden;  // Cacher les débordements horizontaux
 `;
 
 export default Statistiques;

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { FaFilter, FaUserTie, FaFileExcel } from 'react-icons/fa';
+import { FaFilter, FaUserTie, FaFileExcel, FaInfoCircle, FaTable, FaFileContract, FaMoneyBillWave } from 'react-icons/fa';
 import { beneficiairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
+import Modal from '../components/common/Modal';
 
 const Beneficiaires = () => {
   const [beneficiaires, setBeneficiaires] = useState([]);
@@ -18,6 +19,12 @@ const Beneficiaires = () => {
   const [filterAvocat, setFilterAvocat] = useState('');
   const [redacteurs, setRedacteurs] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportCount, setExportCount] = useState({
+    beneficiaires: 0,
+    conventions: 0,
+    paiements: 0
+  });
   
   const navigate = useNavigate();
   
@@ -58,6 +65,22 @@ const Beneficiaires = () => {
       }
       
       setBeneficiaires(filteredData);
+      
+      // Calculer les statistiques pour l'export
+      let conventionsCount = 0;
+      let paiementsCount = 0;
+      
+      filteredData.forEach(b => {
+        if (b.conventions) conventionsCount += b.conventions.length;
+        if (b.paiements) paiementsCount += b.paiements.length;
+      });
+      
+      setExportCount({
+        beneficiaires: filteredData.length,
+        conventions: conventionsCount,
+        paiements: paiementsCount
+      });
+      
       setError(null);
     } catch (err) {
       console.error("Erreur lors de la récupération des bénéficiaires", err);
@@ -131,9 +154,21 @@ const Beneficiaires = () => {
     return formatDate(withFMGDate[0].dateValidationFMG);
   };
   
+  // Fonction pour ouvrir le modal d'export
+  const handleOpenExportModal = () => {
+    setShowExportModal(true);
+  };
+  
+  // Fonction pour fermer le modal d'export
+  const handleCloseExportModal = () => {
+    setShowExportModal(false);
+  };
+  
   // Fonction pour exporter les données en Excel
   const handleExportExcel = () => {
     setExportLoading(true);
+    handleCloseExportModal();
+    
     try {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
@@ -154,9 +189,9 @@ const Beneficiaires = () => {
   // Bouton d'export Excel
   const exportButton = (
     <ExportButton 
-      onClick={handleExportExcel} 
+      onClick={handleOpenExportModal} 
       disabled={exportLoading}
-      title="Exporter la liste complète en Excel (XLSX)"
+      title="Exporter les données en Excel (XLSX)"
     >
       {exportLoading ? 'Export en cours...' : (
         <>
@@ -220,6 +255,78 @@ const Beneficiaires = () => {
       ),
     },
   ], []);
+  
+  // Contenu du modal d'export
+  const exportModalContent = (
+    <>
+      <ModalHeader>
+        <ModalTitle>
+          <FaFileExcel /> 
+          <span>Export Excel</span>
+        </ModalTitle>
+      </ModalHeader>
+      
+      <ModalBody>
+        <InfoBox>
+          <FaInfoCircle />
+          <InfoText>
+            Vous êtes sur le point d'exporter les données suivantes dans un fichier Excel (.xlsx). 
+            Le fichier contiendra trois onglets distincts avec toutes les informations associées.
+          </InfoText>
+        </InfoBox>
+        
+        <ExportSheets>
+          <SheetInfo>
+            <SheetIcon className="beneficiaires">
+              <FaTable />
+            </SheetIcon>
+            <SheetDetails>
+              <SheetName>Onglet "Bénéficiaires"</SheetName>
+              <SheetDescription>
+                Liste complète des {exportCount.beneficiaires} bénéficiaires avec leurs informations associées 
+                (militaire créateur de droit, numéro de décision, date, etc.)
+              </SheetDescription>
+            </SheetDetails>
+          </SheetInfo>
+          
+          <SheetInfo>
+            <SheetIcon className="conventions">
+              <FaFileContract />
+            </SheetIcon>
+            <SheetDetails>
+              <SheetName>Onglet "Conventions"</SheetName>
+              <SheetDescription>
+                Toutes les {exportCount.conventions} conventions d'honoraires liées aux bénéficiaires 
+                (montants, pourcentages, dates d'envoi et de validation, etc.)
+              </SheetDescription>
+            </SheetDetails>
+          </SheetInfo>
+          
+          <SheetInfo>
+            <SheetIcon className="paiements">
+              <FaMoneyBillWave />
+            </SheetIcon>
+            <SheetDetails>
+              <SheetName>Onglet "Paiements"</SheetName>
+              <SheetDescription>
+                Tous les {exportCount.paiements} paiements effectués pour les bénéficiaires
+                (montants, dates, références, coordonnées bancaires, etc.)
+              </SheetDescription>
+            </SheetDetails>
+          </SheetInfo>
+        </ExportSheets>
+      </ModalBody>
+      
+      <ModalFooter>
+        <CancelButton onClick={handleCloseExportModal}>
+          Annuler
+        </CancelButton>
+        <ConfirmExportButton onClick={handleExportExcel}>
+          <FaFileExcel /> Lancer l'export
+        </ConfirmExportButton>
+      </ModalFooter>
+    </>
+  );
   
   return (
     <Container>
@@ -303,6 +410,15 @@ const Beneficiaires = () => {
           searchPlaceholder="Rechercher un bénéficiaire..."
         />
       )}
+      
+      {/* Modal d'export Excel */}
+      <Modal
+        isOpen={showExportModal}
+        onClose={handleCloseExportModal}
+        width="600px"
+      >
+        {exportModalContent}
+      </Modal>
     </Container>
   );
 };
@@ -487,6 +603,162 @@ const ExportButton = styled.button`
   &:disabled {
     background-color: #a5d6a7;
     cursor: not-allowed;
+  }
+  
+  svg {
+    font-size: 16px;
+  }
+`;
+
+// Styles pour le modal d'export
+const ModalHeader = styled.div`
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+`;
+
+const ModalTitle = styled.h2`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  margin: 0;
+  color: #333;
+  
+  svg {
+    color: #4caf50;
+    font-size: 24px;
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 20px 0;
+`;
+
+const InfoBox = styled.div`
+  display: flex;
+  align-items: flex-start;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 20px;
+  
+  svg {
+    color: #1976d2;
+    font-size: 18px;
+    margin-right: 12px;
+    margin-top: 2px;
+  }
+`;
+
+const InfoText = styled.p`
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+`;
+
+const ExportSheets = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const SheetInfo = styled.div`
+  display: flex;
+  align-items: flex-start;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 16px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const SheetIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 16px;
+  
+  svg {
+    font-size: 20px;
+    color: white;
+  }
+  
+  &.beneficiaires {
+    background-color: #3f51b5;
+  }
+  
+  &.conventions {
+    background-color: #f57c00;
+  }
+  
+  &.paiements {
+    background-color: #4caf50;
+  }
+`;
+
+const SheetDetails = styled.div`
+  flex: 1;
+`;
+
+const SheetName = styled.h3`
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+`;
+
+const SheetDescription = styled.p`
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+`;
+
+const ModalFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+`;
+
+const CancelButton = styled.button`
+  background-color: #f5f5f5;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #e0e0e0;
+  }
+`;
+
+const ConfirmExportButton = styled.button`
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #388e3c;
   }
   
   svg {

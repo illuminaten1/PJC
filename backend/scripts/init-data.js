@@ -475,16 +475,20 @@ const genererCommentaires = (specialisationRPC) => {
   return commentairesGeneriques[Math.floor(Math.random() * commentairesGeneriques.length)];
 };
 
-// Fonction pour obtenir des dates aléatoires
-const getRandomDate = (startYear = 2020, endYear = 2025) => {
-  const start = new Date(startYear, 0, 1);
+// Fonction pour obtenir des dates aléatoires (modifiée pour après octobre 2023)
+const getRandomDate = (startYear = 2023, endYear = 2025) => {
+  const start = new Date(2023, 9, 1); // 1er octobre 2023
   const end = new Date(endYear, 11, 31);
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-// Fonction pour obtenir une date future aléatoire
+// Fonction pour obtenir une date future aléatoire (modifiée pour après octobre 2023)
 const getRandomFutureDate = (startDate, maxDays = 90) => {
-  const futureDate = new Date(startDate);
+  // S'assurer que la date de départ est après octobre 2023
+  const minDate = new Date(2023, 9, 1); // 1er octobre 2023
+  const actualStartDate = startDate < minDate ? minDate : startDate;
+  
+  const futureDate = new Date(actualStartDate);
   futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * maxDays));
   return futureDate;
 };
@@ -610,7 +614,11 @@ const genererAvocats = async (nombreAvocats) => {
       telephonePrive: Math.random() < 0.6 ? genererTelephone() : '',
       siretRidet: Math.random() < 0.7 ? genererSIRET() : '',
       commentaires: commentaires,
-      dateCreation: faker.date.past({ years: 2 })
+      // Date de création toujours après octobre 2023
+      dateCreation: faker.date.between({ 
+        from: '2023-10-01T00:00:00.000Z', 
+        to: new Date() 
+      })
     });
     
     avocatsPromises.push(nouvelAvocat.save());
@@ -642,7 +650,8 @@ const genererAffaires = async (nombreAffaires) => {
   for (let i = 0; i < nombreAffaires; i++) {
     const typeAffaire = getRandomItem(typesAffaires);
     const lieu = faker.location.city();
-    const dateFaits = getRandomDate(2021, 2025);
+    // Date des faits après octobre 2023
+    const dateFaits = getRandomDate(2023, 2025);
     const archive = Math.random() < 0.2; // 20% des affaires sont archivées
     
     const nouvelleAffaire = new Affaire({
@@ -663,152 +672,6 @@ const genererAffaires = async (nombreAffaires) => {
   affaireIds = affaires.map(a => a._id);
   console.log(`${nombreAffaires} affaires générées avec succès.`);
   return affaires;
-};
-
-// Étape 4: Générer des bénéficiaires, conventions et paiements
-const genererBeneficiaires = async (nombreBeneficiaires) => {
-  console.log(`Génération de ${nombreBeneficiaires} bénéficiaires...`);
-  
-  // Si RESET_DATA est true, supprimer tous les bénéficiaires existants
-  if (process.env.RESET_DATA === 'true') {
-    try {
-      await Beneficiaire.deleteMany({});
-      console.log('Tous les bénéficiaires existants ont été supprimés.');
-    } catch (err) {
-      console.error('Erreur lors de la suppression des bénéficiaires existants:', err);
-      process.exit(1);
-    }
-  }
-  
-  // Assurer qu'il y a au moins un militaire disponible
-  if (militaireIds.length === 0) {
-    throw new Error('Aucun militaire disponible pour associer les bénéficiaires.');
-  }
-  
-  // Assurer qu'il y a au moins un avocat disponible
-  if (avocatIds.length === 0) {
-    throw new Error('Aucun avocat disponible pour associer aux bénéficiaires.');
-  }
-  
-  // Générer les bénéficiaires
-  const beneficiairesPromises = [];
-  for (let i = 0; i < nombreBeneficiaires; i++) {
-    // Sélectionner un militaire aléatoire
-    const militaireId = getRandomItem(militaireIds);
-    const militaire = await Militaire.findById(militaireId);
-    
-    // Si le militaire est décédé, les bénéficiaires sont des ayants droits
-    // Sinon, 60% de chance que le bénéficiaire soit le militaire lui-même
-    let qualite;
-    let prenom;
-    let nom;
-    
-    if (militaire.decede) {
-      // Pour les militaires décédés, les bénéficiaires sont des ayants droits
-      qualite = getRandomItem(['Conjoint', 'Enfant', 'Parent']);
-      prenom = faker.person.firstName();
-      nom = qualite === 'Conjoint' ? militaire.nom : faker.person.lastName().toUpperCase();
-    } else {
-      // Pour les militaires blessés
-      if (Math.random() < 0.6) {
-        // 60% de chance que le bénéficiaire soit le militaire lui-même
-        qualite = 'Militaire';
-        prenom = militaire.prenom;
-        nom = militaire.nom;
-      } else {
-        // 40% de chance d'avoir un ayant droit comme bénéficiaire supplémentaire
-        qualite = getRandomItem(['Conjoint', 'Enfant', 'Parent']);
-        prenom = faker.person.firstName();
-        nom = qualite === 'Conjoint' ? militaire.nom : faker.person.lastName().toUpperCase();
-      }
-    }
-    
-    // Générer des avocats pour ce bénéficiaire (1 à 3)
-    const nbAvocats = Math.floor(Math.random() * 2) + 1;
-    const selectedAvocatIds = [];
-    for (let j = 0; j < nbAvocats; j++) {
-      let randomIndex = Math.floor(Math.random() * avocatIds.length);
-      if (!selectedAvocatIds.includes(avocatIds[randomIndex])) {
-        selectedAvocatIds.push(avocatIds[randomIndex]);
-      }
-    }
-    
-    // Générer les données du bénéficiaire
-    const archive = militaire.archive;
-    const dateDecision = getRandomDate(2021, 2025);
-    
-    const nouveauBeneficiaire = new Beneficiaire({
-      prenom: prenom,
-      nom: nom,
-      qualite: qualite,
-      militaire: militaireId,
-      numeroDecision: faker.helpers.replaceSymbols('######'),
-      dateDecision: dateDecision,
-      avocats: selectedAvocatIds,
-      conventions: [],
-      paiements: [],
-      archive: archive,
-      dateCreation: faker.date.past({ years: 1 })
-    });
-    
-    // Générer 0 à 3 conventions pour ce bénéficiaire
-    const nbConventions = Math.floor(Math.random() * 3);
-    for (let j = 0; j < nbConventions; j++) {
-      const montant = getRandomAmount(1000, 10000);
-      const dateEnvoiAvocat = getRandomFutureDate(dateDecision, 30);
-      const dateEnvoiBeneficiaire = getRandomFutureDate(dateEnvoiAvocat, 20);
-      const dateValidationFMG = getRandomFutureDate(dateEnvoiBeneficiaire, 45);
-      
-      nouveauBeneficiaire.conventions.push({
-        montant: montant,
-        pourcentageResultats: Math.floor(Math.random() * 10) + 1,
-        dateEnvoiAvocat: dateEnvoiAvocat,
-        dateEnvoiBeneficiaire: dateEnvoiBeneficiaire,
-        dateValidationFMG: Math.random() < 0.7 ? dateValidationFMG : null,
-        avocat: getRandomItem(selectedAvocatIds)
-      });
-    }
-    
-    // Générer 0 à 5 paiements pour ce bénéficiaire
-    const nbPaiements = Math.floor(Math.random() * 5);
-    for (let j = 0; j < nbPaiements; j++) {
-      const coordonneesBancaires = genererCoordonneesBancaires();
-      const montant = getRandomAmount(500, 8000);
-      
-      nouveauBeneficiaire.paiements.push({
-        type: getRandomItem(typesPaiements),
-        montant: montant,
-        date: getRandomDate(2021, 2025),
-        qualiteDestinataire: getRandomItem(qualitesDestinataire),
-        identiteDestinataire: Math.random() < 0.7 ? 
-          `Me ${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}` : 
-          `${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}`,
-        referencePiece: `Facture n°${faker.helpers.replaceSymbols('####-##')}`,
-        adresseDestinataire: `${Math.floor(Math.random() * 100) + 1} ${faker.location.street()}, ${faker.location.zipCode()} ${faker.location.city()}`,
-        siretRidet: Math.random() < 0.6 ? genererSIRET() : '',
-        titulaireCompte: coordonneesBancaires.titulaireCompte,
-        codeEtablissement: coordonneesBancaires.codeEtablissement,
-        codeGuichet: coordonneesBancaires.codeGuichet,
-        numeroCompte: coordonneesBancaires.numeroCompte,
-        cleVerification: coordonneesBancaires.cleVerification
-      });
-    }
-    
-    const beneficiaireSauve = await nouveauBeneficiaire.save();
-    
-    // Mettre à jour le militaire correspondant pour ajouter ce bénéficiaire
-    await Militaire.findByIdAndUpdate(
-      militaireId,
-      { $push: { beneficiaires: beneficiaireSauve._id } }
-    );
-    
-    beneficiairesPromises.push(beneficiaireSauve);
-  }
-  
-  const beneficiaires = await Promise.all(beneficiairesPromises);
-  beneficiaireIds = beneficiaires.map(b => b._id);
-  console.log(`${nombreBeneficiaires} bénéficiaires générés avec succès.`);
-  return beneficiaires;
 };
 
 // Étape 3: Générer des militaires
@@ -872,4 +735,383 @@ const genererMilitaires = async (nombreMilitaires) => {
   militaireIds = militaires.map(m => m._id);
   console.log(`${nombreMilitaires} militaires générés avec succès.`);
   return militaires;
+};
+
+// Étape 4: Générer des bénéficiaires, conventions et paiements
+const genererBeneficiaires = async (nombreBeneficiaires) => {
+  console.log(`Génération de ${nombreBeneficiaires} bénéficiaires...`);
+  
+  // Si RESET_DATA est true, supprimer tous les bénéficiaires existants
+  if (process.env.RESET_DATA === 'true') {
+    try {
+      await Beneficiaire.deleteMany({});
+      console.log('Tous les bénéficiaires existants ont été supprimés.');
+    } catch (err) {
+      console.error('Erreur lors de la suppression des bénéficiaires existants:', err);
+      process.exit(1);
+    }
+  }
+  
+  // Assurer qu'il y a au moins un militaire disponible
+  if (militaireIds.length === 0) {
+    throw new Error('Aucun militaire disponible pour associer les bénéficiaires.');
+  }
+  
+  // Assurer qu'il y a au moins un avocat disponible
+  if (avocatIds.length === 0) {
+    throw new Error('Aucun avocat disponible pour associer aux bénéficiaires.');
+  }
+  
+  // Répartir les militaires selon leur statut (décédé/blessé)
+  const militairesDecedes = [];
+  const militairesBleases = [];
+  
+  for (const militaireId of militaireIds) {
+    const militaire = await Militaire.findById(militaireId);
+    if (militaire.decede) {
+      militairesDecedes.push(militaireId);
+    } else {
+      militairesBleases.push(militaireId);
+    }
+  }
+  
+  console.log(`Militaires décédés: ${militairesDecedes.length}`);
+  console.log(`Militaires blessés: ${militairesBleases.length}`);
+  
+  // Générer les bénéficiaires
+  const beneficiairesPromises = [];
+  let beneficiairesGeneres = 0;
+  
+  // 1. D'abord, créer un bénéficiaire pour chaque militaire blessé (lui-même)
+  for (const militaireId of militairesBleases) {
+    if (beneficiairesGeneres >= nombreBeneficiaires) break;
+    
+    const militaire = await Militaire.findById(militaireId);
+    
+    // Pour les militaires blessés, le bénéficiaire est le militaire lui-même
+    const qualite = 'Militaire';
+    const prenom = militaire.prenom;
+    const nom = militaire.nom;
+    
+    // Générer des avocats pour ce bénéficiaire (1 à 3)
+    const nbAvocats = Math.floor(Math.random() * 2) + 1;
+    const selectedAvocatIds = [];
+    for (let j = 0; j < nbAvocats; j++) {
+      let randomIndex = Math.floor(Math.random() * avocatIds.length);
+      if (!selectedAvocatIds.includes(avocatIds[randomIndex])) {
+        selectedAvocatIds.push(avocatIds[randomIndex]);
+      }
+    }
+    
+    // Générer les données du bénéficiaire
+    const archive = militaire.archive;
+    const dateDecision = getRandomDate(2023, 2025); // Date après octobre 2023
+    
+    const nouveauBeneficiaire = new Beneficiaire({
+      prenom: prenom,
+      nom: nom,
+      qualite: qualite,
+      militaire: militaireId,
+      numeroDecision: faker.helpers.replaceSymbols('######'),
+      dateDecision: dateDecision,
+      avocats: selectedAvocatIds,
+      conventions: [],
+      paiements: [],
+      archive: archive,
+      dateCreation: faker.date.between({ 
+        from: '2023-10-01T00:00:00.000Z', 
+        to: new Date() 
+      })
+    });
+    
+    // Générer 0 à 3 conventions pour ce bénéficiaire
+    const nbConventions = Math.floor(Math.random() * 3);
+    for (let j = 0; j < nbConventions; j++) {
+      const montant = getRandomAmount(1000, 10000);
+      const dateEnvoiAvocat = getRandomFutureDate(dateDecision, 30);
+      const dateEnvoiBeneficiaire = getRandomFutureDate(dateEnvoiAvocat, 20);
+      const dateValidationFMG = getRandomFutureDate(dateEnvoiBeneficiaire, 45);
+      
+      nouveauBeneficiaire.conventions.push({
+        montant: montant,
+        pourcentageResultats: Math.floor(Math.random() * 10) + 1,
+        dateEnvoiAvocat: dateEnvoiAvocat,
+        dateEnvoiBeneficiaire: dateEnvoiBeneficiaire,
+        dateValidationFMG: Math.random() < 0.7 ? dateValidationFMG : null,
+        avocat: getRandomItem(selectedAvocatIds)
+      });
+    }
+    
+    // Générer 0 à 5 paiements pour ce bénéficiaire
+    const nbPaiements = Math.floor(Math.random() * 5);
+    for (let j = 0; j < nbPaiements; j++) {
+      const coordonneesBancaires = genererCoordonneesBancaires();
+      const montant = getRandomAmount(500, 8000);
+      
+      nouveauBeneficiaire.paiements.push({
+        type: getRandomItem(typesPaiements),
+        montant: montant,
+        date: getRandomDate(2023, 2025), // Date après octobre 2023
+        qualiteDestinataire: getRandomItem(qualitesDestinataire),
+        identiteDestinataire: Math.random() < 0.7 ? 
+          `Me ${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}` : 
+          `${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}`,
+        referencePiece: `Facture n°${faker.helpers.replaceSymbols('####-##')}`,
+        adresseDestinataire: `${Math.floor(Math.random() * 100) + 1} ${faker.location.street()}, ${faker.location.zipCode()} ${faker.location.city()}`,
+        siretRidet: Math.random() < 0.6 ? genererSIRET() : '',
+        titulaireCompte: coordonneesBancaires.titulaireCompte,
+        codeEtablissement: coordonneesBancaires.codeEtablissement,
+        codeGuichet: coordonneesBancaires.codeGuichet,
+        numeroCompte: coordonneesBancaires.numeroCompte,
+        cleVerification: coordonneesBancaires.cleVerification
+      });
+    }
+    
+    const beneficiaireSauve = await nouveauBeneficiaire.save();
+    
+    // Mettre à jour le militaire correspondant pour ajouter ce bénéficiaire
+    await Militaire.findByIdAndUpdate(
+      militaireId,
+      { $push: { beneficiaires: beneficiaireSauve._id } }
+    );
+    
+    beneficiairesPromises.push(beneficiaireSauve);
+    beneficiairesGeneres++;
+  }
+  
+  // 2. Ensuite, créer des bénéficiaires pour les militaires décédés (uniquement ayants droits)
+  for (const militaireId of militairesDecedes) {
+    if (beneficiairesGeneres >= nombreBeneficiaires) break;
+    
+    const militaire = await Militaire.findById(militaireId);
+    
+    // Pour les militaires décédés, on génère 1 à 3 ayants droits
+    const nombreAyantsDroits = Math.min(Math.floor(Math.random() * 3) + 1, nombreBeneficiaires - beneficiairesGeneres);
+    
+    for (let i = 0; i < nombreAyantsDroits; i++) {
+      // Choisir une qualité parmi Conjoint, Enfant, Parent
+      const qualite = getRandomItem(['Conjoint', 'Enfant', 'Parent']);
+      const prenom = faker.person.firstName();
+      // Si conjoint, même nom que le militaire
+      const nom = qualite === 'Conjoint' ? militaire.nom : faker.person.lastName().toUpperCase();
+      
+      // Générer des avocats pour ce bénéficiaire (1 à 3)
+      const nbAvocats = Math.floor(Math.random() * 2) + 1;
+      const selectedAvocatIds = [];
+      for (let j = 0; j < nbAvocats; j++) {
+        let randomIndex = Math.floor(Math.random() * avocatIds.length);
+        if (!selectedAvocatIds.includes(avocatIds[randomIndex])) {
+          selectedAvocatIds.push(avocatIds[randomIndex]);
+        }
+      }
+      
+      // Générer les données du bénéficiaire
+      const archive = militaire.archive;
+      const dateDecision = getRandomDate(2023, 2025); // Date après octobre 2023
+      
+      const nouveauBeneficiaire = new Beneficiaire({
+        prenom: prenom,
+        nom: nom,
+        qualite: qualite,
+        militaire: militaireId,
+        numeroDecision: faker.helpers.replaceSymbols('######'),
+        dateDecision: dateDecision,
+        avocats: selectedAvocatIds,
+        conventions: [],
+        paiements: [],
+        archive: archive,
+        dateCreation: faker.date.between({ 
+          from: '2023-10-01T00:00:00.000Z', 
+          to: new Date() 
+        })
+      });
+      
+      // Générer 0 à 3 conventions pour ce bénéficiaire
+      const nbConventions = Math.floor(Math.random() * 3);
+      for (let j = 0; j < nbConventions; j++) {
+        const montant = getRandomAmount(1000, 10000);
+        const dateEnvoiAvocat = getRandomFutureDate(dateDecision, 30);
+        const dateEnvoiBeneficiaire = getRandomFutureDate(dateEnvoiAvocat, 20);
+        const dateValidationFMG = getRandomFutureDate(dateEnvoiBeneficiaire, 45);
+        
+        nouveauBeneficiaire.conventions.push({
+          montant: montant,
+          pourcentageResultats: Math.floor(Math.random() * 10) + 1,
+          dateEnvoiAvocat: dateEnvoiAvocat,
+          dateEnvoiBeneficiaire: dateEnvoiBeneficiaire,
+          dateValidationFMG: Math.random() < 0.7 ? dateValidationFMG : null,
+          avocat: getRandomItem(selectedAvocatIds)
+        });
+      }
+      
+      // Générer 0 à 5 paiements pour ce bénéficiaire
+      const nbPaiements = Math.floor(Math.random() * 5);
+      for (let j = 0; j < nbPaiements; j++) {
+        const coordonneesBancaires = genererCoordonneesBancaires();
+        const montant = getRandomAmount(500, 8000);
+        
+        nouveauBeneficiaire.paiements.push({
+          type: getRandomItem(typesPaiements),
+          montant: montant,
+          date: getRandomDate(2023, 2025), // Date après octobre 2023
+          qualiteDestinataire: getRandomItem(qualitesDestinataire),
+          identiteDestinataire: Math.random() < 0.7 ? 
+            `Me ${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}` : 
+            `${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}`,
+          referencePiece: `Facture n°${faker.helpers.replaceSymbols('####-##')}`,
+          adresseDestinataire: `${Math.floor(Math.random() * 100) + 1} ${faker.location.street()}, ${faker.location.zipCode()} ${faker.location.city()}`,
+          siretRidet: Math.random() < 0.6 ? genererSIRET() : '',
+          titulaireCompte: coordonneesBancaires.titulaireCompte,
+          codeEtablissement: coordonneesBancaires.codeEtablissement,
+          codeGuichet: coordonneesBancaires.codeGuichet,
+          numeroCompte: coordonneesBancaires.numeroCompte,
+          cleVerification: coordonneesBancaires.cleVerification
+        });
+      }
+      
+      const beneficiaireSauve = await nouveauBeneficiaire.save();
+      
+      // Mettre à jour le militaire correspondant pour ajouter ce bénéficiaire
+      await Militaire.findByIdAndUpdate(
+        militaireId,
+        { $push: { beneficiaires: beneficiaireSauve._id } }
+      );
+      
+      beneficiairesPromises.push(beneficiaireSauve);
+      beneficiairesGeneres++;
+    }
+  }
+  
+  // 3. Si on n'a pas atteint le nombre demandé, remplir avec des bénéficiaires supplémentaires
+  while (beneficiairesGeneres < nombreBeneficiaires) {
+    // Choisir aléatoirement entre militaires décédés (pour ayants droits) ou blessés (pour eux-mêmes)
+    let militaireId;
+    let qualite;
+    
+    if (militairesDecedes.length > 0 && (militairesBleases.length === 0 || Math.random() < 0.5)) {
+      // Créer un ayant droit pour un militaire décédé
+      militaireId = getRandomItem(militairesDecedes);
+      qualite = getRandomItem(['Conjoint', 'Enfant', 'Parent']);
+    } else if (militairesBleases.length > 0) {
+      // Pas de nouveaux bénéficiaires pour militaires blessés (déjà eux-mêmes)
+      // On va ajouter quand même un ayant droit d'un militaire décédé
+      if (militairesDecedes.length > 0) {
+        militaireId = getRandomItem(militairesDecedes);
+        qualite = getRandomItem(['Conjoint', 'Enfant', 'Parent']);
+      } else {
+        // Si pas de militaires décédés, on prend un blessé mais on ne génère pas de bénéficiaire
+        // On sort de la boucle
+        break;
+      }
+    } else {
+      // Ni militaires décédés ni blessés disponibles
+      break;
+    }
+    
+    const militaire = await Militaire.findById(militaireId);
+    
+    let prenom, nom;
+    
+    if (militaire.decede) {
+      // Pour les militaires décédés, le bénéficiaire est un ayant droit
+      prenom = faker.person.firstName();
+      nom = qualite === 'Conjoint' ? militaire.nom : faker.person.lastName().toUpperCase();
+    } else {
+      // Pour les militaires blessés, le bénéficiaire est le militaire lui-même
+      // (Ne devrait pas arriver dans cette boucle mais par sécurité)
+      prenom = militaire.prenom;
+      nom = militaire.nom;
+      qualite = 'Militaire';
+    }
+    
+    // Générer des avocats pour ce bénéficiaire (1 à 3)
+    const nbAvocats = Math.floor(Math.random() * 2) + 1;
+    const selectedAvocatIds = [];
+    for (let j = 0; j < nbAvocats; j++) {
+      let randomIndex = Math.floor(Math.random() * avocatIds.length);
+      if (!selectedAvocatIds.includes(avocatIds[randomIndex])) {
+        selectedAvocatIds.push(avocatIds[randomIndex]);
+      }
+    }
+    
+    // Générer les données du bénéficiaire
+    const archive = militaire.archive;
+    const dateDecision = getRandomDate(2023, 2025); // Date après octobre 2023
+    
+    const nouveauBeneficiaire = new Beneficiaire({
+      prenom: prenom,
+      nom: nom,
+      qualite: qualite,
+      militaire: militaireId,
+      numeroDecision: faker.helpers.replaceSymbols('######'),
+      dateDecision: dateDecision,
+      avocats: selectedAvocatIds,
+      conventions: [],
+      paiements: [],
+      archive: archive,
+      dateCreation: faker.date.between({ 
+        from: '2023-10-01T00:00:00.000Z', 
+        to: new Date() 
+      })
+    });
+    
+    // Générer 0 à 3 conventions pour ce bénéficiaire
+    const nbConventions = Math.floor(Math.random() * 3);
+    for (let j = 0; j < nbConventions; j++) {
+      const montant = getRandomAmount(1000, 10000);
+      const dateEnvoiAvocat = getRandomFutureDate(dateDecision, 30);
+      const dateEnvoiBeneficiaire = getRandomFutureDate(dateEnvoiAvocat, 20);
+      const dateValidationFMG = getRandomFutureDate(dateEnvoiBeneficiaire, 45);
+      
+      nouveauBeneficiaire.conventions.push({
+        montant: montant,
+        pourcentageResultats: Math.floor(Math.random() * 10) + 1,
+        dateEnvoiAvocat: dateEnvoiAvocat,
+        dateEnvoiBeneficiaire: dateEnvoiBeneficiaire,
+        dateValidationFMG: Math.random() < 0.7 ? dateValidationFMG : null,
+        avocat: getRandomItem(selectedAvocatIds)
+      });
+    }
+    
+    // Générer 0 à 5 paiements pour ce bénéficiaire
+    const nbPaiements = Math.floor(Math.random() * 5);
+    for (let j = 0; j < nbPaiements; j++) {
+      const coordonneesBancaires = genererCoordonneesBancaires();
+      const montant = getRandomAmount(500, 8000);
+      
+      nouveauBeneficiaire.paiements.push({
+        type: getRandomItem(typesPaiements),
+        montant: montant,
+        date: getRandomDate(2023, 2025), // Date après octobre 2023
+        qualiteDestinataire: getRandomItem(qualitesDestinataire),
+        identiteDestinataire: Math.random() < 0.7 ? 
+          `Me ${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}` : 
+          `${faker.person.firstName()} ${faker.person.lastName().toUpperCase()}`,
+        referencePiece: `Facture n°${faker.helpers.replaceSymbols('####-##')}`,
+        adresseDestinataire: `${Math.floor(Math.random() * 100) + 1} ${faker.location.street()}, ${faker.location.zipCode()} ${faker.location.city()}`,
+        siretRidet: Math.random() < 0.6 ? genererSIRET() : '',
+        titulaireCompte: coordonneesBancaires.titulaireCompte,
+        codeEtablissement: coordonneesBancaires.codeEtablissement,
+        codeGuichet: coordonneesBancaires.codeGuichet,
+        numeroCompte: coordonneesBancaires.numeroCompte,
+        cleVerification: coordonneesBancaires.cleVerification
+      });
+    }
+    
+    const beneficiaireSauve = await nouveauBeneficiaire.save();
+    
+    // Mettre à jour le militaire correspondant pour ajouter ce bénéficiaire
+    await Militaire.findByIdAndUpdate(
+      militaireId,
+      { $push: { beneficiaires: beneficiaireSauve._id } }
+    );
+    
+    beneficiairesPromises.push(beneficiaireSauve);
+    beneficiairesGeneres++;
+  }
+  
+  const beneficiaires = await Promise.all(beneficiairesPromises);
+  beneficiaireIds = beneficiaires.map(b => b._id);
+  console.log(`${beneficiairesGeneres} bénéficiaires générés avec succès.`);
+  return beneficiaires;
 };

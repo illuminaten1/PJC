@@ -8,7 +8,7 @@ const Affaire = require('../models/affaire');
 
 /**
  * @route   GET /api/export/beneficiaires
- * @desc    Exporter les bénéficiaires, conventions et paiements au format Excel
+ * @desc    Exporter les bénéficiaires, conventions et paiements au format Excel avec styling
  * @access  Privé
  */
 router.get('/beneficiaires', authMiddleware, async (req, res) => {
@@ -118,28 +118,105 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     // Création du workbook Excel
     const wb = XLSX.utils.book_new();
     
-    // Style des en-têtes
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "3F51B5" } },
-      alignment: { horizontal: "center" }
+    // Fonctions d'aide pour le styling
+    const applyHeaderStyles = (worksheet) => {
+      // Obtenir les lettres des colonnes
+      const range = XLSX.utils.decode_range(worksheet['!ref']);
+      const lastCol = range.e.c;
+      
+      // Créer un style pour les en-têtes (première ligne)
+      const headerStyle = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "3F51B5" } },
+        alignment: { horizontal: "center", vertical: "center" },
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } }
+        }
+      };
+      
+      // Appliquer le style d'en-tête à la première ligne
+      for (let col = 0; col <= lastCol; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!worksheet[cellRef]) continue;
+        
+        // Définir le style de la cellule
+        worksheet[cellRef].s = headerStyle;
+      }
+      
+      // Appliquer des bordures à toutes les cellules du tableau
+      const dataCellStyle = {
+        border: {
+          top: { style: "thin", color: { rgb: "CCCCCC" } },
+          bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+          left: { style: "thin", color: { rgb: "CCCCCC" } },
+          right: { style: "thin", color: { rgb: "CCCCCC" } }
+        }
+      };
+      
+      // Parcourir toutes les cellules sauf les en-têtes
+      for (let row = 1; row <= range.e.r; row++) {
+        for (let col = 0; col <= lastCol; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+          if (!worksheet[cellRef]) continue;
+          
+          // Définir le style de la cellule de données
+          worksheet[cellRef].s = dataCellStyle;
+        }
+      }
+      
+      // Ajuster la largeur des colonnes pour qu'elles s'adaptent au contenu
+      const wscols = [];
+      for (let col = 0; col <= lastCol; col++) {
+        let maxLen = 10; // Largeur minimale
+        
+        // Parcourir toutes les lignes pour trouver la longueur maximale
+        for (let row = 0; row <= range.e.r; row++) {
+          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+          if (worksheet[cellRef] && worksheet[cellRef].v) {
+            const cellValue = String(worksheet[cellRef].v);
+            if (cellValue.length > maxLen) {
+              maxLen = cellValue.length;
+            }
+          }
+        }
+        
+        // Limiter la largeur maximale à 50 caractères
+        maxLen = Math.min(maxLen + 2, 50);
+        wscols.push({ wch: maxLen });
+      }
+      
+      worksheet['!cols'] = wscols;
     };
-
-    // Ajout de l'onglet Bénéficiaires
+    
+    // Ajout de l'onglet Bénéficiaires avec style
     const wsBeneficiaires = XLSX.utils.json_to_sheet(beneficiairesData);
+    applyHeaderStyles(wsBeneficiaires);
     XLSX.utils.book_append_sheet(wb, wsBeneficiaires, "Bénéficiaires");
-
-    // Ajout de l'onglet Conventions
+    
+    // Ajout de l'onglet Conventions avec style
     const wsConventions = XLSX.utils.json_to_sheet(conventionsData);
+    applyHeaderStyles(wsConventions);
     XLSX.utils.book_append_sheet(wb, wsConventions, "Conventions");
-
-    // Ajout de l'onglet Paiements
+    
+    // Ajout de l'onglet Paiements avec style
     const wsPaiements = XLSX.utils.json_to_sheet(paiementsData);
+    applyHeaderStyles(wsPaiements);
     XLSX.utils.book_append_sheet(wb, wsPaiements, "Paiements");
-
-    // Générer le buffer
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
-
+    
+    // Définir des options de mise en forme
+    const opts = {
+      bookType: 'xlsx',
+      bookSST: false,
+      type: 'buffer',
+      cellStyles: true
+    };
+    
+    // Générer le buffer avec les styles
+    const excelBuffer = XLSX.write(wb, opts);
+    
     // Définir les headers de la réponse
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=beneficiaires-export.xlsx');

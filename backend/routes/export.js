@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const authMiddleware = require('../middleware/auth');
 const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
@@ -8,7 +8,7 @@ const Affaire = require('../models/affaire');
 
 /**
  * @route   GET /api/export/beneficiaires
- * @desc    Exporter les bénéficiaires, conventions et paiements au format Excel avec styling
+ * @desc    Exporter les bénéficiaires, conventions et paiements au format Excel avec styling avancé
  * @access  Privé
  */
 router.get('/beneficiaires', authMiddleware, async (req, res) => {
@@ -41,188 +41,236 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
       return date.toLocaleDateString('fr-FR');
     };
 
-    // Préparation des données pour l'onglet Bénéficiaires
-    const beneficiairesData = beneficiaires.map(b => {
+    // Créer un nouveau classeur Excel
+    const workbook = new ExcelJS.Workbook();
+    
+    // Ajouter des propriétés au document
+    workbook.creator = 'Protection Juridique Complémentaire';
+    workbook.lastModifiedBy = 'Protection Juridique Complémentaire';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    
+    // Style d'en-tête commun à toutes les feuilles
+    const headerStyle = {
+      font: { 
+        name: 'Arial',
+        size: 12,
+        bold: true,
+        color: { argb: 'FFFFFF' }
+      },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '3F51B5' }
+      },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'middle'
+      },
+      border: {
+        top: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+        right: { style: 'thin', color: { argb: '000000' } }
+      }
+    };
+    
+    // Style pour les cellules de données
+    const dataCellStyle = {
+      border: {
+        top: { style: 'thin', color: { argb: 'D0D0D0' } },
+        left: { style: 'thin', color: { argb: 'D0D0D0' } },
+        bottom: { style: 'thin', color: { argb: 'D0D0D0' } },
+        right: { style: 'thin', color: { argb: 'D0D0D0' } }
+      },
+      font: {
+        name: 'Calibri',
+        size: 11
+      }
+    };
+    
+    // Style pour les lignes alternées (pour améliorer la lisibilité)
+    const altRowStyle = {
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'F5F5F5' }
+      }
+    };
+    
+    // Fonction utilitaire pour appliquer les styles d'en-tête
+    const applyHeaderRow = (worksheet, headers) => {
+      // Ajouter les en-têtes
+      const headerRow = worksheet.addRow(headers);
+      
+      // Appliquer le style à chaque cellule d'en-tête
+      headerRow.eachCell((cell) => {
+        cell.style = headerStyle;
+      });
+      
+      // Figer la première ligne (en-têtes)
+      worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+    };
+    
+    // Fonction utilitaire pour appliquer les styles aux cellules de données
+    const applyDataStyles = (worksheet) => {
+      // Appliquer les styles aux cellules de données
+      for (let i = 2; i <= worksheet.rowCount; i++) {
+        const row = worksheet.getRow(i);
+        
+        // Appliquer le style de base à toutes les cellules
+        row.eachCell((cell) => {
+          cell.style = dataCellStyle;
+        });
+        
+        // Appliquer le style alterné pour les lignes paires
+        if (i % 2 === 0) {
+          row.eachCell((cell) => {
+            cell.style = {...dataCellStyle, ...altRowStyle};
+          });
+        }
+      }
+      
+      // Ajuster la largeur des colonnes
+      worksheet.columns.forEach(column => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(maxLength + 2, 50); // Maximum 50 caractères
+      });
+    };
+    
+    // ------------------ ONGLET BÉNÉFICIAIRES ------------------
+    const wsBeneficiaires = workbook.addWorksheet('Bénéficiaires');
+    
+    // Définir les en-têtes de l'onglet Bénéficiaires
+    const beneficiairesHeaders = [
+      'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Affaire',
+      'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
+      'Avocats', 'Rédacteur', 'Nb. Conventions', 'Nb. Paiements', 'Date de création'
+    ];
+    
+    // Appliquer les en-têtes
+    applyHeaderRow(wsBeneficiaires, beneficiairesHeaders);
+    
+    // Ajouter les données
+    beneficiaires.forEach(b => {
       const militaire = b.militaire || {};
       const affaire = militaire._id ? militaireAffaireMap[militaire._id.toString()] || {} : {};
       
-      return {
-        'Prénom': b.prenom || '',
-        'NOM': b.nom || '',
-        'Qualité': b.qualite || '',
-        'Militaire créateur de droit': militaire ? `${militaire.grade || ''} ${militaire.prenom || ''} ${militaire.nom || ''}`.trim() : '',
-        'Affaire': affaire.nom || '',
-        'Date des faits': formatDate(affaire.dateFaits),
-        'Lieu des faits': affaire.lieu || '',
-        'N° de décision': b.numeroDecision || '',
-        'Date de décision': formatDate(b.dateDecision),
-        'Avocats': (b.avocats && b.avocats.length) ? 
+      wsBeneficiaires.addRow([
+        b.prenom || '',
+        b.nom || '',
+        b.qualite || '',
+        militaire ? `${militaire.grade || ''} ${militaire.prenom || ''} ${militaire.nom || ''}`.trim() : '',
+        affaire.nom || '',
+        formatDate(affaire.dateFaits),
+        affaire.lieu || '',
+        b.numeroDecision || '',
+        formatDate(b.dateDecision),
+        (b.avocats && b.avocats.length) ? 
           b.avocats.map(a => `${a.prenom || ''} ${a.nom || ''}`).join(', ') : '',
-        'Rédacteur': affaire.redacteur || '',
-        'Nb. Conventions': b.conventions ? b.conventions.length : 0,
-        'Nb. Paiements': b.paiements ? b.paiements.length : 0,
-        'Date de création': formatDate(b.dateCreation)
-      };
+        affaire.redacteur || '',
+        b.conventions ? b.conventions.length : 0,
+        b.paiements ? b.paiements.length : 0,
+        formatDate(b.dateCreation)
+      ]);
     });
-
-    // Préparation des données pour l'onglet Conventions
-    let conventionsData = [];
+    
+    // Appliquer les styles aux cellules de données
+    applyDataStyles(wsBeneficiaires);
+    
+    // ------------------ ONGLET CONVENTIONS ------------------
+    const wsConventions = workbook.addWorksheet('Conventions');
+    
+    // Définir les en-têtes de l'onglet Conventions
+    const conventionsHeaders = [
+      'Bénéficiaire', 'Qualité', 'Militaire', 'Avocat', 'Cabinet',
+      'Montant', 'Pourcentage Résultats', 'Date Envoi Avocat',
+      'Date Envoi Bénéficiaire', 'Date Validation FMG'
+    ];
+    
+    // Appliquer les en-têtes
+    applyHeaderRow(wsConventions, conventionsHeaders);
+    
+    // Ajouter les données
     beneficiaires.forEach(b => {
       if (b.conventions && b.conventions.length > 0) {
         b.conventions.forEach(c => {
           const avocat = c.avocat && b.avocats ? 
             b.avocats.find(a => a._id.toString() === c.avocat.toString()) : null;
           
-          conventionsData.push({
-            'Bénéficiaire': `${b.prenom || ''} ${b.nom || ''}`.trim(),
-            'Qualité': b.qualite || '',
-            'Militaire': b.militaire ? `${b.militaire.grade || ''} ${b.militaire.prenom || ''} ${b.militaire.nom || ''}`.trim() : '',
-            'Avocat': avocat ? `${avocat.prenom || ''} ${avocat.nom || ''}`.trim() : '',
-            'Cabinet': avocat ? avocat.cabinet || '' : '',
-            'Montant': c.montant ? `${c.montant.toLocaleString('fr-FR')} €` : '',
-            'Pourcentage Résultats': c.pourcentageResultats ? `${c.pourcentageResultats}%` : '',
-            'Date Envoi Avocat': formatDate(c.dateEnvoiAvocat),
-            'Date Envoi Bénéficiaire': formatDate(c.dateEnvoiBeneficiaire),
-            'Date Validation FMG': formatDate(c.dateValidationFMG)
-          });
+          wsConventions.addRow([
+            `${b.prenom || ''} ${b.nom || ''}`.trim(),
+            b.qualite || '',
+            b.militaire ? `${b.militaire.grade || ''} ${b.militaire.prenom || ''} ${b.militaire.nom || ''}`.trim() : '',
+            avocat ? `${avocat.prenom || ''} ${avocat.nom || ''}`.trim() : '',
+            avocat ? avocat.cabinet || '' : '',
+            c.montant ? `${c.montant.toLocaleString('fr-FR')} €` : '',
+            c.pourcentageResultats ? `${c.pourcentageResultats}%` : '',
+            formatDate(c.dateEnvoiAvocat),
+            formatDate(c.dateEnvoiBeneficiaire),
+            formatDate(c.dateValidationFMG)
+          ]);
         });
       }
     });
-
-    // Préparation des données pour l'onglet Paiements
-    let paiementsData = [];
+    
+    // Appliquer les styles aux cellules de données
+    applyDataStyles(wsConventions);
+    
+    // ------------------ ONGLET PAIEMENTS ------------------
+    const wsPaiements = workbook.addWorksheet('Paiements');
+    
+    // Définir les en-têtes de l'onglet Paiements
+    const paiementsHeaders = [
+      'Bénéficiaire', 'Qualité', 'Type', 'Montant', 'Date',
+      'Qualité Destinataire', 'Identité Destinataire', 'Référence Pièce',
+      'Adresse Destinataire', 'SIRET/RIDET', 'Titulaire Compte',
+      'Code Établissement', 'Code Guichet', 'Numéro Compte', 'Clé Vérification'
+    ];
+    
+    // Appliquer les en-têtes
+    applyHeaderRow(wsPaiements, paiementsHeaders);
+    
+    // Ajouter les données
     beneficiaires.forEach(b => {
       if (b.paiements && b.paiements.length > 0) {
         b.paiements.forEach(p => {
-          paiementsData.push({
-            'Bénéficiaire': `${b.prenom || ''} ${b.nom || ''}`.trim(),
-            'Qualité': b.qualite || '',
-            'Type': p.type || '',
-            'Montant': p.montant ? `${p.montant.toLocaleString('fr-FR')} €` : '',
-            'Date': formatDate(p.date),
-            'Qualité Destinataire': p.qualiteDestinataire || '',
-            'Identité Destinataire': p.identiteDestinataire || '',
-            'Référence Pièce': p.referencePiece || '',
-            'Adresse Destinataire': p.adresseDestinataire || '',
-            'SIRET/RIDET': p.siretRidet || '',
-            'Titulaire Compte': p.titulaireCompte || '',
-            'Code Établissement': p.codeEtablissement || '',
-            'Code Guichet': p.codeGuichet || '',
-            'Numéro Compte': p.numeroCompte || '',
-            'Clé Vérification': p.cleVerification || ''
-          });
+          wsPaiements.addRow([
+            `${b.prenom || ''} ${b.nom || ''}`.trim(),
+            b.qualite || '',
+            p.type || '',
+            p.montant ? `${p.montant.toLocaleString('fr-FR')} €` : '',
+            formatDate(p.date),
+            p.qualiteDestinataire || '',
+            p.identiteDestinataire || '',
+            p.referencePiece || '',
+            p.adresseDestinataire || '',
+            p.siretRidet || '',
+            p.titulaireCompte || '',
+            p.codeEtablissement || '',
+            p.codeGuichet || '',
+            p.numeroCompte || '',
+            p.cleVerification || ''
+          ]);
         });
       }
     });
-
-    // Création du workbook Excel
-    const wb = XLSX.utils.book_new();
     
-    // Fonctions d'aide pour le styling
-    const applyHeaderStyles = (worksheet) => {
-      // Obtenir les lettres des colonnes
-      const range = XLSX.utils.decode_range(worksheet['!ref']);
-      const lastCol = range.e.c;
-      
-      // Créer un style pour les en-têtes (première ligne)
-      const headerStyle = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "3F51B5" } },
-        alignment: { horizontal: "center", vertical: "center" },
-        border: {
-          top: { style: "thin", color: { rgb: "000000" } },
-          bottom: { style: "thin", color: { rgb: "000000" } },
-          left: { style: "thin", color: { rgb: "000000" } },
-          right: { style: "thin", color: { rgb: "000000" } }
-        }
-      };
-      
-      // Appliquer le style d'en-tête à la première ligne
-      for (let col = 0; col <= lastCol; col++) {
-        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (!worksheet[cellRef]) continue;
-        
-        // Définir le style de la cellule
-        worksheet[cellRef].s = headerStyle;
-      }
-      
-      // Appliquer des bordures à toutes les cellules du tableau
-      const dataCellStyle = {
-        border: {
-          top: { style: "thin", color: { rgb: "CCCCCC" } },
-          bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-          left: { style: "thin", color: { rgb: "CCCCCC" } },
-          right: { style: "thin", color: { rgb: "CCCCCC" } }
-        }
-      };
-      
-      // Parcourir toutes les cellules sauf les en-têtes
-      for (let row = 1; row <= range.e.r; row++) {
-        for (let col = 0; col <= lastCol; col++) {
-          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!worksheet[cellRef]) continue;
-          
-          // Définir le style de la cellule de données
-          worksheet[cellRef].s = dataCellStyle;
-        }
-      }
-      
-      // Ajuster la largeur des colonnes pour qu'elles s'adaptent au contenu
-      const wscols = [];
-      for (let col = 0; col <= lastCol; col++) {
-        let maxLen = 10; // Largeur minimale
-        
-        // Parcourir toutes les lignes pour trouver la longueur maximale
-        for (let row = 0; row <= range.e.r; row++) {
-          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-          if (worksheet[cellRef] && worksheet[cellRef].v) {
-            const cellValue = String(worksheet[cellRef].v);
-            if (cellValue.length > maxLen) {
-              maxLen = cellValue.length;
-            }
-          }
-        }
-        
-        // Limiter la largeur maximale à 50 caractères
-        maxLen = Math.min(maxLen + 2, 50);
-        wscols.push({ wch: maxLen });
-      }
-      
-      worksheet['!cols'] = wscols;
-    };
+    // Appliquer les styles aux cellules de données
+    applyDataStyles(wsPaiements);
     
-    // Ajout de l'onglet Bénéficiaires avec style
-    const wsBeneficiaires = XLSX.utils.json_to_sheet(beneficiairesData);
-    applyHeaderStyles(wsBeneficiaires);
-    XLSX.utils.book_append_sheet(wb, wsBeneficiaires, "Bénéficiaires");
-    
-    // Ajout de l'onglet Conventions avec style
-    const wsConventions = XLSX.utils.json_to_sheet(conventionsData);
-    applyHeaderStyles(wsConventions);
-    XLSX.utils.book_append_sheet(wb, wsConventions, "Conventions");
-    
-    // Ajout de l'onglet Paiements avec style
-    const wsPaiements = XLSX.utils.json_to_sheet(paiementsData);
-    applyHeaderStyles(wsPaiements);
-    XLSX.utils.book_append_sheet(wb, wsPaiements, "Paiements");
-    
-    // Définir des options de mise en forme
-    const opts = {
-      bookType: 'xlsx',
-      bookSST: false,
-      type: 'buffer',
-      cellStyles: true
-    };
-    
-    // Générer le buffer avec les styles
-    const excelBuffer = XLSX.write(wb, opts);
-    
-    // Définir les headers de la réponse
+    // Générer le fichier et l'envoyer comme réponse HTTP
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=beneficiaires-export.xlsx');
     
-    // Envoyer le fichier
-    res.send(excelBuffer);
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (error) {
     console.error('Erreur lors de l\'export Excel:', error);
     res.status(500).json({ 

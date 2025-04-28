@@ -1,7 +1,6 @@
 // init-data.js
 // Script pour initialiser les données du système avec vérification préalable
 const mongoose = require('mongoose');
-const axios = require('axios');
 const { faker } = require('@faker-js/faker/locale/fr');
 require('dotenv').config();
 

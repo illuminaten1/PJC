@@ -88,31 +88,37 @@ const DataTable = ({
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {rows.map((row, i) => {
-              prepareRow(row);
-              return (
-                <tr
-                  {...row.getRowProps()}
-                  onClick={() => onRowClick && onRowClick(row.original)}
-                  className="clickable-row"
-                >
-                  {row.cells.map(cell => (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+            {rows.length > 0 ? (
+              rows.map((row, i) => {
+                prepareRow(row);
+                return (
+                  <tr
+                    {...row.getRowProps()}
+                    onClick={() => onRowClick && onRowClick(row.original)}
+                    className="clickable-row"
+                  >
+                    {row.cells.map(cell => (
+                      <td {...cell.getCellProps()}>
+                        {cell.render('Cell')}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <EmptyMessage colSpan={columns.length}>
+                  Aucun élément trouvé
+                </EmptyMessage>
+              </tr>
+            )}
           </tbody>
         </StyledTable>
       </TableWrapper>
       
-      <PaginationContainer>
-        <PaginationInfo>
-          {rows.length} élément{rows.length !== 1 ? 's' : ''} trouvé{rows.length !== 1 ? 's' : ''}
-        </PaginationInfo>
-      </PaginationContainer>
+      <ResultCount>
+        {rows.length} élément{rows.length !== 1 ? 's' : ''} trouvé{rows.length !== 1 ? 's' : ''}
+      </ResultCount>
     </TableContainer>
   );
 };
@@ -122,9 +128,6 @@ const TableContainer = styled.div`
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 250px); /* Adapte la hauteur pour prendre la majeure partie de l'écran */
 `;
 
 const SearchContainer = styled.div`
@@ -134,7 +137,6 @@ const SearchContainer = styled.div`
   background-color: #f9f9f9;
   border-bottom: 1px solid #eee;
   position: relative;
-  flex-shrink: 0;
 `;
 
 const SearchIconWrapper = styled.div`
@@ -158,8 +160,7 @@ const SearchInput = styled.input`
 
 const TableWrapper = styled.div`
   overflow-x: auto;
-  overflow-y: auto;
-  flex-grow: 1;
+  width: 100%;
 `;
 
 const StyledTable = styled.table`
@@ -176,9 +177,6 @@ const StyledTable = styled.table`
     background-color: #f9f9f9;
     font-weight: 600;
     color: #333;
-    position: sticky;
-    top: 0;
-    z-index: 1;
   }
   
   tbody tr {
@@ -199,6 +197,12 @@ const StyledTable = styled.table`
   }
 `;
 
+const EmptyMessage = styled.td`
+  text-align: center;
+  padding: 40px !important;
+  color: #757575;
+`;
+
 const HeaderContent = styled.div`
   display: flex;
   align-items: center;
@@ -213,17 +217,12 @@ const SortIcon = styled.span`
   color: #757575;
 `;
 
-const PaginationContainer = styled.div`
+const ResultCount = styled.div`
   display: flex;
-  align-items: center;
   justify-content: flex-end;
   padding: 12px 16px;
   background-color: #f9f9f9;
   border-top: 1px solid #eee;
-  flex-shrink: 0;
-`;
-
-const PaginationInfo = styled.div`
   font-size: 14px;
   color: #757575;
 `;

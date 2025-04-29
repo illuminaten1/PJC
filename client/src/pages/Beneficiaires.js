@@ -7,6 +7,27 @@ import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 
+const BeneficiairesCounter = ({ total, actifs, archived }) => {
+  return (
+    <CounterContainer>
+      <CounterItem>
+        <CounterValue>{total}</CounterValue>
+        <CounterLabel>Total</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{actifs}</CounterValue>
+        <CounterLabel>Actifs</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{archived}</CounterValue>
+        <CounterLabel>Archivés</CounterLabel>
+      </CounterItem>
+    </CounterContainer>
+  );
+};
+
 const Beneficiaires = () => {
   const [beneficiaires, setBeneficiaires] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +46,10 @@ const Beneficiaires = () => {
     conventions: 0,
     paiements: 0
   });
-  
+  const [totalBeneficiaires, setTotalBeneficiaires] = useState(0);
+  const [activesBeneficiaires, setActivesBeneficiaires] = useState(0);
+  const [archivedBeneficiaires, setArchivedBeneficiaires] = useState(0);
+
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -43,7 +67,7 @@ const Beneficiaires = () => {
       if (filterRedacteur) params.redacteur = filterRedacteur;
       if (filterArchive !== '') params.archive = filterArchive;
       
-      // Récupération de tous les bénéficiaires
+      // Récupération des bénéficiaires filtrés
       const response = await beneficiairesAPI.getAll(params);
       let filteredData = response.data;
       
@@ -65,6 +89,24 @@ const Beneficiaires = () => {
       }
       
       setBeneficiaires(filteredData);
+      
+      // Si aucun filtre substantiel n'est appliqué, utilisez cette réponse pour les compteurs
+      const noSubstantialFilters = !searchTerm && !filterQualite && !filterRedacteur && 
+                                  !filterDecision && !filterAvocat && filterArchive === '';
+      
+      if (noSubstantialFilters) {
+        const allBeneficiaires = response.data;
+        setTotalBeneficiaires(allBeneficiaires.length);
+        setActivesBeneficiaires(allBeneficiaires.filter(b => !b.archive).length);
+        setArchivedBeneficiaires(allBeneficiaires.filter(b => b.archive).length);
+      } else {
+        // Sinon, faites une requête supplémentaire pour les statistiques globales
+        const statsResponse = await beneficiairesAPI.getAll({});
+        const allBeneficiaires = statsResponse.data;
+        setTotalBeneficiaires(allBeneficiaires.length);
+        setActivesBeneficiaires(allBeneficiaires.filter(b => !b.archive).length);
+        setArchivedBeneficiaires(allBeneficiaires.filter(b => b.archive).length);
+      }
       
       // Calculer les statistiques pour l'export
       let conventionsCount = 0;
@@ -335,6 +377,12 @@ const Beneficiaires = () => {
         subtitle="Gestion des bénéficiaires de la protection juridique complémentaire"
         actionButton={exportButton}
       />
+
+    <BeneficiairesCounter 
+      total={totalBeneficiaires} 
+      actifs={activesBeneficiaires} 
+      archived={archivedBeneficiaires} 
+    />
       
       <FiltersContainer>
         <FiltersGroup>
@@ -782,6 +830,41 @@ const Error = styled.div`
   background-color: #ffebee;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const CounterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+`;
+
+const CounterItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;
+`;
+
+const CounterValue = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  color: #3f51b5;
+`;
+
+const CounterLabel = styled.div`
+  font-size: 12px;
+  color: #757575;
+  margin-top: 4px;
+`;
+
+const CounterDivider = styled.div`
+  width: 1px;
+  height: 30px;
+  background-color: #e0e0e0;
 `;
 
 export default Beneficiaires;

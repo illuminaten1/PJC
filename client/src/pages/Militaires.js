@@ -6,6 +6,27 @@ import { militairesAPI, affairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 
+const MilitairesCounter = ({ total, actifs, archived }) => {
+  return (
+    <CounterContainer>
+      <CounterItem>
+        <CounterValue>{total}</CounterValue>
+        <CounterLabel>Total</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{actifs}</CounterValue>
+        <CounterLabel>Actifs</CounterLabel>
+      </CounterItem>
+      <CounterDivider />
+      <CounterItem>
+        <CounterValue>{archived}</CounterValue>
+        <CounterLabel>Archivés</CounterLabel>
+      </CounterItem>
+    </CounterContainer>
+  );
+};
+
 const Militaires = () => {
   const [militaires, setMilitaires] = useState([]);
   const [affaires, setAffaires] = useState([]);
@@ -16,6 +37,9 @@ const Militaires = () => {
   const [filterAffaire, setFilterAffaire] = useState('');
   const [filterRedacteur, setFilterRedacteur] = useState('');
   const [filterArchive, setFilterArchive] = useState('false');
+  const [totalMilitaires, setTotalMilitaires] = useState(0);
+  const [activesMilitaires, setActivesMilitaires] = useState(0);
+  const [archivedMilitaires, setArchivedMilitaires] = useState(0);
   
   const navigate = useNavigate();
   
@@ -37,6 +61,22 @@ const Militaires = () => {
       
       const response = await militairesAPI.getAll(params);
       setMilitaires(response.data);
+      
+      // Si aucun filtre n'est appliqué, utilisez directement cette réponse pour les compteurs
+      if (!searchTerm && !filterAffaire && !filterRedacteur && filterArchive === '') {
+        const allMilitaires = response.data;
+        setTotalMilitaires(allMilitaires.length);
+        setActivesMilitaires(allMilitaires.filter(m => !m.archive).length);
+        setArchivedMilitaires(allMilitaires.filter(m => m.archive).length);
+      } else {
+        // Sinon, faites une requête supplémentaire pour les statistiques globales
+        const statsResponse = await militairesAPI.getAll({});
+        const allMilitaires = statsResponse.data;
+        setTotalMilitaires(allMilitaires.length);
+        setActivesMilitaires(allMilitaires.filter(m => !m.archive).length);
+        setArchivedMilitaires(allMilitaires.filter(m => m.archive).length);
+      }
+      
       setError(null);
     } catch (err) {
       console.error("Erreur lors de la récupération des militaires", err);
@@ -127,6 +167,12 @@ const Militaires = () => {
         subtitle="Gestion des militaires créateurs de droit"
       />
       
+      <MilitairesCounter 
+        total={totalMilitaires} 
+        actifs={activesMilitaires} 
+        archived={archivedMilitaires} 
+      />
+
       <FiltersContainer>
         <FiltersGroup>
           <FilterLabel>
@@ -294,6 +340,41 @@ const ResetButton = styled.button`
   &:hover {
     background-color: #d32f2f;
   }
+`;
+
+const CounterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+`;
+
+const CounterItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;
+`;
+
+const CounterValue = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  color: #3f51b5;
+`;
+
+const CounterLabel = styled.div`
+  font-size: 12px;
+  color: #757575;
+  margin-top: 4px;
+`;
+
+const CounterDivider = styled.div`
+  width: 1px;
+  height: 30px;
+  background-color: #e0e0e0;
 `;
 
 export default Militaires;

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // ou bcryptjs
 const Utilisateur = require('../models/utilisateur');
 
 // Clé secrète pour les tokens JWT (à mettre dans .env en production)
@@ -44,7 +44,26 @@ router.post('/login', async (req, res) => {
     }
 
     // Vérifier le mot de passe avec la méthode comparePassword
-    const isMatch = await utilisateur.comparePassword(password);
+    let isMatch = false;
+    
+    try {
+      isMatch = await utilisateur.comparePassword(password);
+    } catch (error) {
+      console.error('Erreur lors de comparePassword:', error);
+      
+      // Fallback en cas d'erreur: essayer la comparaison directe avec bcrypt
+      try {
+        // Si le mot de passe a le format bcrypt, essayer bcrypt.compare directement
+        if (utilisateur.password.startsWith('$2')) {
+          isMatch = await bcrypt.compare(password, utilisateur.password);
+        } else if (utilisateur.passwordNeedsHash === true) {
+          // Si marqué explicitement comme non haché, essayer comparaison directe
+          isMatch = utilisateur.password === password;
+        }
+      } catch (innerError) {
+        console.error('Erreur secondaire lors de la vérification:', innerError);
+      }
+    }
     
     if (!isMatch) {
       return res.status(401).json({ 
@@ -54,7 +73,12 @@ router.post('/login', async (req, res) => {
     }
 
     // Si le mot de passe était en clair, le hacher pour les prochaines connexions
-    if (utilisateur.passwordNeedsHash) {
+    if (utilisateur.passwordNeedsHash === true || 
+       (!utilisateur.password.startsWith('$2a$') && 
+        !utilisateur.password.startsWith('$2b$') && 
+        !utilisateur.password.startsWith('$2y$'))) {
+      
+      // Hacher le mot de passe
       const salt = await bcrypt.genSalt(10);
       utilisateur.password = await bcrypt.hash(password, salt);
       utilisateur.passwordNeedsHash = false;
@@ -116,7 +140,7 @@ router.get('/verify', async (req, res) => {
       const decoded = jwt.verify(token, JWT_SECRET);
       
       // Vérifier que l'utilisateur existe toujours et est actif
-      const utilisateur = await Utilisateur.findById(decoded.id).select('-password');
+      const utilisateur = await Utilisateur.findById(decoded.id).select('-password -passwordNeedsHash');
       
       if (!utilisateur || !utilisateur.actif) {
         return res.status(401).json({ 
@@ -166,35 +190,50 @@ router.post('/init', async (req, res) => {
       });
     }
 
-    // Hacher le mot de passe par défaut
+    // Hacher le mot de passe par défaut de manière explicite
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('admin', salt);
+    
+    // Vérifier que le hachage fonctionne
+    const testVerification = await bcrypt.compare('admin', hashedPassword);
+    if (!testVerification) {
+      throw new Error('Échec de vérification du hachage - problème avec bcrypt');
+    }
 
-    // Créer le premier administrateur
-    const adminUtilisateur = new Utilisateur({
+    // Créer le premier administrateur directement dans la base de données
+    const adminData = {
       username: 'admin',
-      password: hashedPassword,  // Mot de passe haché
+      password: hashedPassword,
       role: 'administrateur',
       nom: 'Administrateur',
-      passwordNeedsHash: false  // Le mot de passe est déjà haché
-    });
-
-    await adminUtilisateur.save();
+      dateCreation: new Date(),
+      actif: true,
+      passwordNeedsHash: false
+    };
+    
+    // Utiliser l'insertion directe pour éviter middleware
+    const result = await mongoose.connection.db.collection('utilisateurs').insertOne(adminData);
+    
+    // Vérifier si l'insertion a réussi
+    if (!result.acknowledged) {
+      throw new Error('Échec de création de l\'administrateur');
+    }
 
     res.status(201).json({
       success: true,
       message: 'Administrateur initial créé avec succès (username: admin, password: admin)',
       utilisateur: {
-        id: adminUtilisateur._id,
-        username: adminUtilisateur.username,
-        nom: adminUtilisateur.nom
+        id: result.insertedId,
+        username: 'admin',
+        nom: 'Administrateur'
       }
     });
   } catch (err) {
     console.error('Erreur d\'initialisation:', err);
     res.status(500).json({ 
       success: false, 
-      message: 'Erreur serveur lors de l\'initialisation' 
+      message: 'Erreur serveur lors de l\'initialisation',
+      error: err.message
     });
   }
 });

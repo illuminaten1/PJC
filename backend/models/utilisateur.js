@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // ou bcryptjs
 const Schema = mongoose.Schema;
 
 // Schéma pour les utilisateurs
@@ -53,15 +53,31 @@ utilisateurSchema.methods.isAdmin = function() {
   return this.role === 'administrateur';
 };
 
-// Méthode pour vérifier un mot de passe
+// Méthode pour vérifier un mot de passe avec meilleure détection d'erreurs
 utilisateurSchema.methods.comparePassword = async function(candidatePassword) {
-  // Si le mot de passe a besoin d'être haché (mot de passe en clair)
-  if (this.passwordNeedsHash) {
+  if (!candidatePassword) {
+    return false; // Retourner false si pas de mot de passe fourni
+  }
+  
+  // Si le mot de passe est en clair (migration)
+  if (this.passwordNeedsHash === true) {
     return this.password === candidatePassword;
   }
   
-  // Sinon, comparer avec bcrypt
-  return await bcrypt.compare(candidatePassword, this.password);
+  // Vérifier si le mot de passe a le format d'un hachage bcrypt
+  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$') || this.password.startsWith('$2y$')) {
+    try {
+      // Utiliser bcrypt pour comparer
+      return await bcrypt.compare(candidatePassword, this.password);
+    } catch (err) {
+      console.error('Erreur bcrypt.compare:', err);
+      // En cas d'erreur, on ne fait pas de fallback et on retourne false
+      return false;
+    }
+  } else {
+    // Si le mot de passe n'a pas le format d'un hachage bcrypt, comparer en clair
+    return this.password === candidatePassword;
+  }
 };
 
 // Middleware pré-sauvegarde pour hacher le mot de passe
@@ -74,15 +90,21 @@ utilisateurSchema.pre('save', async function(next) {
   }
   
   try {
-    // Si le mot de passe doit être haché
-    if (!user.passwordNeedsHash) {
-      // Générer un sel
-      const salt = await bcrypt.genSalt(10);
-      // Hacher le mot de passe avec le sel
-      const hashedPassword = await bcrypt.hash(user.password, salt);
-      // Remplacer le mot de passe en clair par le mot de passe haché
-      user.password = hashedPassword;
+    // Si le mot de passe est marqué explicitement pour ne pas être haché
+    if (user.passwordNeedsHash === true) {
+      return next();
     }
+    
+    // Vérifier si le mot de passe est déjà haché
+    if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
+      // Le mot de passe est déjà haché, ne pas le hacher à nouveau
+      return next();
+    }
+    
+    // Hacher le mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(user.password, salt);
+    user.password = hashedPassword;
     
     next();
   } catch (err) {

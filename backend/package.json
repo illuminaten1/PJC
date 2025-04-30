@@ -8,6 +8,7 @@
         "dev": "nodemon app.js"
     },
     "dependencies": {
+        "bcrypt": "^5.1.1",
         "@faker-js/faker": "^9.7.0",
         "carbone": "^3.5.6",
         "cors": "^2.8.5",

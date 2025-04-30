@@ -6,27 +6,6 @@ import { militairesAPI, affairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 
-const MilitairesCounter = ({ total, actifs, archived }) => {
-  return (
-    <CounterContainer>
-      <CounterItem>
-        <CounterValue>{total}</CounterValue>
-        <CounterLabel>Total</CounterLabel>
-      </CounterItem>
-      <CounterDivider />
-      <CounterItem>
-        <CounterValue>{actifs}</CounterValue>
-        <CounterLabel>Actifs</CounterLabel>
-      </CounterItem>
-      <CounterDivider />
-      <CounterItem>
-        <CounterValue>{archived}</CounterValue>
-        <CounterLabel>Archivés</CounterLabel>
-      </CounterItem>
-    </CounterContainer>
-  );
-};
-
 const Militaires = () => {
   const [militaires, setMilitaires] = useState([]);
   const [affaires, setAffaires] = useState([]);
@@ -162,16 +141,17 @@ const Militaires = () => {
   
   return (
     <Container>
-      <PageHeader 
-        title="Militaires" 
-        subtitle="Gestion des militaires créateurs de droit"
-      />
-      
-      <MilitairesCounter 
-        total={totalMilitaires} 
-        actifs={activesMilitaires} 
-        archived={archivedMilitaires} 
-      />
+    <HeaderContainer> 
+      <TitleArea>
+        <Title>Militaires</Title>
+        <Subtitle>Gestion des militaires créateurs de droit</Subtitle>
+        <StatPills>
+          <StatPill>{totalMilitaires} au total</StatPill>
+          <StatPill className="active">{activesMilitaires} actifs</StatPill>
+          <StatPill className="archived">{archivedMilitaires} archivés</StatPill>
+        </StatPills>
+      </TitleArea>
+    </HeaderContainer>
 
       <FiltersContainer>
         <FiltersGroup>
@@ -342,39 +322,56 @@ const ResetButton = styled.button`
   }
 `;
 
-const CounterContainer = styled.div`
+const HeaderContainer = styled.div`
   display: flex;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
 `;
 
-const CounterItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 16px;
+const TitleArea = styled.div`
+  flex: 1;
 `;
 
-const CounterValue = styled.div`
-  font-size: 20px;
-  font-weight: 600;
-  color: #3f51b5;
+const Title = styled.h1`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: #212121;
 `;
 
-const CounterLabel = styled.div`
-  font-size: 12px;
+const Subtitle = styled.p`
+  font-size: 14px;
   color: #757575;
-  margin-top: 4px;
+  margin: 4px 0 0;
 `;
 
-const CounterDivider = styled.div`
-  width: 1px;
-  height: 30px;
+const StatPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const StatPill = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: #424242;
   background-color: #e0e0e0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  
+  &.active {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+  }
+  
+  &.archived {
+    background-color: #e0e0e0;
+    color: #616161;
+    border: 1px solid #bdbdbd;
+  }
 `;
 
 export default Militaires;

@@ -8,27 +8,6 @@ import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import AffaireForm from '../components/forms/AffaireForm';
 
-// Composant pour afficher les compteurs d'affaires
-const AffairesCounter = ({ total, actives, archived }) => {
-  return (
-    <CounterContainer>
-      <CounterItem>
-        <CounterValue>{total}</CounterValue>
-        <CounterLabel>Total</CounterLabel>
-      </CounterItem>
-      <CounterDivider />
-      <CounterItem>
-        <CounterValue>{actives}</CounterValue>
-        <CounterLabel>Actives</CounterLabel>
-      </CounterItem>
-      <CounterDivider />
-      <CounterItem>
-        <CounterValue>{archived}</CounterValue>
-        <CounterLabel>Archivées</CounterLabel>
-      </CounterItem>
-    </CounterContainer>
-  );
-};
 
 const Affaires = () => {
   const [affaires, setAffaires] = useState([]);
@@ -202,23 +181,22 @@ const Affaires = () => {
   
   return (
     <Container>
-      <PageHeader 
-        title="Affaires" 
-        subtitle="Gestion des dossiers de protection juridique complémentaire"
-        actionButton={
-          <ActionButton onClick={handleOpenModal}>
-            <FaPlus />
-            <span>Nouvelle affaire</span>
-          </ActionButton>
-        }
-      />
-      
-      {/* Ajout du compteur d'affaires ici */}
-      <AffairesCounter 
-        total={totalAffaires} 
-        actives={activesAffaires} 
-        archived={archivedAffaires} 
-      />
+      <HeaderContainer>
+        <TitleArea>
+          <Title>Affaires</Title>
+          <Subtitle>Gestion des dossiers de protection juridique complémentaire</Subtitle>
+          <StatPills>
+            <StatPill>{totalAffaires} au total</StatPill>
+            <StatPill className="active">{activesAffaires} actives</StatPill>
+            <StatPill className="archived">{archivedAffaires} archivées</StatPill>
+          </StatPills>
+        </TitleArea>
+        
+        <ActionButton onClick={handleOpenModal}>
+          <FaPlus />
+          <span>Nouvelle affaire</span>
+        </ActionButton>
+      </HeaderContainer>
       
       <FiltersContainer>
         <FiltersGroup>
@@ -386,42 +364,6 @@ const Error = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-// Styles pour le compteur d'affaires
-const CounterContainer = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
-  margin-bottom: 16px;
-`;
-
-const CounterItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 16px;
-`;
-
-const CounterValue = styled.div`
-  font-size: 20px;
-  font-weight: 600;
-  color: #3f51b5;
-`;
-
-const CounterLabel = styled.div`
-  font-size: 12px;
-  color: #757575;
-  margin-top: 4px;
-`;
-
-const CounterDivider = styled.div`
-  width: 1px;
-  height: 30px;
-  background-color: #e0e0e0;
-`;
-
 const ResetButton = styled.button`
   background-color: #f44336;
   color: white;
@@ -436,6 +378,58 @@ const ResetButton = styled.button`
   
   &:hover {
     background-color: #d32f2f;
+  }
+`;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+`;
+
+const TitleArea = styled.div`
+  flex: 1;
+`;
+
+const Title = styled.h1`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: #212121;
+`;
+
+const Subtitle = styled.p`
+  font-size: 14px;
+  color: #757575;
+  margin: 4px 0 0;
+`;
+
+const StatPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const StatPill = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: #424242;
+  background-color: #e0e0e0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  
+  &.active {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+  }
+  
+  &.archived {
+    background-color: #e0e0e0;
+    color: #616161;
+    border: 1px solid #bdbdbd;
   }
 `;
 

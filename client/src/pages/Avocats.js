@@ -664,7 +664,7 @@ const FilterSelect = styled.select`
   }
 `;
 
-// Nouveaux styles pour aligner la case à cocher RPC
+// Styles pour aligner la case à cocher RPC
 const FilterCheckboxContainer = styled.div`
   display: flex;
   align-items: center;

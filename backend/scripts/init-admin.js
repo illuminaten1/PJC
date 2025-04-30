@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Utilisateur = require('../models/utilisateur');
 require('dotenv').config();
 
@@ -17,14 +18,19 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/pjc', {
     if (count > 0) {
       console.log('Des utilisateurs existent déjà dans la base de données');
     } else {
+      // Hacher le mot de passe par défaut
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('admin', salt);
+      
       // Créer un nouvel utilisateur administrateur
       const admin = new Utilisateur({
         username: 'admin',
-        password: 'admin',
+        password: hashedPassword, // Mot de passe haché
         nom: 'Administrateur',
         role: 'administrateur',
         dateCreation: new Date(),
-        actif: true
+        actif: true,
+        passwordNeedsHash: false // Le mot de passe est déjà haché
       });
       
       await admin.save();

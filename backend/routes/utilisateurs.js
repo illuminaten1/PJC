@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const Utilisateur = require('../models/utilisateur');
 const authMiddleware = require('../middleware/auth');
 
@@ -24,7 +25,7 @@ const isAdmin = (req, res, next) => {
 router.get('/', authMiddleware, isAdmin, async (req, res) => {
   try {
     const utilisateurs = await Utilisateur.find()
-      .select('-password')
+      .select('-password -passwordNeedsHash')
       .sort({ username: 1 });
     
     res.json({
@@ -48,7 +49,7 @@ router.get('/', authMiddleware, isAdmin, async (req, res) => {
 router.get('/:id', authMiddleware, isAdmin, async (req, res) => {
   try {
     const utilisateur = await Utilisateur.findById(req.params.id)
-      .select('-password');
+      .select('-password -passwordNeedsHash');
     
     if (!utilisateur) {
       return res.status(404).json({ 
@@ -104,14 +105,19 @@ router.post('/', authMiddleware, isAdmin, async (req, res) => {
       });
     }
     
+    // Hacher le mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
     // Créer le nouvel utilisateur
     const nouvelUtilisateur = new Utilisateur({
       username,
-      password,
+      password: hashedPassword,
       nom,
       role,
       dateCreation: new Date(),
-      actif: true
+      actif: true,
+      passwordNeedsHash: false
     });
     
     await nouvelUtilisateur.save();
@@ -176,7 +182,12 @@ router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
     
     // Mettre à jour les champs
     if (username) utilisateur.username = username;
-    if (password) utilisateur.password = password;
+    if (password) {
+      // Hacher le nouveau mot de passe
+      const salt = await bcrypt.genSalt(10);
+      utilisateur.password = await bcrypt.hash(password, salt);
+      utilisateur.passwordNeedsHash = false;
+    }
     if (nom) utilisateur.nom = nom;
     if (role) utilisateur.role = role;
     if (actif !== undefined) utilisateur.actif = actif;
@@ -267,7 +278,11 @@ router.patch('/:id/password', authMiddleware, isAdmin, async (req, res) => {
       });
     }
     
-    utilisateur.password = password;
+    // Hacher le nouveau mot de passe
+    const salt = await bcrypt.genSalt(10);
+    utilisateur.password = await bcrypt.hash(password, salt);
+    utilisateur.passwordNeedsHash = false;
+    
     await utilisateur.save();
     
     res.json({

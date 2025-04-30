@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const Utilisateur = require('../models/utilisateur');
 
 // Clé secrète pour les tokens JWT (à mettre dans .env en production)
-const JWT_SECRET = 'pjc_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET || 'pjc_secret_key';
 
 /**
  * @route   POST /api/auth/login
@@ -42,12 +43,22 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Vérifier le mot de passe (comparaison simple car stockage en clair comme demandé)
-    if (utilisateur.password !== password) {
+    // Vérifier le mot de passe avec la méthode comparePassword
+    const isMatch = await utilisateur.comparePassword(password);
+    
+    if (!isMatch) {
       return res.status(401).json({ 
         success: false, 
         message: 'Identifiants incorrects' 
       });
+    }
+
+    // Si le mot de passe était en clair, le hacher pour les prochaines connexions
+    if (utilisateur.passwordNeedsHash) {
+      const salt = await bcrypt.genSalt(10);
+      utilisateur.password = await bcrypt.hash(password, salt);
+      utilisateur.passwordNeedsHash = false;
+      await utilisateur.save();
     }
 
     // Mettre à jour la date de dernière connexion
@@ -155,12 +166,17 @@ router.post('/init', async (req, res) => {
       });
     }
 
+    // Hacher le mot de passe par défaut
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('admin', salt);
+
     // Créer le premier administrateur
     const adminUtilisateur = new Utilisateur({
       username: 'admin',
-      password: 'admin',  // À changer immédiatement après la première connexion
+      password: hashedPassword,  // Mot de passe haché
       role: 'administrateur',
-      nom: 'Administrateur'
+      nom: 'Administrateur',
+      passwordNeedsHash: false  // Le mot de passe est déjà haché
     });
 
     await adminUtilisateur.save();

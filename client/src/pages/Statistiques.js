@@ -130,6 +130,35 @@ const Statistiques = () => {
     }
   };
   
+  // Calcul des totaux pour les tableaux
+  const calculateTotals = () => {
+    if (!statsGlobales || !statsGlobales.parAnnee) return {
+      nbBeneficiaires: 0,
+      nbConventions: 0,
+      montantGageHT: 0,
+      montantPaye: 0,
+      nbReglements: 0
+    };
+
+    return Object.values(statsGlobales.parAnnee).reduce((totals, yearStats) => {
+      return {
+        nbBeneficiaires: totals.nbBeneficiaires + (yearStats.nbBeneficiaires || 0),
+        nbConventions: totals.nbConventions + (yearStats.nbConventions || 0),
+        montantGageHT: totals.montantGageHT + (yearStats.montantGageHT || 0),
+        montantPaye: totals.montantPaye + (yearStats.montantPaye || 0),
+        nbReglements: totals.nbReglements + (yearStats.nbReglements || 0)
+      };
+    }, {
+      nbBeneficiaires: 0,
+      nbConventions: 0,
+      montantGageHT: 0,
+      montantPaye: 0,
+      nbReglements: 0
+    });
+  };
+
+  const totals = calculateTotals();
+  
   if (loading && !statistiques) {
     return (
       <Container>
@@ -184,6 +213,11 @@ const Statistiques = () => {
                     <Td>{statsGlobales?.parAnnee?.[year]?.nbConventions || 0}</Td>
                   </Tr>
                 ))}
+                <TotalRow>
+                  <TotalCell>TOTAL</TotalCell>
+                  <TotalCell>{totals.nbBeneficiaires}</TotalCell>
+                  <TotalCell>{totals.nbConventions}</TotalCell>
+                </TotalRow>
               </tbody>
             </CompactTable>
           </TableCard>
@@ -212,6 +246,11 @@ const Statistiques = () => {
                     </Tr>
                   );
                 })}
+                <TotalRow>
+                  <TotalCell>TOTAL</TotalCell>
+                  <TotalCell>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                  <TotalCell>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                </TotalRow>
               </tbody>
             </CompactTable>
           </TableCard>
@@ -239,6 +278,11 @@ const Statistiques = () => {
                     </Td>
                   </Tr>
                 ))}
+                <TotalRow>
+                  <TotalCell>TOTAL</TotalCell>
+                  <TotalCell>{totals.nbReglements}</TotalCell>
+                  <TotalCell>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                </TotalRow>
               </tbody>
             </CompactTable>
           </TableCard>
@@ -575,6 +619,25 @@ const YearCell = styled.td`
   color: #3f51b5;
   border-bottom: 1px solid #e0e0e0;
   text-align: center;
+`;
+
+// Nouveaux styles pour la ligne de totaux
+const TotalRow = styled.tr`
+  background-color: #e8eaf6 !important;
+  font-weight: 700;
+  
+  &:hover {
+    background-color: #c5cae9 !important;
+  }
+`;
+
+const TotalCell = styled.td`
+  padding: 8px 4px;
+  color: #3f51b5;
+  border-top: 2px solid #c5cae9;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  font-weight: 700;
 `;
 
 const TablesRow = styled.div`

@@ -1,0 +1,313 @@
+/**
+ * Styles de remplacement pour le mode sombre
+ * À importer dans App.js après les autres styles
+ */
+
+/* Styles pour le mode sombre spécifiques à l'application */
+html.dark-mode body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+  
+  /* Remplacements pour les composants styled-components */
+  html.dark-mode .card,
+  html.dark-mode .expandable-section,
+  html.dark-mode .modal-container,
+  html.dark-mode .table-container {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-divider);
+  }
+  
+  /* Headers et footers de modal */
+  html.dark-mode .modal-header,
+  html.dark-mode .modal-footer {
+    background-color: var(--color-surface);
+    border-color: var(--color-divider);
+  }
+  
+  html.dark-mode .modal-title {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .close-button {
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode .close-button:hover {
+    color: var(--color-text);
+  }
+  
+  /* Arrière-plan modal */
+  html.dark-mode .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  /* ExpandableSection */
+  html.dark-mode .expandable-header {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .expandable-header:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  html.dark-mode .expandable-title {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .expand-icon {
+    color: var(--color-primary);
+  }
+  
+  /* Formulaires */
+  html.dark-mode .form-container {
+    background-color: var(--color-surface);
+  }
+  
+  html.dark-mode .field-label {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .field-input,
+  html.dark-mode .field-select,
+  html.dark-mode .field-textarea {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-divider);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .field-input:focus,
+  html.dark-mode .field-select:focus,
+  html.dark-mode .field-textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary-light);
+  }
+  
+  html.dark-mode .field-input::placeholder,
+  html.dark-mode .field-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* DataTable spécifique */
+  html.dark-mode .table-container {
+    background-color: var(--color-surface);
+  }
+  
+  html.dark-mode .search-container {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom-color: var(--color-divider);
+  }
+  
+  html.dark-mode .search-input {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-divider);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  html.dark-mode .search-icon {
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode table th {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    border-bottom-color: var(--color-divider);
+  }
+  
+  html.dark-mode table td {
+    border-bottom-color: var(--color-divider);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  html.dark-mode .result-count {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-top-color: var(--color-divider);
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode .empty-message {
+    color: var(--color-text-light);
+  }
+  
+  /* Améliorations pour les composants de statut (StatusTag) */
+  html.dark-mode .status-success {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+  }
+  
+  html.dark-mode .status-warning {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #ffb74d;
+  }
+  
+  html.dark-mode .status-error {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #e57373;
+  }
+  
+  html.dark-mode .status-info {
+    background-color: rgba(33, 150, 243, 0.2);
+    color: #64b5f6;
+  }
+  
+  /* Améliorations pour les boutons */
+  html.dark-mode .btn-primary {
+    background-color: var(--color-primary);
+  }
+  
+  html.dark-mode .btn-secondary {
+    background-color: var(--color-secondary);
+  }
+  
+  html.dark-mode .btn-outline {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  
+  html.dark-mode .btn-outline:hover {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  /* Spécifique aux Header Components */
+  html.dark-mode .header-card {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .header-label {
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode .header-value {
+    color: var(--color-text);
+  }
+  
+  /* Styles spécifiques à des pages */
+  html.dark-mode .page-header-title {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .page-header-subtitle {
+    color: var(--color-text-light);
+  }
+  
+  /* Éditeur Markdown */
+  html.dark-mode .CodeMirror {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-divider);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .editor-toolbar {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-divider);
+  }
+  
+  html.dark-mode .editor-toolbar a {
+    color: var(--color-text-light) !important;
+  }
+  
+  html.dark-mode .editor-toolbar a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  html.dark-mode .markdown-body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+  
+  /* Composants de dashbaord */
+  html.dark-mode .stat-card {
+    background-color: var(--color-surface);
+  }
+  
+  html.dark-mode .stat-value {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .stat-label {
+    color: var(--color-text-light);
+  }
+  
+  /* Spécifique à DocumentsSection */
+  html.dark-mode .file-upload-area {
+    border-color: var(--color-divider);
+  }
+  
+  html.dark-mode .file-upload-area:hover,
+  html.dark-mode .file-upload-area.drag-active {
+    border-color: var(--color-primary);
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+  }
+  
+  html.dark-mode .file-item {
+    border-bottom-color: var(--color-divider);
+  }
+  
+  html.dark-mode .file-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  html.dark-mode .file-name {
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .file-details {
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode .action-button {
+    color: var(--color-text-light);
+  }
+  
+  html.dark-mode .action-button:hover {
+    color: var(--color-primary);
+  }
+  
+  html.dark-mode .action-button.danger:hover {
+    color: var(--color-error);
+  }
+  
+  /* Adaptations pour les graphiques */
+  html.dark-mode .chart-container canvas {
+    filter: invert(0.85) hue-rotate(180deg);
+  }
+  
+  /* Arrière-plan du document */
+  html.dark-mode #root {
+    background-color: var(--color-background);
+  }
+  
+  /* Tables spécifiques */
+  html.dark-mode .summary-table th {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+  }
+  
+  html.dark-mode .summary-card {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  html.dark-mode .summary-value {
+    color: var(--color-primary);
+  }
+  
+  html.dark-mode .summary-label {
+    color: var(--color-text-light);
+  }
+  
+  /* Pour les components avec des backgrounds spécifiques */
+  html.dark-mode .bg-light {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useTable, useSortBy, useGlobalFilter } from 'react-table';
 import styled from 'styled-components';
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-
+import { ThemeContext } from '../../contexts/ThemeContext';
 const DataTable = ({
   columns,
   data,
@@ -12,6 +12,7 @@ const DataTable = ({
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [globalFilterTimeout, setGlobalFilterTimeout] = useState(null);
+  const { darkMode } = useContext(ThemeContext); // Utilisation du contexte de thème
   
   const {
     getTableProps,
@@ -53,28 +54,29 @@ const DataTable = ({
   }, [searchValue, setGlobalFilter]);
 
   return (
-    <TableContainer>
-      <SearchContainer>
-        <SearchIconWrapper>
+    <TableContainer darkMode={darkMode}>
+      <SearchContainer darkMode={darkMode}>
+        <SearchIconWrapper darkMode={darkMode}>
           <FaSearch />
         </SearchIconWrapper>
         <SearchInput
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           placeholder={searchPlaceholder}
+          darkMode={darkMode}
         />
       </SearchContainer>
       
       <TableWrapper>
-        <StyledTable {...getTableProps()}>
+        <StyledTable {...getTableProps()} darkMode={darkMode}>
           <thead>
             {headerGroups.map(headerGroup => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map(column => (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                  <th {...column.getHeaderProps(column.getSortByToggleProps())} darkMode={darkMode}>
                     <HeaderContent>
                       {column.render('Header')}
-                      <SortIcon>
+                      <SortIcon darkMode={darkMode}>
                         {column.isSorted
                           ? column.isSortedDesc
                             ? <FaSortDown />
@@ -96,9 +98,10 @@ const DataTable = ({
                     {...row.getRowProps()}
                     onClick={() => onRowClick && onRowClick(row.original)}
                     className="clickable-row"
+                    darkMode={darkMode}
                   >
                     {row.cells.map(cell => (
-                      <td {...cell.getCellProps()}>
+                      <td {...cell.getCellProps()} darkMode={darkMode}>
                         {cell.render('Cell')}
                       </td>
                     ))}
@@ -107,7 +110,7 @@ const DataTable = ({
               })
             ) : (
               <tr>
-                <EmptyMessage colSpan={columns.length}>
+                <EmptyMessage colSpan={columns.length} darkMode={darkMode}>
                   Aucun élément trouvé
                 </EmptyMessage>
               </tr>
@@ -116,7 +119,7 @@ const DataTable = ({
         </StyledTable>
       </TableWrapper>
       
-      <ResultCount>
+      <ResultCount darkMode={darkMode}>
         {rows.length} élément{rows.length !== 1 ? 's' : ''} trouvé{rows.length !== 1 ? 's' : ''}
       </ResultCount>
     </TableContainer>
@@ -124,38 +127,49 @@ const DataTable = ({
 };
 
 const TableContainer = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.darkMode ? 'var(--color-surface)' : '#fff'};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-light);
   overflow: hidden;
+  transition: background-color var(--transition-speed);
 `;
 
 const SearchContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #eee;
+  background-color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9'};
+  border-bottom: 1px solid ${props => props.darkMode ? 'var(--color-divider)' : '#eee'};
   position: relative;
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
 `;
 
 const SearchIconWrapper = styled.div`
   position: absolute;
   left: 26px;
-  color: #757575;
+  color: ${props => props.darkMode ? 'var(--color-text-light)' : '#757575'};
+  transition: color var(--transition-speed);
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 8px 16px 8px 36px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.darkMode ? 'var(--color-divider)' : '#ddd'};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : '#fff'};
+  color: ${props => props.darkMode ? 'var(--color-text)' : 'inherit'};
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: var(--color-primary);
   }
+  
+  &::placeholder {
+    color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.3)' : '#aaa'};
+  }
+  
+  transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
 `;
 
 const TableWrapper = styled.div`
@@ -170,13 +184,16 @@ const StyledTable = styled.table`
   th, td {
     padding: 12px 16px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid ${props => props.darkMode ? 'var(--color-divider)' : '#eee'};
+    color: ${props => props.darkMode ? 'var(--color-text)' : 'inherit'};
+    transition: border-color var(--transition-speed), color var(--transition-speed);
   }
   
   th {
-    background-color: #f9f9f9;
+    background-color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9'};
     font-weight: 600;
-    color: #333;
+    color: ${props => props.darkMode ? 'var(--color-text)' : '#333'};
+    transition: background-color var(--transition-speed), color var(--transition-speed);
   }
   
   tbody tr {
@@ -184,7 +201,7 @@ const StyledTable = styled.table`
     transition: background-color 0.2s;
     
     &:hover {
-      background-color: #f5f5f5;
+      background-color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : '#f5f5f5'};
     }
     
     &:last-child td {
@@ -200,7 +217,8 @@ const StyledTable = styled.table`
 const EmptyMessage = styled.td`
   text-align: center;
   padding: 40px !important;
-  color: #757575;
+  color: ${props => props.darkMode ? 'var(--color-text-light)' : '#757575'};
+  transition: color var(--transition-speed);
 `;
 
 const HeaderContent = styled.div`
@@ -214,17 +232,19 @@ const SortIcon = styled.span`
   display: flex;
   align-items: center;
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.darkMode ? 'var(--color-text-light)' : '#757575'};
+  transition: color var(--transition-speed);
 `;
 
 const ResultCount = styled.div`
   display: flex;
   justify-content: flex-end;
   padding: 12px 16px;
-  background-color: #f9f9f9;
-  border-top: 1px solid #eee;
+  background-color: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : '#f9f9f9'};
+  border-top: 1px solid ${props => props.darkMode ? 'var(--color-divider)' : '#eee'};
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.darkMode ? 'var(--color-text-light)' : '#757575'};
+  transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
 `;
 
 export default DataTable;

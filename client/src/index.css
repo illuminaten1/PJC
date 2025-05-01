@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
+  /* Palette de couleurs - Mode clair */
   --color-primary: #3f51b5;
   --color-primary-light: #757de8;
   --color-primary-dark: #002984;
@@ -10,24 +11,66 @@
   --color-text: #212121;
   --color-text-light: #757575;
   --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-divider: #e0e0e0;
   --color-white: #ffffff;
   --color-error: #f44336;
   --color-success: #4caf50;
   --color-warning: #ff9800;
   --color-info: #2196f3;
   
-  --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Ombres */
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-medium: 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-strong: 0 8px 16px rgba(0, 0, 0, 0.1);
   
+  /* Arrondis */
   --border-radius: 4px;
+  
+  /* Espacements */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   
+  /* Transitions */
   --transition-speed: 0.3s;
+
+  /* Ajout de versions RGB des couleurs pour les utilisations avec opacité */
+  --color-primary-rgb: 63, 81, 181;
+  --color-primary-dark-rgb: 0, 41, 132;
+  --color-text-rgb: 33, 33, 33;
+  --color-background-rgb: 245, 245, 245;
+}
+
+/* Palette de couleurs - Mode sombre */
+html.dark-mode {
+  --color-primary-rgb: 63, 140, 255;
+  --color-primary-dark-rgb: 26, 54, 93;
+  --color-text-rgb: 224, 224, 224;
+  --color-background-rgb: 26, 26, 26;
+  --color-primary: #3f8cff; /* Bleu plus lumineux pour le mode sombre */
+  --color-primary-light: #82b1ff;
+  --color-primary-dark: #1a365d;
+  --color-secondary: #ff4081;
+  --color-secondary-light: #ff80ab;
+  --color-secondary-dark: #c51162;
+  --color-text: #e0e0e0;
+  --color-text-light: #9e9e9e;
+  --color-background: #1a1a1a;
+  --color-surface: #121212;
+  --color-divider: #2c2c2c;
+  --color-white: #ffffff;
+  --color-error: #ff5252;
+  --color-success: #69f0ae;
+  --color-warning: #ffab40;
+  --color-info: #40c4ff;
+  
+  /* Ombres adaptées pour le mode sombre */
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-strong: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -41,11 +84,13 @@ body {
   background-color: var(--color-background);
   color: var(--color-text);
   line-height: 1.6;
+  transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 a {
   color: var(--color-primary);
   text-decoration: none;
+  transition: color var(--transition-speed);
 }
 
 a:hover {
@@ -54,8 +99,10 @@ a:hover {
 
 button, input, select, textarea {
   font-family: inherit;
+  transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
 }
 
+/* Classes d'utilité - garder celles de votre index.css existant */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -63,11 +110,12 @@ button, input, select, textarea {
 }
 
 .card {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-light);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+  transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .flex {
@@ -134,13 +182,14 @@ button, input, select, textarea {
   color: var(--color-success);
 }
 
+/* Boutons adaptés au mode sombre */
 .btn {
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--border-radius);
   border: none;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color var(--transition-speed);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -184,6 +233,7 @@ button, input, select, textarea {
   background-color: #d32f2f;
 }
 
+/* Champs de formulaire adaptés au mode sombre */
 .input-group {
   margin-bottom: var(--spacing-md);
 }
@@ -192,14 +242,17 @@ button, input, select, textarea {
   display: block;
   margin-bottom: var(--spacing-xs);
   font-weight: 500;
+  color: var(--color-text);
 }
 
 .input-field {
   width: 100%;
   padding: var(--spacing-sm);
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-divider);
   border-radius: var(--border-radius);
   font-size: 16px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 .input-field:focus {
@@ -207,6 +260,11 @@ button, input, select, textarea {
   outline: none;
 }
 
+html.dark-mode .input-field {
+  background-color: #1e1e1e;
+}
+
+/* Tableaux adaptés au mode sombre */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -216,45 +274,73 @@ button, input, select, textarea {
 .table td {
   padding: var(--spacing-sm);
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .table th {
-  background-color: #f9f9f9;
+  background-color: var(--color-surface);
   font-weight: 500;
 }
 
 .table tr:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
+html.dark-mode .table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Sections dépliables adaptées au mode sombre */
 .expandable-section {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-divider);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
 }
 
 .expandable-header {
   padding: var(--spacing-md);
-  background-color: #f9f9f9;
+  background-color: var(--color-surface);
   font-weight: 500;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid transparent;
 }
 
 .expandable-content {
   padding: var(--spacing-md);
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-divider);
 }
 
+/* Badges adaptés au mode sombre */
 .badge {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+}
+
+html.dark-mode .badge-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+html.dark-mode .badge-warning {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ffb74d;
+}
+
+html.dark-mode .badge-error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+html.dark-mode .badge-info {
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
 }
 
 .badge-success {
@@ -275,4 +361,158 @@ button, input, select, textarea {
 .badge-info {
   background-color: #e3f2fd;
   color: #0d47a1;
+}
+
+/* Adaptations pour DataTable */
+html.dark-mode .table-container {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-light);
+}
+
+html.dark-mode .search-container {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+html.dark-mode .search-input {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+  border-color: var(--color-divider);
+}
+
+html.dark-mode .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+html.dark-mode .table-header {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+html.dark-mode .table-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-mode .empty-message {
+  color: var(--color-text-light);
+}
+
+html.dark-mode .result-count {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-light);
+}
+
+/* Adaptations pour les modales */
+html.dark-mode .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+html.dark-mode .modal-container {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-strong);
+}
+
+html.dark-mode .modal-header {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+html.dark-mode .modal-title {
+  color: var(--color-text);
+}
+
+html.dark-mode .modal-content {
+  color: var(--color-text);
+}
+
+html.dark-mode .modal-footer {
+  border-top: 1px solid var(--color-divider);
+}
+
+html.dark-mode .close-button {
+  color: var(--color-text-light);
+}
+
+html.dark-mode .close-button:hover {
+  color: var(--color-text);
+}
+
+/* Adaptations pour les formulaires */
+html.dark-mode .form-label {
+  color: var(--color-text);
+}
+
+html.dark-mode .form-field {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-divider);
+  color: var(--color-text);
+}
+
+html.dark-mode .form-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(63, 140, 255, 0.2);
+}
+
+html.dark-mode .form-field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+html.dark-mode .select-wrapper::after {
+  color: var(--color-text-light);
+}
+
+html.dark-mode .textarea-field {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-divider);
+  color: var(--color-text);
+}
+
+/* Adaptations pour l'éditeur Markdown */
+html.dark-mode .CodeMirror {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-divider);
+  color: var(--color-text);
+}
+
+html.dark-mode .editor-toolbar {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-divider);
+}
+
+html.dark-mode .editor-toolbar a {
+  color: var(--color-text-light) !important;
+}
+
+html.dark-mode .editor-toolbar a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .markdown-container {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-divider);
+  color: var(--color-text);
+}
+
+/* Animation de chargement pour les deux modes */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--color-text-light);
+}
+
+.loading-spinner {
+  border: 4px solid var(--color-divider);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+  margin-bottom: 10px;
 }

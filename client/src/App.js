@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './darkMode.css'; // Importation des styles de mode sombre
 
-// Contextes
-import AppContext from './contexts/AppContext';
+// Contexts
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext'; // Importation du ThemeProvider
 
 // Composant de route privée
 import PrivateRoute from './utils/PrivateRoute';
@@ -32,7 +33,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
+        <ThemeProvider>
           <Routes>
             {/* Route publique */}
             <Route path="/login" element={<Login />} />
@@ -53,17 +54,11 @@ function App() {
               </Route>
             </Route>
             
-            {/* Routes privées (admin uniquement)
-            <Route element={<PrivateRoute requireAdmin={true} />}>
-              <Route element={<MainLayout />}>
-              </Route>
-            </Route> */}
-            
             {/* Redirection et route 404 */}
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
-        </AppContext.Provider>
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );

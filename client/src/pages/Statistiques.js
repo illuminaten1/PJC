@@ -269,9 +269,11 @@ const Statistiques = () => {
       } else if (options.format === 'pdf') {
         await exportToPDF(statsRef.current, exportData, options);
       }
+      
+      return true; // Retourne une promesse résolue
     } catch (err) {
       console.error("Erreur lors de l'export", err);
-      // Vous pourriez ajouter un état d'erreur pour l'afficher à l'utilisateur
+      throw err; // Propage l'erreur pour que le .catch() dans le composant modal puisse la gérer
     }
   };
 

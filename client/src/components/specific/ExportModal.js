@@ -12,16 +12,31 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
   const [includeRedacteurTable, setIncludeRedacteurTable] = useState(true);
   const [includeCirconstanceTable, setIncludeCirconstanceTable] = useState(true);
   
+  // État pour le chargement
+  const [isExporting, setIsExporting] = useState(false);
+  
   // Gestionnaire pour lancer l'export
   const handleExport = () => {
-    onExport({
+    setIsExporting(true); // Activer l'indicateur de chargement
+    
+    // Préparer les options d'export
+    const exportOptions = {
       format,
       includeAnnualStats,
       includeRedacteurTable: includeAnnualStats && includeRedacteurTable,
       includeCirconstanceTable: includeAnnualStats && includeCirconstanceTable,
       annee
-    });
-    onClose();
+    };
+    
+    // Lancer l'export et gérer la fin du processus
+    onExport(exportOptions)
+      .then(() => {
+        setIsExporting(false);
+        onClose();
+      })
+      .catch(() => {
+        setIsExporting(false);
+      });
   };
   
   // Ne pas rendre si la modal n'est pas visible
@@ -32,12 +47,24 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
   return (
     <ModalOverlay>
       <ModalContent>
+        {/* Indicateur de chargement */}
+        {isExporting && (
+          <LoadingWrapper>
+            <DotsContainer>
+              <Dot />
+              <Dot />
+              <Dot />
+            </DotsContainer>
+            <LoadingText>Export en cours</LoadingText>
+          </LoadingWrapper>
+        )}
+        
         <ModalHeader>
           <ModalTitle>
             <FaFileExport style={{ marginRight: '10px' }} />
             Exporter les statistiques
           </ModalTitle>
-          <CloseButton onClick={onClose}>
+          <CloseButton onClick={onClose} disabled={isExporting}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
@@ -48,7 +75,8 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
             <FormatOptions>
               <FormatCard 
                 active={format === 'excel'} 
-                onClick={() => setFormat('excel')}
+                onClick={() => !isExporting && setFormat('excel')}
+                disabled={isExporting}
               >
                 <FormatIcon>
                   <FaFileExcel />
@@ -59,7 +87,8 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
               
               <FormatCard 
                 active={format === 'pdf'} 
-                onClick={() => setFormat('pdf')}
+                onClick={() => !isExporting && setFormat('pdf')}
+                disabled={isExporting}
               >
                 <FormatIcon>
                   <FaFilePdf />
@@ -71,40 +100,40 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
           </FormatSection>
           
           <OptionsSection>
-            <ToggleField>
+            <ToggleField disabled={isExporting}>
               <ToggleIcon 
                 checked={includeAnnualStats}
-                onClick={() => setIncludeAnnualStats(!includeAnnualStats)}
+                onClick={() => !isExporting && setIncludeAnnualStats(!includeAnnualStats)}
               >
                 {includeAnnualStats ? <FaToggleOn /> : <FaToggleOff />}
               </ToggleIcon>
-              <label onClick={() => setIncludeAnnualStats(!includeAnnualStats)}>
+              <label onClick={() => !isExporting && setIncludeAnnualStats(!includeAnnualStats)}>
                 Inclure les statistiques de l'année {annee}
               </label>
             </ToggleField>
             
             {includeAnnualStats && (
               <IndentedSection>
-                <SubToggleField>
+                <SubToggleField disabled={isExporting}>
                   <ToggleIcon 
                     checked={includeRedacteurTable}
-                    onClick={() => setIncludeRedacteurTable(!includeRedacteurTable)}
+                    onClick={() => !isExporting && setIncludeRedacteurTable(!includeRedacteurTable)}
                   >
                     {includeRedacteurTable ? <FaToggleOn /> : <FaToggleOff />}
                   </ToggleIcon>
-                  <label onClick={() => setIncludeRedacteurTable(!includeRedacteurTable)}>
+                  <label onClick={() => !isExporting && setIncludeRedacteurTable(!includeRedacteurTable)}>
                     Inclure la répartition par rédacteur
                   </label>
                 </SubToggleField>
                 
-                <SubToggleField>
+                <SubToggleField disabled={isExporting}>
                   <ToggleIcon 
                     checked={includeCirconstanceTable}
-                    onClick={() => setIncludeCirconstanceTable(!includeCirconstanceTable)}
+                    onClick={() => !isExporting && setIncludeCirconstanceTable(!includeCirconstanceTable)}
                   >
                     {includeCirconstanceTable ? <FaToggleOn /> : <FaToggleOff />}
                   </ToggleIcon>
-                  <label onClick={() => setIncludeCirconstanceTable(!includeCirconstanceTable)}>
+                  <label onClick={() => !isExporting && setIncludeCirconstanceTable(!includeCirconstanceTable)}>
                     Inclure la répartition par circonstance
                   </label>
                 </SubToggleField>
@@ -114,10 +143,10 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
         </ModalBody>
         
         <ModalFooter>
-          <CancelButton onClick={onClose}>
+          <CancelButton onClick={onClose} disabled={isExporting}>
             Annuler
           </CancelButton>
-          <ExportButton onClick={handleExport}>
+          <ExportButton onClick={handleExport} disabled={isExporting}>
             Exporter
           </ExportButton>
         </ModalFooter>
@@ -141,6 +170,7 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
+  position: relative;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -150,6 +180,50 @@ const ModalContent = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+`;
+
+// Styles pour l'indicateur de chargement
+const LoadingWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  z-index: 10;
+`;
+
+const DotsContainer = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+`;
+
+const Dot = styled.div`
+  width: 12px;
+  height: 12px;
+  margin: 0 5px;
+  background: #3f51b5;
+  border-radius: 50%;
+  
+  &:nth-child(1) { animation: pulse 1s infinite; }
+  &:nth-child(2) { animation: pulse 1s infinite 0.2s; }
+  &:nth-child(3) { animation: pulse 1s infinite 0.4s; }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+`;
+
+const LoadingText = styled.div`
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
 `;
 
 const ModalHeader = styled.div`
@@ -175,7 +249,8 @@ const CloseButton = styled.button`
   border: none;
   color: #757575;
   font-size: 18px;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.5 : 1};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,8 +258,8 @@ const CloseButton = styled.button`
   border-radius: 50%;
   
   &:hover {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: ${props => props.disabled ? 'transparent' : '#f5f5f5'};
+    color: ${props => props.disabled ? '#757575' : '#333'};
   }
 `;
 
@@ -234,15 +309,16 @@ const FormatCard = styled.div`
   padding: 20px;
   border: 2px solid ${props => props.active ? '#3f51b5' : '#e0e0e0'};
   border-radius: 8px;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.7 : 1};
   transition: all 0.2s ease;
   background-color: ${props => props.active ? '#e8eaf6' : 'white'};
   
   &:hover {
-    border-color: #3f51b5;
-    background-color: ${props => props.active ? '#e8eaf6' : '#f5f7ff'};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-color: ${props => props.disabled ? (props.active ? '#3f51b5' : '#e0e0e0') : '#3f51b5'};
+    background-color: ${props => props.disabled ? (props.active ? '#e8eaf6' : 'white') : (props.active ? '#e8eaf6' : '#f5f7ff')};
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.disabled ? 'none' : '0 4px 8px rgba(0, 0, 0, 0.05)'};
   }
 `;
 
@@ -274,10 +350,11 @@ const ToggleField = styled.div`
   background-color: #f5f7ff;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
+  opacity: ${props => props.disabled ? 0.7 : 1};
   
   label {
     margin-left: 12px;
-    cursor: pointer;
+    cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
     font-weight: 500;
     color: #333;
   }
@@ -290,10 +367,11 @@ const SubToggleField = styled.div`
   padding: 10px 16px;
   background-color: white;
   border-radius: 8px;
+  opacity: ${props => props.disabled ? 0.7 : 1};
   
   label {
     margin-left: 12px;
-    cursor: pointer;
+    cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
     color: #333;
   }
 `;
@@ -318,13 +396,14 @@ const CancelButton = styled.button`
   border: none;
   padding: 10px 16px;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.7 : 1};
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.disabled ? '#f5f5f5' : '#e0e0e0'};
   }
 `;
 
@@ -334,13 +413,14 @@ const ExportButton = styled.button`
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.7 : 1};
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.disabled ? '#3f51b5' : '#303f9f'};
   }
 `;
 

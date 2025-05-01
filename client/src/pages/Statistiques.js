@@ -159,6 +159,72 @@ const Statistiques = () => {
 
   const totals = calculateTotals();
   
+  const calculateVariation = (currentValue, previousValue) => {
+    if (previousValue === 0) {
+      // Cas spécial: si la valeur précédente est 0
+      return currentValue > 0 ? { value: 100, direction: 'up' } : null;
+    }
+    
+    const variation = ((currentValue - previousValue) / previousValue) * 100;
+    
+    // Tous les changements sont considérés comme à afficher
+    return {
+      value: Math.abs(variation).toFixed(1), // Arrondi à 1 décimale
+      direction: variation >= 0 ? 'up' : 'down',
+      // Ajouter une classe pour les variations importantes
+      significant: Math.abs(variation) >= 5 
+    };
+  };
+  
+  const prepareDataWithVariations = () => {
+    if (!statsGlobales || !statsGlobales.parAnnee) return [];
+    
+    // Tri des années dans l'ordre croissant
+    const sortedYears = [...years].sort((a, b) => a - b);
+    
+    return sortedYears.map((year, index) => {
+      const yearData = statsGlobales.parAnnee[year] || {};
+      let variations = {};
+      
+      // Ne pas calculer de variation pour la première année (pas de référence antérieure)
+      if (index > 0) {
+        const previousYear = sortedYears[index - 1];
+        const previousYearData = statsGlobales.parAnnee[previousYear] || {};
+        
+        variations = {
+          nbBeneficiaires: calculateVariation(
+            yearData.nbBeneficiaires || 0, 
+            previousYearData.nbBeneficiaires || 0
+          ),
+          nbConventions: calculateVariation(
+            yearData.nbConventions || 0, 
+            previousYearData.nbConventions || 0
+          ),
+          montantGageHT: calculateVariation(
+            yearData.montantGageHT || 0, 
+            previousYearData.montantGageHT || 0
+          ),
+          montantPaye: calculateVariation(
+            yearData.montantPaye || 0, 
+            previousYearData.montantPaye || 0
+          ),
+          nbReglements: calculateVariation(
+            yearData.nbReglements || 0, 
+            previousYearData.nbReglements || 0
+          )
+        };
+      }
+      
+      return {
+        year,
+        data: yearData,
+        variations
+      };
+    });
+  };
+
+  const dataWithVariations = prepareDataWithVariations();
+
   if (loading && !statistiques) {
     return (
       <Container>
@@ -206,11 +272,33 @@ const Statistiques = () => {
                 </tr>
               </thead>
               <tbody>
-                {years.map(year => (
+                {dataWithVariations.map(({ year, data, variations }) => (
                   <Tr key={`conventions-${year}`}>
                     <YearCell>{year}</YearCell>
-                    <Td>{statsGlobales?.parAnnee?.[year]?.nbBeneficiaires || 0}</Td>
-                    <Td>{statsGlobales?.parAnnee?.[year]?.nbConventions || 0}</Td>
+                    <Td>
+                      <div className="value-container">
+                        <span className="value">{data.nbBeneficiaires || 0}</span>
+                        {variations.nbBeneficiaires && (
+                          <VariationIndicator 
+                            className={`${variations.nbBeneficiaires.direction} ${variations.nbBeneficiaires.significant ? 'significant' : ''}`}
+                          >
+                            {variations.nbBeneficiaires.direction === 'up' ? '↑' : '↓'} {variations.nbBeneficiaires.value}%
+                          </VariationIndicator>
+                        )}
+                      </div>
+                    </Td>
+                    <Td>
+                      <div className="value-container">
+                        <span className="value">{data.nbConventions || 0}</span>
+                        {variations.nbConventions && (
+                          <VariationIndicator 
+                            className={`${variations.nbConventions.direction} ${variations.nbConventions.significant ? 'significant' : ''}`}
+                          >
+                            {variations.nbConventions.direction === 'up' ? '↑' : '↓'} {variations.nbConventions.value}%
+                          </VariationIndicator>
+                        )}
+                      </div>
+                    </Td>
                   </Tr>
                 ))}
                 <TotalRow>
@@ -234,15 +322,37 @@ const Statistiques = () => {
                 </tr>
               </thead>
               <tbody>
-                {years.map(year => {
-                  const montantHT = statsGlobales?.parAnnee?.[year]?.montantGageHT || 0;
+                {dataWithVariations.map(({ year, data, variations }) => {
+                  const montantHT = data.montantGageHT || 0;
                   const montantTTC = montantHT * 1.2;
                   
                   return (
                     <Tr key={`montants-${year}`}>
                       <YearCell>{year}</YearCell>
-                      <Td>{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</Td>
-                      <Td>{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</Td>
+                      <Td>
+                        <div className="value-container">
+                          <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                          {variations.montantGageHT && (
+                            <VariationIndicator 
+                              className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                            >
+                              {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                            </VariationIndicator>
+                          )}
+                        </div>
+                      </Td>
+                      <Td>
+                        <div className="value-container">
+                          <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                          {variations.montantGageHT && (
+                            <VariationIndicator 
+                              className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                            >
+                              {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                            </VariationIndicator>
+                          )}
+                        </div>
+                      </Td>
                     </Tr>
                   );
                 })}
@@ -254,7 +364,7 @@ const Statistiques = () => {
               </tbody>
             </CompactTable>
           </TableCard>
-          
+
           {/* Troisième tableau: Dépenses ordonnées */}
           <TableCard>
             <TableTitle>Dépenses Ordonnées</TableTitle>
@@ -267,14 +377,36 @@ const Statistiques = () => {
                 </tr>
               </thead>
               <tbody>
-                {years.map(year => (
+                {dataWithVariations.map(({ year, data, variations }) => (
                   <Tr key={`ordonnes-${year}`}>
                     <YearCell>{year}</YearCell>
-                    <Td>{statsGlobales?.parAnnee?.[year]?.nbReglements || 0}</Td>
                     <Td>
-                      {(statsGlobales?.parAnnee?.[year]?.montantPaye || 0) > 0 
-                        ? `${(statsGlobales?.parAnnee?.[year]?.montantPaye).toLocaleString('fr-FR')} €` 
-                        : '0 €'}
+                      <div className="value-container">
+                        <span className="value">{data.nbReglements || 0}</span>
+                        {variations.nbReglements && (
+                          <VariationIndicator 
+                            className={`${variations.nbReglements.direction} ${variations.nbReglements.significant ? 'significant' : ''}`}
+                          >
+                            {variations.nbReglements.direction === 'up' ? '↑' : '↓'} {variations.nbReglements.value}%
+                          </VariationIndicator>
+                        )}
+                      </div>
+                    </Td>
+                    <Td>
+                      <div className="value-container">
+                        <span className="value">
+                          {(data.montantPaye || 0) > 0 
+                            ? `${(data.montantPaye).toLocaleString('fr-FR')} €` 
+                            : '0 €'}
+                        </span>
+                        {variations.montantPaye && (
+                          <VariationIndicator 
+                            className={`${variations.montantPaye.direction} ${variations.montantPaye.significant ? 'significant' : ''}`}
+                          >
+                            {variations.montantPaye.direction === 'up' ? '↑' : '↓'} {variations.montantPaye.value}%
+                          </VariationIndicator>
+                        )}
+                      </div>
                     </Td>
                   </Tr>
                 ))}
@@ -642,15 +774,7 @@ const Th = styled.th`
   font-weight: 600;
   font-size: 12px;
   border-bottom: 2px solid #ddd;
-  text-align: left;
-  
-  &:first-child {
-    text-align: left;
-  }
-  
-  &:last-child, &:nth-last-child(2) {
-    text-align: right;
-  }
+  text-align: left; /* Tous les en-têtes alignés à gauche */
 `;
 
 const Tr = styled.tr`
@@ -674,10 +798,17 @@ const Td = styled.td`
   padding: 12px 16px;
   color: #333;
   border-bottom: 1px solid #eee;
-  text-align: right;
+  text-align: left; /* Alignement à gauche pour toutes les cellules */
   
-  &:first-child {
-    text-align: left;
+  /* Container pour les valeurs et variations */
+  .value-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Valeur numérique avec largeur fixe */
+  .value {
+    min-width: 100px; /* Largeur minimale pour garantir l'alignement */
   }
 `;
 
@@ -690,13 +821,8 @@ const TotalCell = styled.td`
   padding: 14px 16px;
   color: #333;
   border-top: 2px solid #ddd;
-  text-align: right;
+  text-align: left; /* Alignement à gauche */
   font-weight: 600;
-  
-  &:first-child {
-    text-align: left;
-    color: #444;
-  }
 `;
 
 // Styles non modifiés pour les autres tableaux
@@ -757,6 +883,32 @@ const Container = styled.div`
   padding: 20px;
   max-width: 100%;
   overflow-x: hidden;
+`;
+
+const VariationIndicator = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  width: 45px; /* Largeur fixe pour garantir l'alignement */
+  justify-content: center;
+  
+  &.up {
+    color: #1b5e20;
+    background-color: #e8f5e9;
+  }
+  
+  &.down {
+    color: #b71c1c;
+    background-color: #ffebee;
+  }
+  
+  &.significant {
+    font-weight: 600;
+  }
 `;
 
 export default Statistiques;

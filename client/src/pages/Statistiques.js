@@ -194,12 +194,12 @@ const Statistiques = () => {
       {/* Section des statistiques globales avec 3 tableaux côte à côte */}
       <Section>       
         <TablesRow>
-          {/* Premier tableau: Dépenses gagées par convention PJC */}
+          {/* Premier tableau: Bénéficiaires - Conventions */}
           <TableCard>
-            <TableTitle>BÉNÉFICIAIRES - CONVENTIONS</TableTitle>
+            <TableTitle>Bénéficiaires - Conventions</TableTitle>
             <CompactTable>
               <thead>
-                <tr>
+                <tr className="bg-header">
                   <Th>Année</Th>
                   <Th>Nombre de bénéficiaires</Th>
                   <Th>Nombre de conventions</Th>
@@ -224,10 +224,10 @@ const Statistiques = () => {
 
           {/* Deuxième tableau: Montants totaux gagés (HT et TTC) */}
           <TableCard>
-            <TableTitle>MONTANT TOTAL GAGÉ</TableTitle>
+            <TableTitle>Montant Total Gagé</TableTitle>
             <CompactTable>
               <thead>
-                <tr>
+                <tr className="bg-header">
                   <Th>Année</Th>
                   <Th>Montant total gagé HT</Th>
                   <Th>Montant total gagé TTC</Th>
@@ -257,10 +257,10 @@ const Statistiques = () => {
           
           {/* Troisième tableau: Dépenses ordonnées */}
           <TableCard>
-            <TableTitle>DÉPENSES ORDONNÉES</TableTitle>
+            <TableTitle>Dépenses Ordonnées</TableTitle>
             <CompactTable>
               <thead>
-                <tr>
+                <tr className="bg-header">
                   <Th>Année</Th>
                   <Th>Nombre de règlements</Th>
                   <Th>Montant total ordonné TTC</Th>
@@ -421,6 +421,7 @@ const Statistiques = () => {
   );
 };
 
+// Styles existants non modifiés
 const Section = styled.section`
   margin-bottom: 30px;
   background-color: #fff;
@@ -588,62 +589,19 @@ const TableRow = styled.tr`
   }
 `;
 
+// Styles mis à jour pour le design avec contours accentués
 const TableTitle = styled.div`
-  font-size: 12px;
-  font-weight: 500;
-  color: white;
-  background-color: #3f51b5;
-  padding: 8px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const Tr = styled.tr`
-  &:nth-child(odd) {
-    background-color: #ffffff;
-  }
-  
-  &:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  &:hover {
-    background-color: rgba(63, 81, 181, 0.05);
-  }
-`;
-
-const YearCell = styled.td`
-  padding: 6px 4px;
-  font-weight: 500;
-  color: #3f51b5;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-`;
-
-// Nouveaux styles pour la ligne de totaux
-const TotalRow = styled.tr`
-  background-color: #e8eaf6 !important;
-  font-weight: 700;
-  
-  &:hover {
-    background-color: #c5cae9 !important;
-  }
-`;
-
-const TotalCell = styled.td`
-  padding: 8px 4px;
-  color: #3f51b5;
-  border-top: 2px solid #c5cae9;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-  font-weight: 700;
+  padding: 16px;
+  font-weight: 600;
+  color: #424242;
+  background-color: #f7f7f7;
+  border-bottom: 2px solid #3f51b5;
 `;
 
 const TablesRow = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
   margin-bottom: 20px;
   
   @media (max-width: 992px) {
@@ -658,46 +616,93 @@ const TablesRow = styled.div`
 const TableCard = styled.div`
   background: white;
   border-radius: 4px;
-  overflow: hidden;  // Pour contenir les débordements internes
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  width: 100%;  // Assurer que la carte prend toute la largeur disponible
+  width: 100%;
+  height: 100%;
+  border: 2px solid #ddd;
 `;
 
 const CompactTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  table-layout: auto;  // Changé de 'fixed' à 'auto' pour s'adapter au contenu
+  table-layout: auto;
+  
+  .bg-header {
+    background-color: #f5f5f5;
+  }
 `;
 
 const Th = styled.th`
-  background-color: #f5f5f5;
-  color: #333;
-  padding: 6px 4px;
-  font-weight: 500;
+  padding: 12px 16px;
+  color: #555;
+  font-weight: 600;
   font-size: 12px;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;  // Ajouter des points de suspension si le texte est trop long
+  border-bottom: 2px solid #ddd;
+  text-align: left;
+  
+  &:first-child {
+    text-align: left;
+  }
+  
+  &:last-child, &:nth-last-child(2) {
+    text-align: right;
+  }
+`;
+
+const Tr = styled.tr`
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f9f9f9;
+  }
+`;
+
+const YearCell = styled.td`
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #3f51b5;
+  border-bottom: 1px solid #eee;
+  text-align: left;
 `;
 
 const Td = styled.td`
-  padding: 6px 4px;
+  padding: 12px 16px;
   color: #333;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-  white-space: normal;  // Changé de 'nowrap' à 'normal' pour permettre le retour à la ligne
-  overflow: hidden;
-  text-overflow: ellipsis;  // Ajouter des points de suspension si le texte est trop long
+  border-bottom: 1px solid #eee;
+  text-align: right;
+  
+  &:first-child {
+    text-align: left;
+  }
 `;
 
-// Pour les tableaux de la section des répartitions
+const TotalRow = styled.tr`
+  background-color: #f5f5f5 !important;
+  font-weight: 600;
+`;
+
+const TotalCell = styled.td`
+  padding: 14px 16px;
+  color: #333;
+  border-top: 2px solid #ddd;
+  text-align: right;
+  font-weight: 600;
+  
+  &:first-child {
+    text-align: left;
+    color: #444;
+  }
+`;
+
+// Styles non modifiés pour les autres tableaux
 const ChartsSection = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));  // Réduire la largeur minimale
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   margin-bottom: 24px;
 `;
@@ -707,16 +712,16 @@ const ChartCard = styled.div`
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  height: auto;  // Changé de '400px' fixe à 'auto' pour s'adapter au contenu
-  min-height: 400px;  // Garder une hauteur minimale
-  overflow: hidden;  // Contenir les débordements
+  height: auto;
+  min-height: 400px;
+  overflow: hidden;
 `;
 
 const ResponsiveTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  table-layout: auto;  // Changé de 'fixed' à 'auto'
+  table-layout: auto;
 `;
 
 const TableHeader = styled.th`
@@ -739,7 +744,7 @@ const TableDataCell = styled.td`
   color: #333;
   border-bottom: 1px solid #e0e0e0;
   text-align: left;
-  white-space: normal;  // Permettre le retour à la ligne
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
   
@@ -750,8 +755,8 @@ const TableDataCell = styled.td`
 
 const Container = styled.div`
   padding: 20px;
-  max-width: 100%;  // Assurer que le conteneur ne dépasse pas la largeur de la page
-  overflow-x: hidden;  // Cacher les débordements horizontaux
+  max-width: 100%;
+  overflow-x: hidden;
 `;
 
 export default Statistiques;

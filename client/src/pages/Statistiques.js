@@ -331,11 +331,13 @@ const Statistiques = () => {
                         <div className="value-container">
                           <span className="value">{data.nbBeneficiaires || 0}</span>
                           {variations.nbBeneficiaires && (
-                            <VariationIndicator 
-                              className={`${variations.nbBeneficiaires.direction} ${variations.nbBeneficiaires.significant ? 'significant' : ''}`}
-                            >
-                              {variations.nbBeneficiaires.direction === 'up' ? '↑' : '↓'} {variations.nbBeneficiaires.value}%
-                            </VariationIndicator>
+                            variations.nbBeneficiaires.direction === 'up' 
+                              ? <VariationUp className={variations.nbBeneficiaires.significant ? 'significant' : ''}>
+                                  ↑ {variations.nbBeneficiaires.value}%
+                                </VariationUp>
+                              : <VariationDown className={variations.nbBeneficiaires.significant ? 'significant' : ''}>
+                                  ↓ {variations.nbBeneficiaires.value}%
+                                </VariationDown>
                           )}
                         </div>
                       </Td>
@@ -343,11 +345,13 @@ const Statistiques = () => {
                         <div className="value-container">
                           <span className="value">{data.nbConventions || 0}</span>
                           {variations.nbConventions && (
-                            <VariationIndicator 
-                              className={`${variations.nbConventions.direction} ${variations.nbConventions.significant ? 'significant' : ''}`}
-                            >
-                              {variations.nbConventions.direction === 'up' ? '↑' : '↓'} {variations.nbConventions.value}%
-                            </VariationIndicator>
+                            variations.nbConventions.direction === 'up' 
+                              ? <VariationUp className={variations.nbConventions.significant ? 'significant' : ''}>
+                                  ↑ {variations.nbConventions.value}%
+                                </VariationUp>
+                              : <VariationDown className={variations.nbConventions.significant ? 'significant' : ''}>
+                                  ↓ {variations.nbConventions.value}%
+                                </VariationDown>
                           )}
                         </div>
                       </Td>
@@ -361,7 +365,6 @@ const Statistiques = () => {
                 </tbody>
               </CompactTable>
             </TableCard>
-
             {/* Deuxième tableau: Montants totaux gagés (HT et TTC) */}
             <TableCard>
               <TableTitle>Montant Total Gagé</TableTitle>
@@ -385,11 +388,13 @@ const Statistiques = () => {
                           <div className="value-container">
                             <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
-                              <VariationIndicator 
-                                className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
-                              >
-                                {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
-                              </VariationIndicator>
+                              variations.montantGageHT.direction === 'up' 
+                                ? <VariationUp className={variations.montantGageHT.significant ? 'significant' : ''}>
+                                    ↑ {variations.montantGageHT.value}%
+                                  </VariationUp>
+                                : <VariationDown className={variations.montantGageHT.significant ? 'significant' : ''}>
+                                    ↓ {variations.montantGageHT.value}%
+                                  </VariationDown>
                             )}
                           </div>
                         </Td>
@@ -397,11 +402,13 @@ const Statistiques = () => {
                           <div className="value-container">
                             <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
-                              <VariationIndicator 
-                                className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
-                              >
-                                {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
-                              </VariationIndicator>
+                              variations.montantGageHT.direction === 'up' 
+                                ? <VariationUp className={variations.montantGageHT.significant ? 'significant' : ''}>
+                                    ↑ {variations.montantGageHT.value}%
+                                  </VariationUp>
+                                : <VariationDown className={variations.montantGageHT.significant ? 'significant' : ''}>
+                                    ↓ {variations.montantGageHT.value}%
+                                  </VariationDown>
                             )}
                           </div>
                         </Td>
@@ -416,7 +423,6 @@ const Statistiques = () => {
                 </tbody>
               </CompactTable>
             </TableCard>
-
             {/* Troisième tableau: Dépenses ordonnées */}
             <TableCard>
               <TableTitle>Dépenses Ordonnées</TableTitle>
@@ -436,11 +442,13 @@ const Statistiques = () => {
                         <div className="value-container">
                           <span className="value">{data.nbReglements || 0}</span>
                           {variations.nbReglements && (
-                            <VariationIndicator 
-                              className={`${variations.nbReglements.direction} ${variations.nbReglements.significant ? 'significant' : ''}`}
-                            >
-                              {variations.nbReglements.direction === 'up' ? '↑' : '↓'} {variations.nbReglements.value}%
-                            </VariationIndicator>
+                            variations.nbReglements.direction === 'up' 
+                              ? <VariationUp className={variations.nbReglements.significant ? 'significant' : ''}>
+                                  ↑ {variations.nbReglements.value}%
+                                </VariationUp>
+                              : <VariationDown className={variations.nbReglements.significant ? 'significant' : ''}>
+                                  ↓ {variations.nbReglements.value}%
+                                </VariationDown>
                           )}
                         </div>
                       </Td>
@@ -452,11 +460,13 @@ const Statistiques = () => {
                               : '0 €'}
                           </span>
                           {variations.montantPaye && (
-                            <VariationIndicator 
-                              className={`${variations.montantPaye.direction} ${variations.montantPaye.significant ? 'significant' : ''}`}
-                            >
-                              {variations.montantPaye.direction === 'up' ? '↑' : '↓'} {variations.montantPaye.value}%
-                            </VariationIndicator>
+                            variations.montantPaye.direction === 'up' 
+                              ? <VariationUp className={variations.montantPaye.significant ? 'significant' : ''}>
+                                  ↑ {variations.montantPaye.value}%
+                                </VariationUp>
+                              : <VariationDown className={variations.montantPaye.significant ? 'significant' : ''}>
+                                  ↓ {variations.montantPaye.value}%
+                                </VariationDown>
                           )}
                         </div>
                       </Td>
@@ -954,26 +964,28 @@ const Container = styled.div`
   overflow-x: hidden;
 `;
 
-const VariationIndicator = styled.span`
-  font-size: 11px;
+const VariationUp = styled.span`
+  color: #4caf50;
+  font-size: 12px;
   font-weight: 500;
-  padding: 1px 4px;
-  border-radius: 3px;
   margin-left: 8px;
   display: inline-flex;
   align-items: center;
-  width: 45px; /* Largeur fixe pour garantir l'alignement */
-  justify-content: center;
+  min-width: 45px; /* Largeur minimale pour garantir l'alignement */
   
-  &.up {
-    color: #1b5e20;
-    background-color: #e8f5e9;
+  &.significant {
+    font-weight: 600;
   }
-  
-  &.down {
-    color: #b71c1c;
-    background-color: #ffebee;
-  }
+`;
+
+const VariationDown = styled.span`
+  color: #f44336;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  min-width: 45px; /* Largeur minimale pour garantir l'alignement */
   
   &.significant {
     font-weight: 600;

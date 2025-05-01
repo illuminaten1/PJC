@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaFileExcel, FaFilePdf, FaTimes } from 'react-icons/fa';
+import { FaFileExcel, FaFilePdf, FaTimes, FaToggleOn, FaToggleOff, FaFileExport } from 'react-icons/fa';
 
 /**
  * Composant de modal pour configurer l'export des statistiques
@@ -33,61 +33,84 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
     <ModalOverlay>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>Exporter les statistiques</ModalTitle>
+          <ModalTitle>
+            <FaFileExport style={{ marginRight: '10px' }} />
+            Exporter les statistiques
+          </ModalTitle>
           <CloseButton onClick={onClose}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
         
         <ModalBody>
-          <FormGroup>
+          <FormatSection>
             <Label>Format d'export</Label>
-            <RadioGroup>
-              <RadioOption
-                active={format === 'excel'}
+            <FormatOptions>
+              <FormatCard 
+                active={format === 'excel'} 
                 onClick={() => setFormat('excel')}
               >
-                <FaFileExcel />
-                <RadioLabel>Excel</RadioLabel>
-              </RadioOption>
+                <FormatIcon>
+                  <FaFileExcel />
+                </FormatIcon>
+                <FormatTitle>Excel</FormatTitle>
+                <FormatDesc>Fichier tableur avec plusieurs feuilles</FormatDesc>
+              </FormatCard>
               
-              <RadioOption
-                active={format === 'pdf'}
+              <FormatCard 
+                active={format === 'pdf'} 
                 onClick={() => setFormat('pdf')}
               >
-                <FaFilePdf />
-                <RadioLabel>PDF</RadioLabel>
-              </RadioOption>
-            </RadioGroup>
-          </FormGroup>
+                <FormatIcon>
+                  <FaFilePdf />
+                </FormatIcon>
+                <FormatTitle>PDF</FormatTitle>
+                <FormatDesc>Document formaté pour impression</FormatDesc>
+              </FormatCard>
+            </FormatOptions>
+          </FormatSection>
           
-          <FormGroup>
-            <Checkbox
-              checked={includeAnnualStats}
-              onChange={() => setIncludeAnnualStats(!includeAnnualStats)}
-              label={`Inclure les statistiques de l'année ${annee}`}
-            />
-          </FormGroup>
-          
-          {includeAnnualStats && (
-            <IndentedSection>
-              <FormGroup>
-                <Checkbox
-                  checked={includeRedacteurTable}
-                  onChange={() => setIncludeRedacteurTable(!includeRedacteurTable)}
-                  label="Inclure la répartition par rédacteur"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Checkbox
-                  checked={includeCirconstanceTable}
-                  onChange={() => setIncludeCirconstanceTable(!includeCirconstanceTable)}
-                  label="Inclure la répartition par circonstance"
-                />
-              </FormGroup>
-            </IndentedSection>
-          )}
+          <OptionsSection>
+            <ToggleField>
+              <ToggleIcon 
+                checked={includeAnnualStats}
+                onClick={() => setIncludeAnnualStats(!includeAnnualStats)}
+              >
+                {includeAnnualStats ? <FaToggleOn /> : <FaToggleOff />}
+              </ToggleIcon>
+              <label onClick={() => setIncludeAnnualStats(!includeAnnualStats)}>
+                Inclure les statistiques de l'année {annee}
+              </label>
+            </ToggleField>
+            
+            {includeAnnualStats && (
+              <IndentedSection>
+                <SubToggleField>
+                  <ToggleIcon 
+                    checked={includeRedacteurTable}
+                    onClick={() => setIncludeRedacteurTable(!includeRedacteurTable)}
+                  >
+                    {includeRedacteurTable ? <FaToggleOn /> : <FaToggleOff />}
+                  </ToggleIcon>
+                  <label onClick={() => setIncludeRedacteurTable(!includeRedacteurTable)}>
+                    Inclure la répartition par rédacteur
+                  </label>
+                </SubToggleField>
+                
+                <SubToggleField>
+                  <ToggleIcon 
+                    checked={includeCirconstanceTable}
+                    onClick={() => setIncludeCirconstanceTable(!includeCirconstanceTable)}
+                  >
+                    {includeCirconstanceTable ? <FaToggleOn /> : <FaToggleOff />}
+                  </ToggleIcon>
+                  <label onClick={() => setIncludeCirconstanceTable(!includeCirconstanceTable)}>
+                    Inclure la répartition par circonstance
+                  </label>
+                </SubToggleField>
+              </IndentedSection>
+            )}
+          </OptionsSection>
         </ModalBody>
         
         <ModalFooter>
@@ -100,21 +123,6 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
         </ModalFooter>
       </ModalContent>
     </ModalOverlay>
-  );
-};
-
-// Composant pour les options de case à cocher
-const Checkbox = ({ checked, onChange, label }) => {
-  return (
-    <CheckboxWrapper>
-      <CheckboxInput
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        id={`checkbox-${label}`}
-      />
-      <CheckboxLabel htmlFor={`checkbox-${label}`}>{label}</CheckboxLabel>
-    </CheckboxWrapper>
   );
 };
 
@@ -135,9 +143,9 @@ const ModalOverlay = styled.div`
 const ModalContent = styled.div`
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 500px;
+  max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
@@ -150,13 +158,16 @@ const ModalHeader = styled.div`
   align-items: center;
   padding: 16px 24px;
   border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f7ff;
 `;
 
 const ModalTitle = styled.h3`
   margin: 0;
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: #3f51b5;
+  display: flex;
+  align-items: center;
 `;
 
 const CloseButton = styled.button`
@@ -190,70 +201,114 @@ const ModalFooter = styled.div`
   gap: 12px;
 `;
 
-const FormGroup = styled.div`
-  margin-bottom: 20px;
+const FormatSection = styled.div`
+  margin-bottom: 24px;
+`;
+
+const OptionsSection = styled.div`
+  margin-top: 24px;
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   font-weight: 500;
   color: #333;
+  font-size: 16px;
 `;
 
-const RadioGroup = styled.div`
+const FormatOptions = styled.div`
   display: flex;
   gap: 16px;
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+  }
 `;
 
-const RadioOption = styled.div`
+const FormatCard = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 16px;
+  padding: 20px;
   border: 2px solid ${props => props.active ? '#3f51b5' : '#e0e0e0'};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: ${props => props.active ? '#e8eaf6' : 'transparent'};
-  
-  svg {
-    font-size: 24px;
-    margin-bottom: 8px;
-    color: ${props => props.active ? '#3f51b5' : '#757575'};
-  }
+  background-color: ${props => props.active ? '#e8eaf6' : 'white'};
   
   &:hover {
     border-color: #3f51b5;
-    background-color: #f5f7ff;
+    background-color: ${props => props.active ? '#e8eaf6' : '#f5f7ff'};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   }
 `;
 
-const RadioLabel = styled.span`
-  font-size: 14px;
+const FormatIcon = styled.div`
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #3f51b5;
+`;
+
+const FormatTitle = styled.h4`
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
   color: #333;
 `;
 
-const CheckboxWrapper = styled.div`
+const FormatDesc = styled.p`
+  margin: 0;
+  font-size: 14px;
+  color: #757575;
+  text-align: center;
+`;
+
+const ToggleField = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  padding: 12px 16px;
+  background-color: #f5f7ff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  
+  label {
+    margin-left: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+  }
+`;
+
+const SubToggleField = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px 16px;
+  background-color: white;
+  border-radius: 8px;
+  
+  label {
+    margin-left: 12px;
+    cursor: pointer;
+    color: #333;
+  }
+`;
+
+const ToggleIcon = styled.span`
+  font-size: 24px;
+  color: ${props => props.checked ? '#3f51b5' : '#aaaaaa'};
+  cursor: pointer;
   display: flex;
   align-items: center;
 `;
 
-const CheckboxInput = styled.input`
-  margin: 0;
-  margin-right: 8px;
-  cursor: pointer;
-`;
-
-const CheckboxLabel = styled.label`
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-`;
-
 const IndentedSection = styled.div`
-  margin-left: 24px;
-  padding-left: 12px;
+  margin-left: 12px;
+  padding: 5px 5px 5px 12px;
   border-left: 2px solid #e0e0e0;
 `;
 
@@ -261,12 +316,12 @@ const CancelButton = styled.button`
   background-color: #f5f5f5;
   color: #333;
   border: none;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
   
   &:hover {
     background-color: #e0e0e0;
@@ -277,12 +332,12 @@ const ExportButton = styled.button`
   background-color: #3f51b5;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
   
   &:hover {
     background-color: #303f9f;

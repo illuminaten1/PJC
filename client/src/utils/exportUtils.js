@@ -312,34 +312,47 @@ export const exportToExcel = async (data, options) => {
       // Espacement
       annualSheet.getRow(10).height = 20;
       
-      // Si l'option est activée pour la répartition par rédacteur
-      if (options.includeRedacteurTable && Object.keys(data.annual.parRedacteur).length > 0) {
-        // Titre de la section rédacteurs
-        annualSheet.mergeCells('A11:C11');
-        annualSheet.getCell('A11').value = 'Répartition par rédacteur';
-        annualSheet.getCell('A11').font = { bold: true, size: 14 };
-        
+      // Créer une ligne de titre commune pour les répartitions
+        annualSheet.mergeCells('A11:H11');
+        annualSheet.getCell('A11').value = 'Répartitions détaillées';
+        annualSheet.getCell('A11').font = { bold: true, size: 16 };
+        annualSheet.getCell('A11').alignment = { horizontal: 'center' };
+
+        // Espacement
+        annualSheet.getRow(12).height = 10;
+
+        // Si l'option est activée pour la répartition par rédacteur
+        if (options.includeRedacteurTable && Object.keys(data.annual.parRedacteur).length > 0) {
+        // Titre de la section rédacteurs (colonne A)
+        annualSheet.mergeCells('A13:C13');
+        annualSheet.getCell('A13').value = 'Répartition par rédacteur';
+        annualSheet.getCell('A13').font = { bold: true, size: 14 };
+
         // En-têtes du tableau
-        annualSheet.getCell('A12').value = 'Rédacteur';
-        annualSheet.getCell('B12').value = 'Bénéficiaires';
-        annualSheet.getCell('C12').value = 'Pourcentage';
-        
+        annualSheet.getCell('A14').value = 'Rédacteur';
+        annualSheet.getCell('B14').value = 'Bénéficiaires';
+        annualSheet.getCell('C14').value = 'Pourcentage';
+
         // Style d'en-tête
-        ['A12', 'B12', 'C12'].forEach(cell => {
-          Object.assign(annualSheet.getCell(cell), headerStyle);
+        ['A14', 'B14', 'C14'].forEach(cell => {
+            Object.assign(annualSheet.getCell(cell), headerStyle);
         });
-        
-        // Largeur de colonne supplémentaire
+
+        // Largeur de colonne
+        annualSheet.getColumn('A').width = 30;
+        annualSheet.getColumn('B').width = 15;
         annualSheet.getColumn('C').width = 15;
-        
+
         // Calcul du total
         const totalRedacteurs = Object.values(data.annual.parRedacteur).reduce((a, b) => a + b, 0);
-        
+
         // Données
-        let redRow = 13;
-        Object.entries(data.annual.parRedacteur)
-          .sort((a, b) => b[1] - a[1]) // Tri par nombre décroissant
-          .forEach(([redacteur, count]) => {
+        let redRow = 15;
+        const redacteurEntries = Object.entries(data.annual.parRedacteur)
+            .sort((a, b) => b[1] - a[1]); // Tri par nombre décroissant
+
+        // Assurez-vous d'afficher tous les rédacteurs
+        redacteurEntries.forEach(([redacteur, count]) => {
             const percentage = totalRedacteurs > 0 ? (count / totalRedacteurs) * 100 : 0;
             
             annualSheet.getCell(`A${redRow}`).value = redacteur;
@@ -348,44 +361,51 @@ export const exportToExcel = async (data, options) => {
             annualSheet.getCell(`C${redRow}`).numFmt = '0.0%';
             
             redRow++;
-          });
-      }
-      
-      // Si l'option est activée pour la répartition par circonstance
-      if (options.includeCirconstanceTable && Object.keys(data.annual.parCirconstance).length > 0) {
-        // Titre de la section circonstances
-        annualSheet.mergeCells('A15:C15');
-        annualSheet.getCell('A15').value = 'Répartition par circonstance';
-        annualSheet.getCell('A15').font = { bold: true, size: 14 };
-        
-        // En-têtes du tableau
-        annualSheet.getCell('A16').value = 'Circonstance';
-        annualSheet.getCell('B16').value = 'Militaires';
-        annualSheet.getCell('C16').value = 'Pourcentage';
-        
-        // Style d'en-tête
-        ['A16', 'B16', 'C16'].forEach(cell => {
-          Object.assign(annualSheet.getCell(cell), headerStyle);
         });
-        
+        }
+
+        // Si l'option est activée pour la répartition par circonstance
+        if (options.includeCirconstanceTable && Object.keys(data.annual.parCirconstance).length > 0) {
+        // Titre de la section circonstances (colonne E)
+        annualSheet.mergeCells('E13:G13');
+        annualSheet.getCell('E13').value = 'Répartition par circonstance';
+        annualSheet.getCell('E13').font = { bold: true, size: 14 };
+
+        // En-têtes du tableau
+        annualSheet.getCell('E14').value = 'Circonstance';
+        annualSheet.getCell('F14').value = 'Militaires';
+        annualSheet.getCell('G14').value = 'Pourcentage';
+
+        // Style d'en-tête
+        ['E14', 'F14', 'G14'].forEach(cell => {
+            Object.assign(annualSheet.getCell(cell), headerStyle);
+        });
+
+        // Largeur de colonne
+        annualSheet.getColumn('E').width = 30;
+        annualSheet.getColumn('F').width = 15;
+        annualSheet.getColumn('G').width = 15;
+
         // Calcul du total
         const totalCirconstances = Object.values(data.annual.parCirconstance).reduce((a, b) => a + b, 0);
-        
+
         // Données
-        let circRow = 17;
-        Object.entries(data.annual.parCirconstance)
-          .sort((a, b) => b[1] - a[1]) // Tri par nombre décroissant
-          .forEach(([circonstance, count]) => {
+        let circRow = 15;
+        const circonstanceEntries = Object.entries(data.annual.parCirconstance)
+            .sort((a, b) => b[1] - a[1]); // Tri par nombre décroissant
+
+        // Assurez-vous d'afficher toutes les circonstances
+        circonstanceEntries.forEach(([circonstance, count]) => {
             const percentage = totalCirconstances > 0 ? (count / totalCirconstances) * 100 : 0;
             
-            annualSheet.getCell(`A${circRow}`).value = circonstance;
-            annualSheet.getCell(`B${circRow}`).value = count;
-            annualSheet.getCell(`C${circRow}`).value = percentage / 100; // Format pourcentage
-            annualSheet.getCell(`C${circRow}`).numFmt = '0.0%';
+            annualSheet.getCell(`E${circRow}`).value = circonstance;
+            annualSheet.getCell(`F${circRow}`).value = count;
+            annualSheet.getCell(`G${circRow}`).value = percentage / 100; // Format pourcentage
+            annualSheet.getCell(`G${circRow}`).numFmt = '0.0%';
             
             circRow++;
-          });
-      }
+        });
+        }
       
       // Ajouter une nouvelle feuille pour les données budgétaires si disponibles
       if (data.annual.budget && data.annual.budget.parMois && data.annual.budget.parMois.length > 0) {
@@ -677,40 +697,111 @@ export const exportToPDF = async (element, data, options) => {
         }
         
         // Si demandé, ajouter les tableaux de répartition
-        if ((options.includeRedacteurTable || options.includeCirconstanceTable) && 
-            yOffset > 180) { // Si l'espace est insuffisant, ajouter une page
-          pdf.addPage();
-          yOffset = 15;
-        }
-        
-        if (options.includeRedacteurTable) {
-          const redacteurTable = element.querySelector('.redacteur-table');
-          
-          if (redacteurTable) {
-            pdf.setFontSize(14);
-            pdf.setTextColor(0, 0, 0);
-            pdf.text('Répartition par rédacteur', 20, yOffset);
+        if (options.includeRedacteurTable || options.includeCirconstanceTable) {
+            // Toujours ajouter une nouvelle page pour les tableaux de répartition
+            pdf.addPage();
+            yOffset = 15;
             
-            const redacteurCanvas = await html2canvas(redacteurTable, {
-              scale: 2,
-              useCORS: true,
-              logging: false,
-              allowTaint: true,
-              backgroundColor: '#ffffff'
-            });
+            pdf.setFontSize(16);
+            pdf.setTextColor(63, 81, 181);
+            pdf.text('Répartitions détaillées', 149, 15, { align: 'center' });
             
-            const redacteurImgData = redacteurCanvas.toDataURL('image/png');
+            pdf.setFontSize(10);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text(`Année ${options.annee}`, 149, 22, { align: 'center' });
             
-            // Ajuster la taille
-            const redacteurWidth = 130;
-            const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
-            
-            yOffset += 5;
-            pdf.addImage(redacteurImgData, 'PNG', 20, yOffset, redacteurWidth, redacteurHeight);
-            
-            yOffset += redacteurHeight + 15;
+            yOffset = 35;
           }
-        }
+        
+          if (options.includeRedacteurTable) {
+            const redacteurTable = element.querySelector('.redacteur-table');
+            
+            if (redacteurTable) {
+              pdf.setFontSize(14);
+              pdf.setTextColor(0, 0, 0);
+              pdf.text('Répartition par rédacteur', 20, yOffset);
+              
+              const redacteurCanvas = await html2canvas(redacteurTable, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+              });
+              
+              const redacteurImgData = redacteurCanvas.toDataURL('image/png');
+              
+              // Ajuster la taille pour occuper la moitié gauche de la page
+              const redacteurWidth = 130;
+              const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
+              
+              yOffset += 5;
+              pdf.addImage(redacteurImgData, 'PNG', 20, yOffset, redacteurWidth, redacteurHeight);
+              
+              // Conservez yOffset pour le tableau suivant ou d'autres éléments
+              const nextYOffset = yOffset + redacteurHeight + 15;
+              
+              // Si on a le tableau des circonstances, le placer à droite
+              if (options.includeCirconstanceTable) {
+                const circonstanceTable = element.querySelector('.circonstance-table');
+                
+                if (circonstanceTable) {
+                  pdf.setFontSize(14);
+                  pdf.setTextColor(0, 0, 0);
+                  pdf.text('Répartition par circonstance', 160, yOffset - 5);
+                  
+                  const circonstanceCanvas = await html2canvas(circonstanceTable, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                  });
+                  
+                  const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
+                  
+                  // Ajuster la taille pour occuper la moitié droite de la page
+                  const circonstanceWidth = 130; 
+                  const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
+                  
+                  pdf.addImage(circonstanceImgData, 'PNG', 160, yOffset, circonstanceWidth, circonstanceHeight);
+                  
+                  // Mettre à jour yOffset avec le maximum des deux hauteurs
+                  yOffset = Math.max(nextYOffset, yOffset + circonstanceHeight + 15);
+                }
+              } else {
+                yOffset = nextYOffset;
+              }
+            }
+          } else if (options.includeCirconstanceTable) {
+            // Si on n'a que le tableau des circonstances, le centrer
+            const circonstanceTable = element.querySelector('.circonstance-table');
+            
+            if (circonstanceTable) {
+              pdf.setFontSize(14);
+              pdf.setTextColor(0, 0, 0);
+              pdf.text('Répartition par circonstance', 149, yOffset, { align: 'center' });
+              
+              const circonstanceCanvas = await html2canvas(circonstanceTable, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+              });
+              
+              const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
+              
+              // Ajuster la taille et centrer
+              const circonstanceWidth = 200;
+              const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
+              
+              yOffset += 5;
+              pdf.addImage(circonstanceImgData, 'PNG', (297 - circonstanceWidth) / 2, yOffset, circonstanceWidth, circonstanceHeight);
+              
+              yOffset += circonstanceHeight + 15;
+            }
+          }
         
         if (options.includeCirconstanceTable) {
           const circonstanceTable = element.querySelector('.circonstance-table');

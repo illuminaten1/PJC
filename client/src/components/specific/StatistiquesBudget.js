@@ -106,15 +106,15 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   };
   
   return (
-    <Container>
-      <FullWidthChartContainer>
+    <Container className="budget-section">
+      <FullWidthChartContainer className="budget-chart">
         <Bar data={chartData} options={chartOptions} />
       </FullWidthChartContainer>
       
       <SummaryContainer>
         <SummaryTitle>Synthèse annuelle {annee}</SummaryTitle>
         
-        <SummaryGrid>
+        <SummaryGrid className="budget-summary">
           <SummaryCard>
             <SummaryLabel>Total engagé</SummaryLabel>
             <SummaryValue>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} € HT</SummaryValue>
@@ -132,7 +132,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
         </SummaryGrid>
       </SummaryContainer>
       
-      <DetailTable>
+      <DetailTable className="budget-detail-table">
         <thead>
           <tr>
             <th>Mois</th>

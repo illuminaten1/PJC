@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt } from 'react-icons/fa';
+import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt, FaFileExport } from 'react-icons/fa';
 import { statistiquesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
+import { exportToExcel, exportToPDF } from '../utils/exportUtils';
+import ExportModal from '../components/specific/ExportModal';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,6 +34,12 @@ const Statistiques = () => {
   const [statsGlobales, setStatsGlobales] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Nouvel état pour la modale d'export
+  const [showExportModal, setShowExportModal] = useState(false);
+  
+  // Référence pour les éléments à exporter en PDF
+  const statsRef = useRef(null);
   
   // Générer les années pour le sélecteur (à partir de 2023 jusqu'à l'année actuelle + 1)
   const generateYears = () => {
@@ -91,7 +99,7 @@ const Statistiques = () => {
           nbReglements: 0
         };
       });
-      
+
       // Récupérer les données pour chaque année individuellement
       for (const year of years) {
         try {
@@ -224,6 +232,48 @@ const Statistiques = () => {
   };
 
   const dataWithVariations = prepareDataWithVariations();
+  
+  // Fonction pour gérer l'export des données
+  const handleExport = async (options) => {
+    // Préparation des données pour l'export
+    const exportData = {
+      global: {
+        parAnnee: statsGlobales?.parAnnee || {},
+        totals: calculateTotals()
+      },
+      annual: options.includeAnnualStats ? {
+        finances: statistiques?.finances || {},
+        affaires: statistiques?.affaires || {},
+        parRedacteur: options.includeRedacteurTable ? statistiques?.parRedacteur || {} : {},
+        parCirconstance: options.includeCirconstanceTable ? statistiques?.parCirconstance || {} : {},
+        budget: null // Initialisé à null
+      } : null,
+      annee: annee,
+      dataWithVariations: dataWithVariations
+    };
+    
+    // Si les statistiques annuelles sont demandées, récupérer les données budgétaires
+    if (options.includeAnnualStats) {
+      try {
+        const budgetResponse = await statistiquesAPI.getBudgetByAnnee(annee);
+        exportData.annual.budget = budgetResponse.data;
+      } catch (err) {
+        console.error("Erreur lors de la récupération des statistiques budgétaires pour l'export", err);
+        // Continuer l'export même si les données budgétaires sont indisponibles
+      }
+    }
+    
+    try {
+      if (options.format === 'excel') {
+        await exportToExcel(exportData, options);
+      } else if (options.format === 'pdf') {
+        await exportToPDF(statsRef.current, exportData, options);
+      }
+    } catch (err) {
+      console.error("Erreur lors de l'export", err);
+      // Vous pourriez ajouter un état d'erreur pour l'afficher à l'utilisateur
+    }
+  };
 
   if (loading && !statistiques) {
     return (
@@ -257,298 +307,318 @@ const Statistiques = () => {
           </SectionTitle>
         </SectionHeader>
 
-      {/* Section des statistiques globales avec 3 tableaux côte à côte */}
-      <Section>       
-        <TablesRow>
-          {/* Premier tableau: Bénéficiaires - Conventions */}
-          <TableCard>
-            <TableTitle>Bénéficiaires - Conventions</TableTitle>
-            <CompactTable>
-              <thead>
-                <tr className="bg-header">
-                  <Th>Année</Th>
-                  <Th>Nombre de bénéficiaires</Th>
-                  <Th>Nombre de conventions</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataWithVariations.map(({ year, data, variations }) => (
-                  <Tr key={`conventions-${year}`}>
-                    <YearCell>{year}</YearCell>
-                    <Td>
-                      <div className="value-container">
-                        <span className="value">{data.nbBeneficiaires || 0}</span>
-                        {variations.nbBeneficiaires && (
-                          <VariationIndicator 
-                            className={`${variations.nbBeneficiaires.direction} ${variations.nbBeneficiaires.significant ? 'significant' : ''}`}
-                          >
-                            {variations.nbBeneficiaires.direction === 'up' ? '↑' : '↓'} {variations.nbBeneficiaires.value}%
-                          </VariationIndicator>
-                        )}
-                      </div>
-                    </Td>
-                    <Td>
-                      <div className="value-container">
-                        <span className="value">{data.nbConventions || 0}</span>
-                        {variations.nbConventions && (
-                          <VariationIndicator 
-                            className={`${variations.nbConventions.direction} ${variations.nbConventions.significant ? 'significant' : ''}`}
-                          >
-                            {variations.nbConventions.direction === 'up' ? '↑' : '↓'} {variations.nbConventions.value}%
-                          </VariationIndicator>
-                        )}
-                      </div>
-                    </Td>
-                  </Tr>
-                ))}
-                <TotalRow>
-                  <TotalCell>TOTAL</TotalCell>
-                  <TotalCell>{totals.nbBeneficiaires}</TotalCell>
-                  <TotalCell>{totals.nbConventions}</TotalCell>
-                </TotalRow>
-              </tbody>
-            </CompactTable>
-          </TableCard>
-
-          {/* Deuxième tableau: Montants totaux gagés (HT et TTC) */}
-          <TableCard>
-            <TableTitle>Montant Total Gagé</TableTitle>
-            <CompactTable>
-              <thead>
-                <tr className="bg-header">
-                  <Th>Année</Th>
-                  <Th>Montant total gagé HT</Th>
-                  <Th>Montant total gagé TTC</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataWithVariations.map(({ year, data, variations }) => {
-                  const montantHT = data.montantGageHT || 0;
-                  const montantTTC = montantHT * 1.2;
-                  
-                  return (
-                    <Tr key={`montants-${year}`}>
+      {/* Ajout de la référence pour l'export PDF */}
+      <div ref={statsRef}>
+        {/* Section des statistiques globales avec 3 tableaux côte à côte */}
+        <Section>       
+          <TablesRow>
+            {/* Premier tableau: Bénéficiaires - Conventions */}
+            <TableCard>
+              <TableTitle>Bénéficiaires - Conventions</TableTitle>
+              <CompactTable>
+                <thead>
+                  <tr className="bg-header">
+                    <Th>Année</Th>
+                    <Th>Nombre de bénéficiaires</Th>
+                    <Th>Nombre de conventions</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataWithVariations.map(({ year, data, variations }) => (
+                    <Tr key={`conventions-${year}`}>
                       <YearCell>{year}</YearCell>
                       <Td>
                         <div className="value-container">
-                          <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
-                          {variations.montantGageHT && (
+                          <span className="value">{data.nbBeneficiaires || 0}</span>
+                          {variations.nbBeneficiaires && (
                             <VariationIndicator 
-                              className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                              className={`${variations.nbBeneficiaires.direction} ${variations.nbBeneficiaires.significant ? 'significant' : ''}`}
                             >
-                              {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                              {variations.nbBeneficiaires.direction === 'up' ? '↑' : '↓'} {variations.nbBeneficiaires.value}%
                             </VariationIndicator>
                           )}
                         </div>
                       </Td>
                       <Td>
                         <div className="value-container">
-                          <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
-                          {variations.montantGageHT && (
+                          <span className="value">{data.nbConventions || 0}</span>
+                          {variations.nbConventions && (
                             <VariationIndicator 
-                              className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                              className={`${variations.nbConventions.direction} ${variations.nbConventions.significant ? 'significant' : ''}`}
                             >
-                              {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                              {variations.nbConventions.direction === 'up' ? '↑' : '↓'} {variations.nbConventions.value}%
                             </VariationIndicator>
                           )}
                         </div>
                       </Td>
                     </Tr>
-                  );
-                })}
-                <TotalRow>
-                  <TotalCell>TOTAL</TotalCell>
-                  <TotalCell>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                  <TotalCell>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                </TotalRow>
-              </tbody>
-            </CompactTable>
-          </TableCard>
+                  ))}
+                  <TotalRow>
+                    <TotalCell>TOTAL</TotalCell>
+                    <TotalCell>{totals.nbBeneficiaires}</TotalCell>
+                    <TotalCell>{totals.nbConventions}</TotalCell>
+                  </TotalRow>
+                </tbody>
+              </CompactTable>
+            </TableCard>
 
-          {/* Troisième tableau: Dépenses ordonnées */}
-          <TableCard>
-            <TableTitle>Dépenses Ordonnées</TableTitle>
-            <CompactTable>
-              <thead>
-                <tr className="bg-header">
-                  <Th>Année</Th>
-                  <Th>Nombre de règlements</Th>
-                  <Th>Montant total ordonné TTC</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataWithVariations.map(({ year, data, variations }) => (
-                  <Tr key={`ordonnes-${year}`}>
-                    <YearCell>{year}</YearCell>
-                    <Td>
-                      <div className="value-container">
-                        <span className="value">{data.nbReglements || 0}</span>
-                        {variations.nbReglements && (
-                          <VariationIndicator 
-                            className={`${variations.nbReglements.direction} ${variations.nbReglements.significant ? 'significant' : ''}`}
-                          >
-                            {variations.nbReglements.direction === 'up' ? '↑' : '↓'} {variations.nbReglements.value}%
-                          </VariationIndicator>
-                        )}
-                      </div>
-                    </Td>
-                    <Td>
-                      <div className="value-container">
-                        <span className="value">
-                          {(data.montantPaye || 0) > 0 
-                            ? `${(data.montantPaye).toLocaleString('fr-FR')} €` 
-                            : '0 €'}
-                        </span>
-                        {variations.montantPaye && (
-                          <VariationIndicator 
-                            className={`${variations.montantPaye.direction} ${variations.montantPaye.significant ? 'significant' : ''}`}
-                          >
-                            {variations.montantPaye.direction === 'up' ? '↑' : '↓'} {variations.montantPaye.value}%
-                          </VariationIndicator>
-                        )}
-                      </div>
-                    </Td>
-                  </Tr>
-                ))}
-                <TotalRow>
-                  <TotalCell>TOTAL</TotalCell>
-                  <TotalCell>{totals.nbReglements}</TotalCell>
-                  <TotalCell>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                </TotalRow>
-              </tbody>
-            </CompactTable>
-          </TableCard>
-        </TablesRow>
-      </Section>
-      
-      <SectionHeader>
-          <SectionTitle>
-            <FaCalendarAlt/>
-            <span>Synthèse par année</span>
-          </SectionTitle>
-      </SectionHeader>
-      <YearSelector>
-        <YearLabel>Année budgétaire :</YearLabel>
-        <Select
-          value={annee}
-          onChange={(e) => setAnnee(parseInt(e.target.value))}
-        >
-          {years.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
-        </Select>
-      </YearSelector>
-      
-      <SummaryCards>
-        <StatCard className="finances">
-          <StatIconContainer>
-            <FaEuroSign />
-          </StatIconContainer>
-          <StatContent>
-            <StatValue>{statistiques?.finances?.montantGage?.toLocaleString('fr-FR') || '0'} € HT</StatValue>
-            <StatLabel>Budget engagé</StatLabel>
-            <StatDetail>
-              <span>Conventions :</span>
-              <span>{statistiques?.finances?.nbConventions || 0}</span>
-            </StatDetail>
-            <StatDetail>
-              <span>Payé :</span>
-              <span>{statistiques?.finances?.montantPaye?.toLocaleString('fr-FR') || '0'} € TTC</span>
-            </StatDetail>
-          </StatContent>
-        </StatCard>
+            {/* Deuxième tableau: Montants totaux gagés (HT et TTC) */}
+            <TableCard>
+              <TableTitle>Montant Total Gagé</TableTitle>
+              <CompactTable>
+                <thead>
+                  <tr className="bg-header">
+                    <Th>Année</Th>
+                    <Th>Montant total gagé HT</Th>
+                    <Th>Montant total gagé TTC</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataWithVariations.map(({ year, data, variations }) => {
+                    const montantHT = data.montantGageHT || 0;
+                    const montantTTC = montantHT * 1.2;
+                    
+                    return (
+                      <Tr key={`montants-${year}`}>
+                        <YearCell>{year}</YearCell>
+                        <Td>
+                          <div className="value-container">
+                            <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                            {variations.montantGageHT && (
+                              <VariationIndicator 
+                                className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                              >
+                                {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                              </VariationIndicator>
+                            )}
+                          </div>
+                        </Td>
+                        <Td>
+                          <div className="value-container">
+                            <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                            {variations.montantGageHT && (
+                              <VariationIndicator 
+                                className={`${variations.montantGageHT.direction} ${variations.montantGageHT.significant ? 'significant' : ''}`}
+                              >
+                                {variations.montantGageHT.direction === 'up' ? '↑' : '↓'} {variations.montantGageHT.value}%
+                              </VariationIndicator>
+                            )}
+                          </div>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                  <TotalRow>
+                    <TotalCell>TOTAL</TotalCell>
+                    <TotalCell>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                    <TotalCell>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                  </TotalRow>
+                </tbody>
+              </CompactTable>
+            </TableCard>
+
+            {/* Troisième tableau: Dépenses ordonnées */}
+            <TableCard>
+              <TableTitle>Dépenses Ordonnées</TableTitle>
+              <CompactTable>
+                <thead>
+                  <tr className="bg-header">
+                    <Th>Année</Th>
+                    <Th>Nombre de règlements</Th>
+                    <Th>Montant total ordonné TTC</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataWithVariations.map(({ year, data, variations }) => (
+                    <Tr key={`ordonnes-${year}`}>
+                      <YearCell>{year}</YearCell>
+                      <Td>
+                        <div className="value-container">
+                          <span className="value">{data.nbReglements || 0}</span>
+                          {variations.nbReglements && (
+                            <VariationIndicator 
+                              className={`${variations.nbReglements.direction} ${variations.nbReglements.significant ? 'significant' : ''}`}
+                            >
+                              {variations.nbReglements.direction === 'up' ? '↑' : '↓'} {variations.nbReglements.value}%
+                            </VariationIndicator>
+                          )}
+                        </div>
+                      </Td>
+                      <Td>
+                        <div className="value-container">
+                          <span className="value">
+                            {(data.montantPaye || 0) > 0 
+                              ? `${(data.montantPaye).toLocaleString('fr-FR')} €` 
+                              : '0 €'}
+                          </span>
+                          {variations.montantPaye && (
+                            <VariationIndicator 
+                              className={`${variations.montantPaye.direction} ${variations.montantPaye.significant ? 'significant' : ''}`}
+                            >
+                              {variations.montantPaye.direction === 'up' ? '↑' : '↓'} {variations.montantPaye.value}%
+                            </VariationIndicator>
+                          )}
+                        </div>
+                      </Td>
+                    </Tr>
+                  ))}
+                  <TotalRow>
+                    <TotalCell>TOTAL</TotalCell>
+                    <TotalCell>{totals.nbReglements}</TotalCell>
+                    <TotalCell>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                  </TotalRow>
+                </tbody>
+              </CompactTable>
+            </TableCard>
+          </TablesRow>
+        </Section>
         
-        <StatCard className="affaires">
-          <StatIconContainer>
-            <FaFolder />
-          </StatIconContainer>
-          <StatContent>
-            <StatValue>{statistiques?.affaires?.total || 0}</StatValue>
-            <StatLabel>Affaires</StatLabel>
-          </StatContent>
-        </StatCard>
-        
-        <StatCard className="redacteurs">
-          <StatIconContainer>
-            <FaUsers />
-          </StatIconContainer>
-          <StatContent>
-            <StatValue>{Object.keys(statistiques?.parRedacteur || {}).length}</StatValue>
-            <StatLabel>Rédacteurs actifs</StatLabel>
-            <StatDetail>
-              <span>Bénéficiaires :</span>
-              <span>{Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0)}</span>
-            </StatDetail>
-          </StatContent>
-        </StatCard>
-      </SummaryCards>
-      
-      <Section>
         <SectionHeader>
-          <SectionTitle>
-            <FaChartBar />
-            <span>Suivi budgétaire {annee}</span>
-          </SectionTitle>
+            <SectionTitle>
+              <FaCalendarAlt/>
+              <span>Synthèse par année</span>
+            </SectionTitle>
         </SectionHeader>
         
-        <StatistiquesBudget annee={annee} />
-      </Section>
-      
-      <ChartsSection>
-      <ChartCard>
-        <BlockTitle>Répartition par rédacteur</BlockTitle>
-        <ResponsiveTable>
-          <thead>
-            <tr>
-              <TableHeader>Rédacteur</TableHeader>
-              <TableHeader>Bénéficiaires</TableHeader>
-              <TableHeader>Pourcentage</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(statistiques?.parRedacteur || {}).sort((a, b) => b[1] - a[1]).map(([redacteur, count]) => {
-              const total = Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-              
-              return (
-                <TableRow key={`redacteur-${redacteur}`}>
-                  <TableDataCell>{redacteur}</TableDataCell>
-                  <TableDataCell>{count}</TableDataCell>
-                  <TableDataCell>{percentage}%</TableDataCell>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </ResponsiveTable>
-      </ChartCard>
+        {/* Remplacer le sélecteur d'année par les actions */}
+        <HeaderActions>
+          <YearSelector>
+            <YearLabel>Année budgétaire :</YearLabel>
+            <Select
+              value={annee}
+              onChange={(e) => setAnnee(parseInt(e.target.value))}
+            >
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </Select>
+          </YearSelector>
+          
+          <ExportButton onClick={() => setShowExportModal(true)}>
+            <FaFileExport />
+            <span>Exporter</span>
+          </ExportButton>
+        </HeaderActions>
+
+        <SummaryCards className="summary-cards">
+          <StatCard className="finances">
+            <StatIconContainer>
+              <FaEuroSign />
+            </StatIconContainer>
+            <StatContent>
+              <StatValue>{statistiques?.finances?.montantGage?.toLocaleString('fr-FR') || '0'} € HT</StatValue>
+              <StatLabel>Budget engagé</StatLabel>
+              <StatDetail>
+                <span>Conventions :</span>
+                <span>{statistiques?.finances?.nbConventions || 0}</span>
+              </StatDetail>
+              <StatDetail>
+                <span>Payé :</span>
+                <span>{statistiques?.finances?.montantPaye?.toLocaleString('fr-FR') || '0'} € TTC</span>
+              </StatDetail>
+            </StatContent>
+          </StatCard>
+          
+          <StatCard className="affaires">
+            <StatIconContainer>
+              <FaFolder />
+            </StatIconContainer>
+            <StatContent>
+              <StatValue>{statistiques?.affaires?.total || 0}</StatValue>
+              <StatLabel>Affaires</StatLabel>
+            </StatContent>
+          </StatCard>
+          
+          <StatCard className="redacteurs">
+            <StatIconContainer>
+              <FaUsers />
+            </StatIconContainer>
+            <StatContent>
+              <StatValue>{Object.keys(statistiques?.parRedacteur || {}).length}</StatValue>
+              <StatLabel>Rédacteurs actifs</StatLabel>
+              <StatDetail>
+                <span>Bénéficiaires :</span>
+                <span>{Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0)}</span>
+              </StatDetail>
+            </StatContent>
+          </StatCard>
+        </SummaryCards>
         
-      <ChartCard>
-        <BlockTitle>Répartition par circonstance</BlockTitle>
-        <ResponsiveTable>
-          <thead>
-            <tr>
-              <TableHeader>Circonstance</TableHeader>
-              <TableHeader>Militaires</TableHeader>
-              <TableHeader>Pourcentage</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(statistiques?.parCirconstance || {}).sort((a, b) => b[1] - a[1]).map(([circonstance, count]) => {
-              const total = Object.values(statistiques?.parCirconstance || {}).reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-              
-              return (
-                <TableRow key={`circonstance-${circonstance}`}>
-                  <TableDataCell>{circonstance}</TableDataCell>
-                  <TableDataCell>{count}</TableDataCell>
-                  <TableDataCell>{percentage}%</TableDataCell>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </ResponsiveTable>
-      </ChartCard>
-      </ChartsSection>
+        <Section>
+          <SectionHeader>
+            <SectionTitle>
+              <FaChartBar />
+              <span>Suivi budgétaire {annee}</span>
+            </SectionTitle>
+          </SectionHeader>
+          
+          <StatistiquesBudget annee={annee} />
+        </Section>
+        
+        <ChartsSection>
+        <ChartCard className="redacteur-table">
+          <BlockTitle>Répartition par rédacteur</BlockTitle>
+          <ResponsiveTable>
+            <thead>
+              <tr>
+                <TableHeader>Rédacteur</TableHeader>
+                <TableHeader>Bénéficiaires</TableHeader>
+                <TableHeader>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parRedacteur || {}).sort((a, b) => b[1] - a[1]).map(([redacteur, count]) => {
+                const total = Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`redacteur-${redacteur}`}>
+                    <TableDataCell>{redacteur}</TableDataCell>
+                    <TableDataCell>{count}</TableDataCell>
+                    <TableDataCell>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
+          
+        <ChartCard className="circonstance-table">
+          <BlockTitle>Répartition par circonstance</BlockTitle>
+          <ResponsiveTable>
+            <thead>
+              <tr>
+                <TableHeader>Circonstance</TableHeader>
+                <TableHeader>Militaires</TableHeader>
+                <TableHeader>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parCirconstance || {}).sort((a, b) => b[1] - a[1]).map(([circonstance, count]) => {
+                const total = Object.values(statistiques?.parCirconstance || {}).reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`circonstance-${circonstance}`}>
+                    <TableDataCell>{circonstance}</TableDataCell>
+                    <TableDataCell>{count}</TableDataCell>
+                    <TableDataCell>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
+        </ChartsSection>
+      </div> {/* Fermeture de la div ref={statsRef} */}
+      
+      {/* Modale d'export */}
+      <ExportModal
+        show={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExport}
+        annee={annee}
+      />
     </Container>
   );
 };
@@ -586,7 +656,6 @@ const SectionTitle = styled.h2`
 const YearSelector = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
 `;
 
 const YearLabel = styled.span`
@@ -825,7 +894,7 @@ const TotalCell = styled.td`
   font-weight: 600;
 `;
 
-// Styles non modifiés pour les autres tableaux
+// Styles pour les tableaux des répartitions
 const ChartsSection = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -908,6 +977,40 @@ const VariationIndicator = styled.span`
   
   &.significant {
     font-weight: 600;
+  }
+`;
+
+// Nouveaux styles pour l'export
+const HeaderActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+`;
+
+const ExportButton = styled.button`
+  display: flex;
+  align-items: center;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  
+  svg {
+    margin-right: 8px;
+  }
+  
+  &:hover {
+    background-color: #388e3c;
+  }
+  
+  &:active {
+    background-color: #2e7d32;
   }
 `;
 

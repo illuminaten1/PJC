@@ -700,8 +700,8 @@ export const exportToPDF = async (element, data, options) => {
         if (options.includeRedacteurTable || options.includeCirconstanceTable) {
             // Toujours ajouter une nouvelle page pour les tableaux de répartition
             pdf.addPage();
-            yOffset = 15;
             
+            // Ajouter le titre en haut de la page avec un espacement suffisant
             pdf.setFontSize(16);
             pdf.setTextColor(63, 81, 181);
             pdf.text('Répartitions détaillées', 149, 15, { align: 'center' });
@@ -710,138 +710,123 @@ export const exportToPDF = async (element, data, options) => {
             pdf.setTextColor(120, 120, 120);
             pdf.text(`Année ${options.annee}`, 149, 22, { align: 'center' });
             
-            yOffset = 35;
-          }
-        
-          if (options.includeRedacteurTable) {
-            const redacteurTable = element.querySelector('.redacteur-table');
+            // Commencer les tableaux plus bas pour laisser de l'espace au titre
+            let yOffset = 35;
             
-            if (redacteurTable) {
-              pdf.setFontSize(14);
-              pdf.setTextColor(0, 0, 0);
-              pdf.text('Répartition par rédacteur', 20, yOffset);
+            // Disposition côte à côte si les deux tableaux sont inclus
+            if (options.includeRedacteurTable && options.includeCirconstanceTable) {
+              const redacteurTable = element.querySelector('.redacteur-table');
+              const circonstanceTable = element.querySelector('.circonstance-table');
               
-              const redacteurCanvas = await html2canvas(redacteurTable, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-              });
-              
-              const redacteurImgData = redacteurCanvas.toDataURL('image/png');
-              
-              // Ajuster la taille pour occuper la moitié gauche de la page
-              const redacteurWidth = 130;
-              const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
-              
-              yOffset += 5;
-              pdf.addImage(redacteurImgData, 'PNG', 20, yOffset, redacteurWidth, redacteurHeight);
-              
-              // Conservez yOffset pour le tableau suivant ou d'autres éléments
-              const nextYOffset = yOffset + redacteurHeight + 15;
-              
-              // Si on a le tableau des circonstances, le placer à droite
-              if (options.includeCirconstanceTable) {
-                const circonstanceTable = element.querySelector('.circonstance-table');
+              if (redacteurTable && circonstanceTable) {
+                // Titres des tableaux
+                pdf.setFontSize(14);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text('Répartition par rédacteur', 70, yOffset, { align: 'center' });
+                pdf.text('Répartition par circonstance', 230, yOffset, { align: 'center' });
                 
-                if (circonstanceTable) {
-                  pdf.setFontSize(14);
-                  pdf.setTextColor(0, 0, 0);
-                  pdf.text('Répartition par circonstance', 160, yOffset - 5);
-                  
-                  const circonstanceCanvas = await html2canvas(circonstanceTable, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff'
-                  });
-                  
-                  const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
-                  
-                  // Ajuster la taille pour occuper la moitié droite de la page
-                  const circonstanceWidth = 130; 
-                  const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
-                  
-                  pdf.addImage(circonstanceImgData, 'PNG', 160, yOffset, circonstanceWidth, circonstanceHeight);
-                  
-                  // Mettre à jour yOffset avec le maximum des deux hauteurs
-                  yOffset = Math.max(nextYOffset, yOffset + circonstanceHeight + 15);
+                yOffset += 10;
+                
+                // Capture et rendu des tableaux
+                const redacteurCanvas = await html2canvas(redacteurTable, {
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                  allowTaint: true,
+                  backgroundColor: '#ffffff',
+                  onclone: (clonedDoc) => {
+                    // Éventuellement, modifier le clone pour optimiser le rendu
+                    const clonedTable = clonedDoc.querySelector('.redacteur-table');
+                    if (clonedTable) {
+                      // Ajuster la hauteur ou d'autres propriétés si nécessaire
+                    }
+                  }
+                });
+                
+                const circonstanceCanvas = await html2canvas(circonstanceTable, {
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                  allowTaint: true,
+                  backgroundColor: '#ffffff'
+                });
+                
+                // Calculer les dimensions optimales pour les tableaux côte à côte
+                const redacteurWidth = 120;
+                const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
+                
+                const circonstanceWidth = 120;
+                const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
+                
+                // Ajouter les images avec un espacement horizontal
+                const redacteurImgData = redacteurCanvas.toDataURL('image/png');
+                pdf.addImage(redacteurImgData, 'PNG', 10, yOffset, redacteurWidth, redacteurHeight);
+                
+                const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
+                pdf.addImage(circonstanceImgData, 'PNG', 170, yOffset, circonstanceWidth, circonstanceHeight);
+                
+                // Si un tableau est beaucoup plus long que l'autre et déborde sur une nouvelle page,
+                // nous pourrions ajouter une nouvelle page automatiquement
+                const maxHeight = Math.max(redacteurHeight, circonstanceHeight);
+                if (yOffset + maxHeight > 190) { // Près de la fin de la page
+                  // Gérer la pagination si nécessaire
                 }
-              } else {
-                yOffset = nextYOffset;
+              }
+            } 
+            // Si un seul tableau est inclus, le centrer sur la page
+            else if (options.includeRedacteurTable) {
+              const redacteurTable = element.querySelector('.redacteur-table');
+              
+              if (redacteurTable) {
+                pdf.setFontSize(14);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text('Répartition par rédacteur', 149, yOffset, { align: 'center' });
+                
+                yOffset += 10;
+                
+                const redacteurCanvas = await html2canvas(redacteurTable, {
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                  allowTaint: true,
+                  backgroundColor: '#ffffff'
+                });
+                
+                const redacteurWidth = 200;
+                const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
+                
+                const redacteurImgData = redacteurCanvas.toDataURL('image/png');
+                pdf.addImage(redacteurImgData, 'PNG', (297 - redacteurWidth) / 2, yOffset, redacteurWidth, redacteurHeight);
+              }
+            } 
+            else if (options.includeCirconstanceTable) {
+              const circonstanceTable = element.querySelector('.circonstance-table');
+              
+              if (circonstanceTable) {
+                pdf.setFontSize(14);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text('Répartition par circonstance', 149, yOffset, { align: 'center' });
+                
+                yOffset += 10;
+                
+                const circonstanceCanvas = await html2canvas(circonstanceTable, {
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                  allowTaint: true,
+                  backgroundColor: '#ffffff'
+                });
+                
+                const circonstanceWidth = 200;
+                const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
+                
+                const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
+                pdf.addImage(circonstanceImgData, 'PNG', (297 - circonstanceWidth) / 2, yOffset, circonstanceWidth, circonstanceHeight);
               }
             }
-          } else if (options.includeCirconstanceTable) {
-            // Si on n'a que le tableau des circonstances, le centrer
-            const circonstanceTable = element.querySelector('.circonstance-table');
-            
-            if (circonstanceTable) {
-              pdf.setFontSize(14);
-              pdf.setTextColor(0, 0, 0);
-              pdf.text('Répartition par circonstance', 149, yOffset, { align: 'center' });
-              
-              const circonstanceCanvas = await html2canvas(circonstanceTable, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-              });
-              
-              const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
-              
-              // Ajuster la taille et centrer
-              const circonstanceWidth = 200;
-              const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
-              
-              yOffset += 5;
-              pdf.addImage(circonstanceImgData, 'PNG', (297 - circonstanceWidth) / 2, yOffset, circonstanceWidth, circonstanceHeight);
-              
-              yOffset += circonstanceHeight + 15;
-            }
-          }
-        
-        if (options.includeCirconstanceTable) {
-          const circonstanceTable = element.querySelector('.circonstance-table');
-          
-          if (circonstanceTable) {
-            pdf.setFontSize(14);
-            pdf.setTextColor(0, 0, 0);
-            
-            // Placement à droite ou en dessous selon l'espace disponible
-            let circX = 20;
-            let circY = yOffset;
-            
-            if (options.includeRedacteurTable && yOffset < 180) {
-              // Placer à droite du tableau précédent
-              circX = 160;
-              circY = yOffset - (yOffset - 15); // Revenir au même niveau que le tableau précédent
-            }
-            
-            pdf.text('Répartition par circonstance', circX, circY);
-            
-            const circonstanceCanvas = await html2canvas(circonstanceTable, {
-              scale: 2,
-              useCORS: true,
-              logging: false,
-              allowTaint: true,
-              backgroundColor: '#ffffff'
-            });
-            
-            const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
-            
-            // Ajuster la taille
-            const circonstanceWidth = 130;
-            const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
-            
-            circY += 5;
-            pdf.addImage(circonstanceImgData, 'PNG', circX, circY, circonstanceWidth, circonstanceHeight);
           }
         }
-      }
-    }
+    }  
     
     // Télécharger le PDF
     pdf.save(`statistiques_pjc_${options.includeAnnualStats ? `avec_${options.annee}_` : ''}${new Date().toISOString().split('T')[0]}.pdf`);

@@ -12,16 +12,16 @@ const storage = multer.diskStorage({
   filename: function(req, file, cb) {
     // Convention de nommage pour les templates personnalisés
     const templateType = req.params.templateType;
-    cb(null, `${templateType}_template.odt`);
+    cb(null, `${templateType}_template.docx`);
   }
 });
 
 const upload = multer({ 
   storage: storage,
   fileFilter: function(req, file, cb) {
-    // N'accepter que les fichiers .odt
-    if (file.mimetype !== 'application/vnd.oasis.opendocument.text') {
-      return cb(new Error('Seuls les fichiers ODT sont acceptés'));
+    // N'accepter que les fichiers .docx
+    if (file.mimetype !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return cb(new Error('Seuls les fichiers DOCX sont acceptés'));
     }
     cb(null, true);
   }
@@ -32,8 +32,8 @@ router.get('/status', (req, res) => {
   try {
     const templatesPath = path.join(__dirname, '../templates');
     const templateStatus = {
-      convention: fs.existsSync(path.join(templatesPath, 'convention_template.odt')) ? 'custom' : 'default',
-      reglement: fs.existsSync(path.join(templatesPath, 'reglement_template.odt')) ? 'custom' : 'default'
+      convention: fs.existsSync(path.join(templatesPath, 'convention_template.docx')) ? 'custom' : 'default',
+      reglement: fs.existsSync(path.join(templatesPath, 'reglement_template.docx')) ? 'custom' : 'default'
     };
     
     res.json(templateStatus);
@@ -54,8 +54,8 @@ router.get('/download/:templateType', (req, res) => {
     }
     
     // Chemins des fichiers
-    const customTemplatePath = path.join(__dirname, '../templates', `${templateType}_template.odt`);
-    const defaultTemplatePath = path.join(__dirname, '../templates', `default_${templateType}_template.odt`);
+    const customTemplatePath = path.join(__dirname, '../templates', `${templateType}_template.docx`);
+    const defaultTemplatePath = path.join(__dirname, '../templates', `default_${templateType}_template.docx`);
     
     // Déterminer quel fichier envoyer
     const filePath = fs.existsSync(customTemplatePath) ? customTemplatePath : defaultTemplatePath;
@@ -64,8 +64,8 @@ router.get('/download/:templateType', (req, res) => {
       return res.status(404).json({ message: 'Template non trouvé' });
     }
     
-    res.setHeader('Content-Type', 'application/vnd.oasis.opendocument.text');
-    res.setHeader('Content-Disposition', `attachment; filename=${templateType}_template.odt`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename=${templateType}_template.docx`);
     
     // Envoyer le fichier
     const fileStream = fs.createReadStream(filePath);
@@ -111,7 +111,7 @@ router.post('/restore/:templateType', (req, res) => {
       return res.status(400).json({ message: 'Type de template non valide' });
     }
     
-    const customTemplatePath = path.join(__dirname, '../templates', `${templateType}_template.odt`);
+    const customTemplatePath = path.join(__dirname, '../templates', `${templateType}_template.docx`);
     
     // Supprimer le template personnalisé s'il existe
     if (fs.existsSync(customTemplatePath)) {

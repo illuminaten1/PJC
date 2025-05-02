@@ -33,15 +33,15 @@ const validateObjectId = (req, res, next) => {
   next();
 };
 
-// POST - Générer une convention d'honoraires (avec support ODT)
+// POST - Générer une convention d'honoraires (avec support ODT/DOCX)
 router.post('/convention/:beneficiaireId/:conventionIndex', validateMongoId('beneficiaireId'), async (req, res) => {
   try {
     const { beneficiaireId, conventionIndex } = req.params;
-    const { format = 'pdf' } = req.query; // Nouveau paramètre pour spécifier le format
+    const { format = 'pdf' } = req.query; // Paramètre pour spécifier le format
     
     // Vérifier que le format est valide
-    if (format !== 'pdf' && format !== 'odt') {
-      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt' });
+    if (format !== 'pdf' && format !== 'odt' && format !== 'docx') {
+      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt, docx' });
     }
     
     // Récupérer les données nécessaires avec vérification à chaque étape
@@ -119,6 +119,8 @@ router.post('/convention/:beneficiaireId/:conventionIndex', validateMongoId('ben
       contentType = 'application/pdf';
     } else if (format === 'odt') {
       contentType = 'application/vnd.oasis.opendocument.text';
+    } else if (format === 'docx') {
+      contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
     
     // Envoyer le document
@@ -135,7 +137,7 @@ router.post('/convention/:beneficiaireId/:conventionIndex', validateMongoId('ben
   }
 });
 
-// POST - Générer une fiche de règlement (avec support ODT)
+// POST - Générer une fiche de règlement (avec support ODT/DOCX)
 router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('beneficiaireId'), async (req, res) => {
   try {
     const { beneficiaireId, paiementIndex } = req.params;
@@ -146,9 +148,9 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('benefi
     console.log(`beneficiaireId: ${beneficiaireId}, paiementIndex: ${paiementIndex}`);
     
     // Vérifier si le format est valide
-    if (format !== 'pdf' && format !== 'odt') {
+    if (format !== 'pdf' && format !== 'odt' && format !== 'docx') {
       return res.status(400).json({ 
-        message: `Format non pris en charge. Formats supportés: pdf, odt` 
+        message: `Format non pris en charge. Formats supportés: pdf, odt, docx` 
       });
     }
     
@@ -244,6 +246,8 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('benefi
         contentType = 'application/pdf';
       } else if (format === 'odt') {
         contentType = 'application/vnd.oasis.opendocument.text';
+      } else if (format === 'docx') {
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       }
       
       res.contentType(contentType);
@@ -274,11 +278,11 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('benefi
 router.post('/synthese-affaire/:id', validateMongoId('id'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { format = 'pdf' } = req.query; // Format pdf ou odt
+    const { format = 'pdf' } = req.query; // Format pdf, odt ou docx
     
     // Vérifier que le format est valide
-    if (format !== 'pdf' && format !== 'odt') {
-      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt' });
+    if (format !== 'pdf' && format !== 'odt' && format !== 'docx') {
+      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt, docx' });
     }
     
     // Récupérer l'affaire avec toutes ses données associées
@@ -313,6 +317,8 @@ router.post('/synthese-affaire/:id', validateMongoId('id'), async (req, res) => 
       contentType = 'application/pdf';
     } else if (format === 'odt') {
       contentType = 'application/vnd.oasis.opendocument.text';
+    } else if (format === 'docx') {
+      contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
     
     // Envoyer le document
@@ -332,11 +338,16 @@ router.post('/synthese-affaire/:id', validateMongoId('id'), async (req, res) => 
 // POST - Générer une fiche d'information thématique
 router.post('/fiche-information', async (req, res) => {
   try {
-    const { titre, theme, sections, format } = req.body;
+    const { titre, theme, sections, format = 'docx' } = req.body;
     
     // Vérifier les données requises
     if (!titre || !theme || !sections || !Array.isArray(sections)) {
       return res.status(400).json({ message: 'Données incomplètes pour générer la fiche d\'information' });
+    }
+    
+    // Vérifier que le format est valide
+    if (format !== 'pdf' && format !== 'odt' && format !== 'docx') {
+      return res.status(400).json({ message: 'Format non valide. Formats supportés: pdf, odt, docx' });
     }
     
     // Données pour la génération du document
@@ -346,12 +357,21 @@ router.post('/fiche-information', async (req, res) => {
       sections
     };
     
-    // Générer le document (ODT ou DOCX)
-    const docBuffer = await documentGenerator.genererFicheInformation(data, format || 'docx');
+    // Générer le document 
+    const docBuffer = await documentGenerator.genererFicheInformation(data, format);
     
     // Déterminer le type MIME en fonction du format
-    const contentType = format === 'odt' ? 'application/vnd.oasis.opendocument.text' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    const extension = format === 'odt' ? 'odt' : 'docx';
+    let contentType;
+    if (format === 'pdf') {
+      contentType = 'application/pdf';
+    } else if (format === 'odt') {
+      contentType = 'application/vnd.oasis.opendocument.text';
+    } else if (format === 'docx') {
+      contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    }
+    
+    // Définir le nom du fichier
+    const extension = format;
     
     // Envoyer le document
     res.contentType(contentType);

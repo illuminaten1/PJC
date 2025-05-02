@@ -125,7 +125,7 @@ const formatDate = (date) => {
 /**
  * Génère un document de convention d'honoraires dans le format demandé
  * @param {Object} data - Données pour la convention
- * @param {String} format - Format de sortie ('pdf' ou 'odt')
+ * @param {String} format - Format de sortie ('pdf', 'odt' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererConventionHonoraires = async (data, format = 'pdf') => {
@@ -166,9 +166,12 @@ exports.genererConventionHonoraires = async (data, format = 'pdf') => {
         dateDocument: formatDate(new Date())
     };
 
+    // Déterminer le format du template à utiliser
+    const extension = format.toLowerCase() === 'docx' ? 'docx' : 'odt';
+    
     // Vérifier si le template personnalisé existe
-    const templatePath = path.join(__dirname, '../templates/convention_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_convention_template.odt');
+    const templatePath = path.join(__dirname, `../templates/convention_template.${extension}`);
+    const defaultTemplatePath = path.join(__dirname, `../templates/default_convention_template.${extension}`);
     
     let actualTemplatePath;
     
@@ -177,14 +180,17 @@ exports.genererConventionHonoraires = async (data, format = 'pdf') => {
     } else if (fs.existsSync(defaultTemplatePath)) {
       actualTemplatePath = defaultTemplatePath;
     } else {
-      throw new Error("Aucun template de convention d'honoraires n'est disponible");
+      throw new Error(`Aucun template de convention d'honoraires n'est disponible au format ${extension}`);
     }
     
     return new Promise((resolve, reject) => {
-      // Générer le document avec Carbone (format selon le paramètre)
+      // Options pour Carbone
       const options = {
-        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : null
+        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : 
+                   format.toLowerCase() === 'docx' ? 'docx' : null
       };
+      
+      console.log(`Génération d'une convention au format ${format} avec template ${actualTemplatePath}`);
       
       carbone.render(actualTemplatePath, dataForTemplate, options, function(err, result) {
         if (err) {
@@ -203,7 +209,7 @@ exports.genererConventionHonoraires = async (data, format = 'pdf') => {
 /**
  * Génère une fiche de règlement dans le format demandé
  * @param {Object} data - Données pour la fiche de règlement
- * @param {String} format - Format du document ('pdf' ou 'odt')
+ * @param {String} format - Format du document ('pdf', 'odt' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererFicheReglement = async (data, format = 'pdf') => {
@@ -248,9 +254,12 @@ exports.genererFicheReglement = async (data, format = 'pdf') => {
       dateDocument: formatDate(new Date())
     };
 
+    // Déterminer le format du template à utiliser
+    const extension = format.toLowerCase() === 'docx' ? 'docx' : 'odt';
+    
     // Vérifier si le template personnalisé existe
-    const templatePath = path.join(__dirname, '../templates/reglement_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_reglement_template.odt');
+    const templatePath = path.join(__dirname, `../templates/reglement_template.${extension}`);
+    const defaultTemplatePath = path.join(__dirname, `../templates/default_reglement_template.${extension}`);
     
     let actualTemplatePath;
     
@@ -259,14 +268,17 @@ exports.genererFicheReglement = async (data, format = 'pdf') => {
     } else if (fs.existsSync(defaultTemplatePath)) {
       actualTemplatePath = defaultTemplatePath;
     } else {
-      throw new Error("Aucun template de fiche de règlement n'est disponible");
+      throw new Error(`Aucun template de fiche de règlement n'est disponible au format ${extension}`);
     }
     
     return new Promise((resolve, reject) => {
-      // Générer le document avec Carbone (format selon le paramètre)
+      // Options pour Carbone
       const options = {
-        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : null
+        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : 
+                   format.toLowerCase() === 'docx' ? 'docx' : null
       };
+      
+      console.log(`Génération d'une fiche de règlement au format ${format} avec template ${actualTemplatePath}`);
       
       carbone.render(actualTemplatePath, dataForTemplate, options, function(err, result) {
         if (err) {
@@ -285,7 +297,7 @@ exports.genererFicheReglement = async (data, format = 'pdf') => {
 /**
  * Génère un document de synthèse d'une affaire complète
  * @param {Object} data - Données pour la synthèse (affaire, militaires, bénéficiaires)
- * @param {String} format - Format de sortie ('pdf' ou 'odt')
+ * @param {String} format - Format de sortie ('pdf', 'odt' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
@@ -469,9 +481,12 @@ exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
       });
     }
     
-    // Utiliser le template de boucle
-    const templatePath = path.join(__dirname, '../templates/synthese_affaire_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_synthese_affaire_template.odt');
+    // Déterminer le format du template à utiliser
+    const extension = format.toLowerCase() === 'docx' ? 'docx' : 'odt';
+    
+    // Vérifier si le template personnalisé existe
+    const templatePath = path.join(__dirname, `../templates/synthese_affaire_template.${extension}`);
+    const defaultTemplatePath = path.join(__dirname, `../templates/default_synthese_affaire_template.${extension}`);
     
     let actualTemplatePath;
     
@@ -480,13 +495,17 @@ exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
     } else if (fs.existsSync(defaultTemplatePath)) {
       actualTemplatePath = defaultTemplatePath;
     } else {
-      throw new Error("Aucun template de synthèse d'affaire n'est disponible");
+      throw new Error(`Aucun template de synthèse d'affaire n'est disponible au format ${extension}`);
     }
     
     return new Promise((resolve, reject) => {
+      // Options pour Carbone
       const options = {
-        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : null
+        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : 
+                   format.toLowerCase() === 'docx' ? 'docx' : null
       };
+      
+      console.log(`Génération d'une synthèse d'affaire au format ${format} avec template ${actualTemplatePath}`);
       
       carbone.render(actualTemplatePath, templateData, options, function(err, result) {
         if (err) {
@@ -498,6 +517,57 @@ exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
     });
   } catch (error) {
     console.error("Erreur lors de la génération de la synthèse d'affaire:", error);
+    throw error;
+  }
+};
+
+/**
+ * Génère une fiche d'information thématique
+ * @param {Object} data - Données pour la fiche d'information
+ * @param {String} format - Format de sortie ('pdf', 'odt' ou 'docx')
+ * @returns {Promise<Buffer>} - Document généré
+ */
+exports.genererFicheInformation = async (data, format = 'docx') => {
+  try {
+    // Préparer les données pour Carbone
+    const templateData = {
+      titre: data.titre || 'Fiche d\'information',
+      theme: data.theme || 'Thème non précisé',
+      sections: data.sections || [],
+      dateDocument: formatDate(new Date())
+    };
+    
+    // Déterminer le template à utiliser (pour ce type de document, privilégier DOCX)
+    const templatePath = path.join(__dirname, '../templates/fiche_information_template.docx');
+    const defaultTemplatePath = path.join(__dirname, '../templates/default_fiche_information_template.docx');
+    
+    let actualTemplatePath;
+    
+    if (fs.existsSync(templatePath)) {
+      actualTemplatePath = templatePath;
+    } else if (fs.existsSync(defaultTemplatePath)) {
+      actualTemplatePath = defaultTemplatePath;
+    } else {
+      throw new Error(`Aucun template de fiche d'information n'est disponible`);
+    }
+    
+    return new Promise((resolve, reject) => {
+      // Génération du document avec format spécifié
+      const options = {
+        convertTo: format.toLowerCase() === 'pdf' ? 'pdf' : 
+                   format.toLowerCase() === 'odt' ? 'odt' : 'docx'
+      };
+      
+      carbone.render(actualTemplatePath, templateData, options, function(err, result) {
+        if (err) {
+          console.error(`Erreur lors de la génération de la fiche d'information:`, err);
+          return reject(err);
+        }
+        resolve(result);
+      });
+    });
+  } catch (error) {
+    console.error(`Erreur dans la génération de la fiche d'information:`, error);
     throw error;
   }
 };

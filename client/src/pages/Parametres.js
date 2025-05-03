@@ -36,8 +36,8 @@ const Parametres = () => {
 
   // Nouveaux états pour les templates
   const [templates, setTemplates] = useState({
-    convention: { name: 'Convention d\'honoraires', filename: 'convention_template.odt', status: 'default' },
-    reglement: { name: 'Fiche de règlement', filename: 'reglement_template.odt', status: 'default' }
+    convention: { name: 'Convention d\'honoraires', filename: 'convention_template.docx', status: 'default' },
+    reglement: { name: 'Fiche de règlement', filename: 'reglement_template.docx', status: 'default' }
   });
   const [templateLoading, setTemplateLoading] = useState(false);
   const conventionInputRef = useRef(null);
@@ -374,8 +374,8 @@ const handleTransferPortfolio = async () => {
     
     // Vérifier l'extension du fichier
     const fileExt = file.name.split('.').pop().toLowerCase();
-    if (fileExt !== 'odt') {
-      setError(`Le fichier doit être au format ODT (.odt)`);
+    if (fileExt !== 'docx') {
+      setError(`Le fichier doit être au format DOCX (.docx)`);
       return;
     }
     
@@ -647,7 +647,7 @@ const handleTransferPortfolio = async () => {
             <h4>Personnalisation des templates de documents</h4>
             <ul>
               <li>Vous pouvez <strong>télécharger</strong> les templates existants pour voir leur structure</li>
-              <li>Utilisez LibreOffice ou OpenOffice pour modifier les templates (format ODT)</li>
+              <li>Utilisez LibreOffice ou Microsoft Word pour modifier les templates (format DOCX)</li>
               <li>Ne modifiez pas les variables entre accolades comme {"{d.beneficiaire.nom}"} - elles seront remplacées par les données</li>
               <li>Après modification, <strong>uploadez</strong> le template personnalisé</li>
               <li>Si besoin, vous pouvez <strong>restaurer</strong> le template par défaut à tout moment</li>
@@ -808,7 +808,7 @@ const handleTransferPortfolio = async () => {
                       type="file"
                       ref={conventionInputRef}
                       style={{ display: 'none' }}
-                      accept=".odt"
+                      accept=".docx"
                       onChange={(e) => handleUploadTemplate(e, 'convention')}
                     />
                     
@@ -859,7 +859,7 @@ const handleTransferPortfolio = async () => {
                       type="file"
                       ref={reglementInputRef}
                       style={{ display: 'none' }}
-                      accept=".odt"
+                      accept=".docx"
                       onChange={(e) => handleUploadTemplate(e, 'reglement')}
                     />
                     

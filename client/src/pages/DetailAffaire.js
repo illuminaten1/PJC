@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaArchive, FaTrash, FaChartBar, FaStickyNote, FaFileAlt } from 'react-icons/fa';
+import { FaEdit, FaArchive, FaTrash, FaChartBar, FaStickyNote, FaFilePdf, FaFileWord } from 'react-icons/fa';
 import { affairesAPI, statistiquesAPI, documentsAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';

@@ -132,15 +132,12 @@ const DetailAffaire = () => {
     return new Date(date).toLocaleDateString('fr-FR');
   };
   
-  const handleGenerateSynthese = async () => {
+  const handleGenerateSynthese = async (format = 'pdf') => {
     try {
       // Afficher un message pour informer l'utilisateur
       setLoading(true);
       
-      // Définir le format souhaité (pdf ou odt)
-      const format = 'pdf'; // Vous pourriez ajouter une option dans l'interface pour choisir
-      
-      // Appeler l'API pour générer la synthèse
+      // Appeler l'API pour générer la synthèse avec le format spécifié
       const response = await documentsAPI.genererSyntheseAffaire(id, format);
       
       // Créer un URL pour le blob reçu
@@ -212,11 +209,19 @@ const DetailAffaire = () => {
 
             {/* Nouveau bouton pour générer la synthèse */}
             <ActionButton 
-              onClick={handleGenerateSynthese} 
-              title="Générer une synthèse complète de l'affaire"
+              onClick={() => handleGenerateSynthese('pdf')} 
+              title="Générer une synthèse PDF de l'affaire"
             >
-              <FaFileAlt />
-              <ButtonText>Synthèse</ButtonText>
+              <FaFilePdf />
+              <ButtonText>Synthèse PDF</ButtonText>
+            </ActionButton>
+
+            <ActionButton 
+              onClick={() => handleGenerateSynthese('docx')} 
+              title="Générer une synthèse DOCX de l'affaire"
+            >
+              <FaFileWord />
+              <ButtonText>Synthèse DOCX</ButtonText>
             </ActionButton>
             
             <ActionButton 

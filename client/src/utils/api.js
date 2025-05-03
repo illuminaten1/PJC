@@ -105,16 +105,16 @@ export const militairesAPI = {
 
 // API pour la génération de documents
 export const documentsAPI = {
-  genererConvention: (beneficiaireId, conventionId) => 
-    api.post(`/documents/convention/${beneficiaireId}/${conventionId}`, {}, { 
+  genererConvention: (beneficiaireId, conventionId, format = 'pdf') => 
+    api.post(`/documents/convention/${beneficiaireId}/${conventionId}?format=${format}`, {}, { 
       responseType: 'blob' 
     }),
-  genererReglement: (beneficiaireId, paiementId) => 
-    api.post(`/documents/reglement/${beneficiaireId}/${paiementId}`, {}, { 
+  genererReglement: (beneficiaireId, paiementId, format = 'pdf') => 
+    api.post(`/documents/reglement/${beneficiaireId}/${paiementId}?format=${format}`, {}, { 
       responseType: 'blob' 
     }),
-  genererFicheInformation: (data) => 
-    api.post(`/documents/fiche-information`, data, { 
+  genererFicheInformation: (data, format = 'docx') => 
+    api.post(`/documents/fiche-information?format=${format}`, data, { 
       responseType: 'blob' 
     })
 };

@@ -154,11 +154,11 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
                     <FaFilePdf />
                   </ActionButton>
                   
-                  {/* Nouveau bouton pour télécharger en ODT */}
+                  {/* Nouveau bouton pour télécharger en DOCX */}
                   <ActionButton 
-                    onClick={() => handleDownloadConvention(index, 'odt')} 
-                    title="Télécharger la convention en ODT"
-                    className="odt"
+                    onClick={() => handleDownloadConvention(index, 'docx')} 
+                    title="Télécharger la convention en DOCX"
+                    className="docx"
                   >
                     <FaFileWord />
                   </ActionButton>
@@ -285,7 +285,7 @@ const ActionButton = styled.button`
     }
   }
   
-  &.odt {
+  &.docx {
     color: #2196f3;
     
     &:hover {

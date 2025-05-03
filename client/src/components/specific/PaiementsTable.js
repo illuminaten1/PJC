@@ -146,11 +146,11 @@ const PaiementsTable = ({ paiements = [], beneficiaireId, onUpdate }) => {
                     <FaFilePdf />
                   </ActionButton>
                   
-                  {/* Nouveau bouton pour ODT */}
+                  {/* Nouveau bouton pour DOCX */}
                   <ActionButton 
-                    onClick={() => handleDownloadReglement(index, 'odt')} 
-                    title="Télécharger en ODT"
-                    className="odt"
+                    onClick={() => handleDownloadReglement(index, 'docx')} 
+                    title="Télécharger en DOCX"
+                    className="docx"
                   >
                     <FaFileWord />
                   </ActionButton>
@@ -276,7 +276,7 @@ const ActionButton = styled.button`
     }
   }
   
-  &.odt {
+  &.docx {
     color: #2196f3;
     
     &:hover {

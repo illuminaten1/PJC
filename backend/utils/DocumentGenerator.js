@@ -125,7 +125,7 @@ const formatDate = (date) => {
 /**
  * Génère un document de convention d'honoraires dans le format demandé
  * @param {Object} data - Données pour la convention
- * @param {String} format - Format de sortie ('pdf' ou 'odt')
+ * @param {String} format - Format de sortie ('pdf' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererConventionHonoraires = async (data, format = 'pdf') => {
@@ -167,8 +167,8 @@ exports.genererConventionHonoraires = async (data, format = 'pdf') => {
     };
 
     // Vérifier si le template personnalisé existe
-    const templatePath = path.join(__dirname, '../templates/convention_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_convention_template.odt');
+    const templatePath = path.join(__dirname, '../templates/convention_template.docx');
+    const defaultTemplatePath = path.join(__dirname, '../templates/default_convention_template.docx');
     
     let actualTemplatePath;
     
@@ -203,7 +203,7 @@ exports.genererConventionHonoraires = async (data, format = 'pdf') => {
 /**
  * Génère une fiche de règlement dans le format demandé
  * @param {Object} data - Données pour la fiche de règlement
- * @param {String} format - Format du document ('pdf' ou 'odt')
+ * @param {String} format - Format du document ('pdf' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererFicheReglement = async (data, format = 'pdf') => {
@@ -249,8 +249,8 @@ exports.genererFicheReglement = async (data, format = 'pdf') => {
     };
 
     // Vérifier si le template personnalisé existe
-    const templatePath = path.join(__dirname, '../templates/reglement_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_reglement_template.odt');
+    const templatePath = path.join(__dirname, '../templates/reglement_template.docx');
+    const defaultTemplatePath = path.join(__dirname, '../templates/default_reglement_template.docx');
     
     let actualTemplatePath;
     
@@ -285,7 +285,7 @@ exports.genererFicheReglement = async (data, format = 'pdf') => {
 /**
  * Génère un document de synthèse d'une affaire complète
  * @param {Object} data - Données pour la synthèse (affaire, militaires, bénéficiaires)
- * @param {String} format - Format de sortie ('pdf' ou 'odt')
+ * @param {String} format - Format de sortie ('pdf' ou 'docx')
  * @returns {Promise<Buffer>} - Document généré
  */
 exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
@@ -470,8 +470,8 @@ exports.genererSyntheseAffaire = async (data, format = 'pdf') => {
     }
     
     // Utiliser le template de boucle
-    const templatePath = path.join(__dirname, '../templates/synthese_affaire_template.odt');
-    const defaultTemplatePath = path.join(__dirname, '../templates/default_synthese_affaire_template.odt');
+    const templatePath = path.join(__dirname, '../templates/synthese_affaire_template.docx');
+    const defaultTemplatePath = path.join(__dirname, '../templates/default_synthese_affaire_template.docx');
     
     let actualTemplatePath;
     

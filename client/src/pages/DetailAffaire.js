@@ -8,6 +8,7 @@ import Modal from '../components/common/Modal';
 import AffaireForm from '../components/forms/AffaireForm';
 import AffaireTree from '../components/specific/AffaireTree';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
+import SyntheseDropdownButton from '../components/specific/SyntheseDropdownButton';
 import { MarkdownEditor, MarkdownDisplay } from '../components/common/MarkdownEditor';
 import {
   HeaderCard,
@@ -207,22 +208,7 @@ const DetailAffaire = () => {
               <ButtonText>{affaire.archive ? "Désarchiver tout" : "Archiver tout"}</ButtonText>
             </ActionButton>
 
-            {/* Nouveau bouton pour générer la synthèse */}
-            <ActionButton 
-              onClick={() => handleGenerateSynthese('pdf')} 
-              title="Générer une synthèse PDF de l'affaire"
-            >
-              <FaFilePdf />
-              <ButtonText>Synthèse PDF</ButtonText>
-            </ActionButton>
-
-            <ActionButton 
-              onClick={() => handleGenerateSynthese('docx')} 
-              title="Générer une synthèse DOCX de l'affaire"
-            >
-              <FaFileWord />
-              <ButtonText>Synthèse DOCX</ButtonText>
-            </ActionButton>
+            <SyntheseDropdownButton onGenerateSynthese={handleGenerateSynthese} />
             
             <ActionButton 
               onClick={() => setDeleteModalOpen(true)} 

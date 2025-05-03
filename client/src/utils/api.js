@@ -113,8 +113,8 @@ export const documentsAPI = {
     api.post(`/documents/reglement/${beneficiaireId}/${paiementId}?format=${format}`, {}, { 
       responseType: 'blob' 
     }),
-  genererFicheInformation: (data, format = 'docx') => 
-    api.post(`/documents/fiche-information?format=${format}`, data, { 
+  genererSyntheseAffaire: (affaireId, format = 'pdf') => 
+    api.post(`/documents/synthese-affaire/${affaireId}?format=${format}`, {}, { 
       responseType: 'blob' 
     })
 };

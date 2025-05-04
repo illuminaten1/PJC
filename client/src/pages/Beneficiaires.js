@@ -291,8 +291,9 @@ const Beneficiaires = () => {
         <InfoBox>
           <FaInfoCircle />
           <InfoText>
-            Vous êtes sur le point d'exporter les données suivantes dans un fichier Excel (.xlsx). 
+            Vous êtes sur le point d'exporter les données de la page dans un fichier Excel (.xlsx). 
             Le fichier contiendra trois onglets distincts avec toutes les informations associées.
+            Vous pouvez choisir quelles informations exporter en appliquant des filtres sur la page.
           </InfoText>
         </InfoBox>
         
@@ -317,7 +318,7 @@ const Beneficiaires = () => {
             <SheetDetails>
               <SheetName>Onglet "Conventions"</SheetName>
               <SheetDescription>
-                Toutes les {exportCount.conventions} conventions d'honoraires liées aux bénéficiaires 
+                Les {exportCount.conventions} conventions d'honoraires liées aux bénéficiaires 
                 (montants, pourcentages, dates d'envoi et de validation, etc.)
               </SheetDescription>
             </SheetDetails>
@@ -330,7 +331,7 @@ const Beneficiaires = () => {
             <SheetDetails>
               <SheetName>Onglet "Paiements"</SheetName>
               <SheetDescription>
-                Tous les {exportCount.paiements} paiements effectués pour les bénéficiaires
+                Les {exportCount.paiements} paiements effectués pour les bénéficiaires
                 (montants, dates, références, coordonnées bancaires, etc.)
               </SheetDescription>
             </SheetDetails>

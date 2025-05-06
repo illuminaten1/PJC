@@ -85,8 +85,12 @@ fi
 
 # Initialisation des données fictives si nécessaire
 echo "Vérification et initialisation des données..."
-node scripts/init-data.js
-echo "Vérification et initialisation des données terminées."
+if [ "$SKIP_DATA_INIT" = "true" ]; then
+  echo "⏩ Initialisation des données ignorée en environnement de production"
+else
+  node scripts/init-data.js
+  echo "Vérification et initialisation des données terminées."
+fi
 
 # Démarrage de l'application
 echo "Démarrage du serveur Node.js"

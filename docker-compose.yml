@@ -24,7 +24,7 @@ services:
       - MONGODB_URI=mongodb://admin:password123@mongodb:27017/protection-juridique?authSource=admin
       - JWT_SECRET=pjc_secret_key
       - PORT=5002
-      - SKIP_DATA_INIT=true
+      - SKIP_DATA_INIT=false
     depends_on:
       - mongodb
     volumes:

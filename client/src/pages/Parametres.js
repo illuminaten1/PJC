@@ -769,6 +769,7 @@ const handleTransferPortfolio = async () => {
       ) : (
         <>
           {/* Section des templates de documents */}
+          {isAdmin() && (
           <Section>
             <ExpandableSection
               title="Templates de documents (voir la documentation avant de modifier)"
@@ -879,8 +880,9 @@ const handleTransferPortfolio = async () => {
               </TemplatesList>
             </ExpandableSection>
           </Section>
+          )}
 
-          {/* Nouvelle section pour la gestion des utilisateurs (admin uniquement) */}
+          {/* Section pour la gestion des utilisateurs (admin uniquement) */}
           {isAdmin() && (
             <Section>
               <ExpandableSection
@@ -962,7 +964,9 @@ const handleTransferPortfolio = async () => {
             </Section>
           )}
 
-<Section>
+          {/* Section pour la gestion des circonstances (admin uniquement) */}
+          {isAdmin() && (
+          <Section>
             <ExpandableSection
               title="Circonstances (voir la documentation avant de modifier)"
               defaultExpanded={true}
@@ -993,7 +997,9 @@ const handleTransferPortfolio = async () => {
               </AddParameterForm>
             </ExpandableSection>
           </Section>
+        )}
           
+          {/* Section pour la gestion des rédacteurs (admin uniquement) */}
           <Section>
             <ExpandableSection
               title="Rédacteurs (voir la documentation avant de modifier)"

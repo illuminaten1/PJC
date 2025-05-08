@@ -720,332 +720,329 @@ const handleTransferPortfolio = async () => {
         </ExpandableSection>
       </Section>
       
-      {/* Afficher le mode historique si activé */}
-      {historiqueModeOpen ? (
+{/* Afficher le mode historique si activé */}
+{historiqueModeOpen ? (
+  <Section>
+    <HistoriqueHeader>
+      <h2>Historique des transferts de portefeuille (30 derniers jours)</h2>
+      <BackButton onClick={() => setHistoriqueModeOpen(false)}>
+        <FaArrowLeft style={{ marginRight: '8px' }} />
+        Retour aux paramètres
+      </BackButton>
+    </HistoriqueHeader>
+    
+    {historiqueLoading ? (
+      <Loading>Chargement de l'historique...</Loading>
+    ) : historiqueTransferts.length === 0 ? (
+      <EmptyHistorique>
+        Aucun transfert de portefeuille n'a été effectué durant les 30 derniers jours.
+      </EmptyHistorique>
+    ) : (
+      <HistoriqueList>
+        {historiqueTransferts.map((transfert, index) => (
+          <HistoriqueItem key={index} status={transfert.statut}>
+            <HistoriqueDate>{formatDate(transfert.dateTransfert)}</HistoriqueDate>
+            <HistoriqueContent>
+              <div>
+                <strong>De:</strong> {transfert.sourceRedacteur}
+              </div>
+              <div>
+                <strong>Vers:</strong> {transfert.targetRedacteur}
+              </div>
+              <div>
+                <strong>Affaires modifiées:</strong> {transfert.affairesModifiees}
+              </div>
+              <div>
+                <strong>Statut:</strong> {transfert.statut}
+              </div>
+              {transfert.message && (
+                <HistoriqueMessage>
+                  {transfert.message}
+                </HistoriqueMessage>
+              )}
+            </HistoriqueContent>
+          </HistoriqueItem>
+        ))}
+      </HistoriqueList>
+    )}
+  </Section>
+) : (
+  <>
+    {isAdmin() && (
+      <>
+        {/* Section des templates de documents */}
         <Section>
-          <HistoriqueHeader>
-            <h2>Historique des transferts de portefeuille (30 derniers jours)</h2>
-            <BackButton onClick={() => setHistoriqueModeOpen(false)}>
-              <FaArrowLeft style={{ marginRight: '8px' }} />
-              Retour aux paramètres
-            </BackButton>
-          </HistoriqueHeader>
-          
-          {historiqueLoading ? (
-            <Loading>Chargement de l'historique...</Loading>
-          ) : historiqueTransferts.length === 0 ? (
-            <EmptyHistorique>
-              Aucun transfert de portefeuille n'a été effectué durant les 30 derniers jours.
-            </EmptyHistorique>
-          ) : (
-            <HistoriqueList>
-              {historiqueTransferts.map((transfert, index) => (
-                <HistoriqueItem key={index} status={transfert.statut}>
-                  <HistoriqueDate>{formatDate(transfert.dateTransfert)}</HistoriqueDate>
-                  <HistoriqueContent>
-                    <div>
-                      <strong>De:</strong> {transfert.sourceRedacteur}
-                    </div>
-                    <div>
-                      <strong>Vers:</strong> {transfert.targetRedacteur}
-                    </div>
-                    <div>
-                      <strong>Affaires modifiées:</strong> {transfert.affairesModifiees}
-                    </div>
-                    <div>
-                      <strong>Statut:</strong> {transfert.statut}
-                    </div>
-                    {transfert.message && (
-                      <HistoriqueMessage>
-                        {transfert.message}
-                      </HistoriqueMessage>
-                    )}
-                  </HistoriqueContent>
-                </HistoriqueItem>
-              ))}
-            </HistoriqueList>
-          )}
+          <ExpandableSection
+            title="Templates de documents (voir la documentation avant de modifier)"
+            defaultExpanded={true}
+          >
+            <TemplatesList>
+              {/* Template de convention */}
+              <TemplateItem>
+                <TemplateInfo>
+                  <TemplateName>{templates.convention.name}</TemplateName>
+                  <TemplateStatus status={templates.convention.status}>
+                    {templates.convention.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
+                  </TemplateStatus>
+                </TemplateInfo>
+                <TemplateActions>
+                  <TemplateButton 
+                    title="Télécharger le template actuel"
+                    onClick={() => handleDownloadTemplate('convention')}
+                    disabled={templateLoading}
+                    className="download"
+                  >
+                    <FaDownload />
+                    <span>Télécharger</span>
+                  </TemplateButton>
+                  
+                  <TemplateButton 
+                    title="Uploader un template personnalisé"
+                    onClick={() => triggerFileInput(conventionInputRef)}
+                    disabled={templateLoading}
+                    className="upload"
+                  >
+                    <FaUpload />
+                    <span>Uploader</span>
+                  </TemplateButton>
+                  
+                  <input
+                    type="file"
+                    ref={conventionInputRef}
+                    style={{ display: 'none' }}
+                    accept=".docx"
+                    onChange={(e) => handleUploadTemplate(e, 'convention')}
+                  />
+                  
+                  {templates.convention.status === 'custom' && (
+                    <TemplateButton 
+                      title="Restaurer le template par défaut"
+                      onClick={() => openRestoreConfirmation('convention')}
+                      disabled={templateLoading}
+                      className="restore"
+                    >
+                      <FaUndo />
+                      <span>Restaurer</span>
+                    </TemplateButton>
+                  )}
+                </TemplateActions>
+              </TemplateItem>
+              
+              {/* Template de règlement */}
+              <TemplateItem>
+                <TemplateInfo>
+                  <TemplateName>{templates.reglement.name}</TemplateName>
+                  <TemplateStatus status={templates.reglement.status}>
+                    {templates.reglement.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
+                  </TemplateStatus>
+                </TemplateInfo>
+                <TemplateActions>
+                  <TemplateButton 
+                    title="Télécharger le template actuel"
+                    onClick={() => handleDownloadTemplate('reglement')}
+                    disabled={templateLoading}
+                    className="download"
+                  >
+                    <FaDownload />
+                    <span>Télécharger</span>
+                  </TemplateButton>
+                  
+                  <TemplateButton 
+                    title="Uploader un template personnalisé"
+                    onClick={() => triggerFileInput(reglementInputRef)}
+                    disabled={templateLoading}
+                    className="upload"
+                  >
+                    <FaUpload />
+                    <span>Uploader</span>
+                  </TemplateButton>
+                  
+                  <input
+                    type="file"
+                    ref={reglementInputRef}
+                    style={{ display: 'none' }}
+                    accept=".docx"
+                    onChange={(e) => handleUploadTemplate(e, 'reglement')}
+                  />
+                  
+                  {templates.reglement.status === 'custom' && (
+                    <TemplateButton 
+                      title="Restaurer le template par défaut"
+                      onClick={() => openRestoreConfirmation('reglement')}
+                      disabled={templateLoading}
+                      className="restore"
+                    >
+                      <FaUndo />
+                      <span>Restaurer</span>
+                    </TemplateButton>
+                  )}
+                </TemplateActions>
+              </TemplateItem>
+            </TemplatesList>
+          </ExpandableSection>
         </Section>
-      ) : (
-        <>
-          {/* Section des templates de documents */}
-          {isAdmin() && (
-          <Section>
-            <ExpandableSection
-              title="Templates de documents (voir la documentation avant de modifier)"
-              defaultExpanded={true}
-            >
-              <TemplatesList>
-                {/* Template de convention */}
-                <TemplateItem>
-                  <TemplateInfo>
-                    <TemplateName>{templates.convention.name}</TemplateName>
-                    <TemplateStatus status={templates.convention.status}>
-                      {templates.convention.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
-                    </TemplateStatus>
-                  </TemplateInfo>
-                  <TemplateActions>
-                    <TemplateButton 
-                      title="Télécharger le template actuel"
-                      onClick={() => handleDownloadTemplate('convention')}
-                      disabled={templateLoading}
-                      className="download"
-                    >
-                      <FaDownload />
-                      <span>Télécharger</span>
-                    </TemplateButton>
-                    
-                    <TemplateButton 
-                      title="Uploader un template personnalisé"
-                      onClick={() => triggerFileInput(conventionInputRef)}
-                      disabled={templateLoading}
-                      className="upload"
-                    >
-                      <FaUpload />
-                      <span>Uploader</span>
-                    </TemplateButton>
-                    
-                    <input
-                      type="file"
-                      ref={conventionInputRef}
-                      style={{ display: 'none' }}
-                      accept=".docx"
-                      onChange={(e) => handleUploadTemplate(e, 'convention')}
-                    />
-                    
-                    {templates.convention.status === 'custom' && (
-                      <TemplateButton 
-                        title="Restaurer le template par défaut"
-                        onClick={() => openRestoreConfirmation('convention')}
-                        disabled={templateLoading}
-                        className="restore"
-                      >
-                        <FaUndo />
-                        <span>Restaurer</span>
-                      </TemplateButton>
-                    )}
-                  </TemplateActions>
-                </TemplateItem>
-                
-                {/* Template de règlement */}
-                <TemplateItem>
-                  <TemplateInfo>
-                    <TemplateName>{templates.reglement.name}</TemplateName>
-                    <TemplateStatus status={templates.reglement.status}>
-                      {templates.reglement.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
-                    </TemplateStatus>
-                  </TemplateInfo>
-                  <TemplateActions>
-                    <TemplateButton 
-                      title="Télécharger le template actuel"
-                      onClick={() => handleDownloadTemplate('reglement')}
-                      disabled={templateLoading}
-                      className="download"
-                    >
-                      <FaDownload />
-                      <span>Télécharger</span>
-                    </TemplateButton>
-                    
-                    <TemplateButton 
-                      title="Uploader un template personnalisé"
-                      onClick={() => triggerFileInput(reglementInputRef)}
-                      disabled={templateLoading}
-                      className="upload"
-                    >
-                      <FaUpload />
-                      <span>Uploader</span>
-                    </TemplateButton>
-                    
-                    <input
-                      type="file"
-                      ref={reglementInputRef}
-                      style={{ display: 'none' }}
-                      accept=".docx"
-                      onChange={(e) => handleUploadTemplate(e, 'reglement')}
-                    />
-                    
-                    {templates.reglement.status === 'custom' && (
-                      <TemplateButton 
-                        title="Restaurer le template par défaut"
-                        onClick={() => openRestoreConfirmation('reglement')}
-                        disabled={templateLoading}
-                        className="restore"
-                      >
-                        <FaUndo />
-                        <span>Restaurer</span>
-                      </TemplateButton>
-                    )}
-                  </TemplateActions>
-                </TemplateItem>
-              </TemplatesList>
-            </ExpandableSection>
-          </Section>
-          )}
 
-          {/* Section pour la gestion des utilisateurs (admin uniquement) */}
-          {isAdmin() && (
-            <Section>
-              <ExpandableSection
-                title="Gestion des utilisateurs"
-                defaultExpanded={true}
-              >
-                {utilisateursLoading ? (
-                  <Loading>Chargement des utilisateurs...</Loading>
-                ) : (
-                  <>
-                    <UserActionButton onClick={() => openUtilisateurModal()}>
-                      <FaUserPlus />
-                      <span>Ajouter un utilisateur</span>
-                    </UserActionButton>
-                    
-                    <UsersList>
-                      {utilisateurs.map((utilisateur) => (
-                        <UserItem key={utilisateur._id} active={utilisateur.actif}>
-                          <UserInfo>
-                            <UserName>{utilisateur.nom}</UserName>
-                            <UserUsername>@{utilisateur.username}</UserUsername>
-                            <UserRole>
-                              {utilisateur.role === 'administrateur' ? 'Administrateur' : 'Rédacteur'}
-                            </UserRole>
-                            <UserStatus active={utilisateur.actif}>
-                              {utilisateur.actif ? 'Actif' : 'Inactif'}
-                            </UserStatus>
-                          </UserInfo>
-                          <UserActions>
-                            <UserActionButton 
-                              title="Modifier l'utilisateur" 
-                              onClick={() => openUtilisateurModal(utilisateur)}
-                              small
-                            >
-                              <FaUserEdit />
-                            </UserActionButton>
-                            
-                            <UserActionButton 
-                              title="Changer le mot de passe" 
-                              onClick={() => openPasswordModal(utilisateur)}
-                              small
-                            >
-                              <FaKey />
-                            </UserActionButton>
-                            
-                            <UserActionButton 
-                              title={utilisateur.actif ? "Désactiver l'utilisateur" : "Activer l'utilisateur"} 
-                              onClick={() => toggleUtilisateurActif(utilisateur)}
-                              small
-                              status={utilisateur.actif ? 'warning' : 'success'}
-                            >
-                              {utilisateur.actif ? <FaTrash /> : <FaUndo />}
-                            </UserActionButton>
-                            
-                            {/* Ne pas permettre de supprimer son propre compte */}
-                            {user && user.id !== utilisateur._id && (
-                              <UserActionButton 
-                                title="Supprimer l'utilisateur" 
-                                onClick={() => confirmerSuppressionUtilisateur(utilisateur)}
-                                small
-                                status="danger"
-                              >
-                                <FaTrash />
-                              </UserActionButton>
-                            )}
-                          </UserActions>
-                        </UserItem>
-                      ))}
-                    </UsersList>
-                    
-                    {utilisateurs.length === 0 && (
-                      <EmptyUsers>
-                        Aucun utilisateur trouvé. Cliquez sur "Ajouter un utilisateur" pour créer le premier compte.
-                      </EmptyUsers>
-                    )}
-                  </>
+        {/* Nouvelle section pour la gestion des utilisateurs (admin uniquement) */}
+        <Section>
+          <ExpandableSection
+            title="Gestion des utilisateurs"
+            defaultExpanded={true}
+          >
+            {utilisateursLoading ? (
+              <Loading>Chargement des utilisateurs...</Loading>
+            ) : (
+              <>
+                <UserActionButton onClick={() => openUtilisateurModal()}>
+                  <FaUserPlus />
+                  <span>Ajouter un utilisateur</span>
+                </UserActionButton>
+                
+                <UsersList>
+                  {utilisateurs.map((utilisateur) => (
+                    <UserItem key={utilisateur._id} active={utilisateur.actif}>
+                      <UserInfo>
+                        <UserName>{utilisateur.nom}</UserName>
+                        <UserUsername>@{utilisateur.username}</UserUsername>
+                        <UserRole>
+                          {utilisateur.role === 'administrateur' ? 'Administrateur' : 'Rédacteur'}
+                        </UserRole>
+                        <UserStatus active={utilisateur.actif}>
+                          {utilisateur.actif ? 'Actif' : 'Inactif'}
+                        </UserStatus>
+                      </UserInfo>
+                      <UserActions>
+                        <UserActionButton 
+                          title="Modifier l'utilisateur" 
+                          onClick={() => openUtilisateurModal(utilisateur)}
+                          small
+                        >
+                          <FaUserEdit />
+                        </UserActionButton>
+                        
+                        <UserActionButton 
+                          title="Changer le mot de passe" 
+                          onClick={() => openPasswordModal(utilisateur)}
+                          small
+                        >
+                          <FaKey />
+                        </UserActionButton>
+                        
+                        <UserActionButton 
+                          title={utilisateur.actif ? "Désactiver l'utilisateur" : "Activer l'utilisateur"} 
+                          onClick={() => toggleUtilisateurActif(utilisateur)}
+                          small
+                          status={utilisateur.actif ? 'warning' : 'success'}
+                        >
+                          {utilisateur.actif ? <FaTrash /> : <FaUndo />}
+                        </UserActionButton>
+                        
+                        {/* Ne pas permettre de supprimer son propre compte */}
+                        {user && user.id !== utilisateur._id && (
+                          <UserActionButton 
+                            title="Supprimer l'utilisateur" 
+                            onClick={() => confirmerSuppressionUtilisateur(utilisateur)}
+                            small
+                            status="danger"
+                          >
+                            <FaTrash />
+                          </UserActionButton>
+                        )}
+                      </UserActions>
+                    </UserItem>
+                  ))}
+                </UsersList>
+                
+                {utilisateurs.length === 0 && (
+                  <EmptyUsers>
+                    Aucun utilisateur trouvé. Cliquez sur "Ajouter un utilisateur" pour créer le premier compte.
+                  </EmptyUsers>
                 )}
-              </ExpandableSection>
-            </Section>
-          )}
+              </>
+            )}
+          </ExpandableSection>
+        </Section>
+      
 
-          {/* Section pour la gestion des circonstances (admin uniquement) */}
-          {isAdmin() && (
-          <Section>
-            <ExpandableSection
-              title="Circonstances (voir la documentation avant de modifier)"
-              defaultExpanded={true}
-            >
-              <ParametersList>
-                {parametres.circonstances && parametres.circonstances.map((circonstance, index) => (
-                  <ParameterItem key={index}>
-                    <ParameterText>{circonstance}</ParameterText>
-                    <DeleteButton onClick={() => openDeleteConfirmation('circonstances', index, circonstance)}>
-                      <FaTrash />
-                    </DeleteButton>
-                  </ParameterItem>
-                ))}
-              </ParametersList>
+        <Section>
+          <ExpandableSection
+            title="Circonstances (voir la documentation avant de modifier)"
+            defaultExpanded={true}
+          >
+            <ParametersList>
+              {parametres.circonstances && parametres.circonstances.map((circonstance, index) => (
+                <ParameterItem key={index}>
+                  <ParameterText>{circonstance}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('circonstances', index, circonstance)}>
+                    <FaTrash />
+                  </DeleteButton>
+                </ParameterItem>
+              ))}
+            </ParametersList>
+            
+            <AddParameterForm>
+              <AddParameterInput
+                type="text"
+                value={circonstanceInput}
+                onChange={(e) => setCirconstanceInput(e.target.value)}
+                onKeyDown={handleCirconstanceKeyDown}
+                placeholder="Nouvelle circonstance..."
+              />
+              <AddButton onClick={handleAddCirconstance}>
+                <FaPlus />
+                <span>Ajouter</span>
+              </AddButton>
+            </AddParameterForm>
+          </ExpandableSection>
+        </Section>
+        
+        <Section>
+          <ExpandableSection
+            title="Rédacteurs (voir la documentation avant de modifier)"
+            defaultExpanded={true}
+          >
+            <ParametersList>
+              {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (
+                <ParameterItem key={index}>
+                  <ParameterText>{redacteur}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('redacteurs', index, redacteur)}>
+                    <FaTrash />
+                  </DeleteButton>
+                </ParameterItem>
+              ))}
+            </ParametersList>
+            
+            <AddParameterForm>
+              <AddParameterInput
+                type="text"
+                value={redacteurInput}
+                onChange={(e) => setRedacteurInput(e.target.value)}
+                onKeyDown={handleRedacteurKeyDown}
+                placeholder="Nouveau rédacteur..."
+              />
+              <AddButton onClick={handleAddRedacteur}>
+                <FaPlus />
+                <span>Ajouter</span>
+              </AddButton>
+            </AddParameterForm>
+            
+            {/* Boutons pour le transfert et l'historique */}
+            <ActionButtonsContainer>
+              <TransferButton onClick={openTransferModal}>
+                <FaExchangeAlt />
+                <span>Transférer un portefeuille</span>
+              </TransferButton>
               
-              <AddParameterForm>
-                <AddParameterInput
-                  type="text"
-                  value={circonstanceInput}
-                  onChange={(e) => setCirconstanceInput(e.target.value)}
-                  onKeyDown={handleCirconstanceKeyDown}
-                  placeholder="Nouvelle circonstance..."
-                />
-                <AddButton onClick={handleAddCirconstance}>
-                  <FaPlus />
-                  <span>Ajouter</span>
-                </AddButton>
-              </AddParameterForm>
-            </ExpandableSection>
-          </Section>
-        )}
-          
-          {/* Section pour la gestion des rédacteurs (admin uniquement) */}
-          <Section>
-            <ExpandableSection
-              title="Rédacteurs (voir la documentation avant de modifier)"
-              defaultExpanded={true}
-            >
-              <ParametersList>
-                {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (
-                  <ParameterItem key={index}>
-                    <ParameterText>{redacteur}</ParameterText>
-                    <DeleteButton onClick={() => openDeleteConfirmation('redacteurs', index, redacteur)}>
-                      <FaTrash />
-                    </DeleteButton>
-                  </ParameterItem>
-                ))}
-              </ParametersList>
-              
-              <AddParameterForm>
-                <AddParameterInput
-                  type="text"
-                  value={redacteurInput}
-                  onChange={(e) => setRedacteurInput(e.target.value)}
-                  onKeyDown={handleRedacteurKeyDown}
-                  placeholder="Nouveau rédacteur..."
-                />
-                <AddButton onClick={handleAddRedacteur}>
-                  <FaPlus />
-                  <span>Ajouter</span>
-                </AddButton>
-              </AddParameterForm>
-              
-              {/* Boutons pour le transfert et l'historique */}
-              <ActionButtonsContainer>
-                <TransferButton onClick={openTransferModal}>
-                  <FaExchangeAlt />
-                  <span>Transférer un portefeuille</span>
-                </TransferButton>
-                
-                <HistoryButton onClick={openHistoriqueMode}>
-                  <FaHistory />
-                  <span>Voir l'historique des transferts</span>
-                </HistoryButton>
-              </ActionButtonsContainer>
-            </ExpandableSection>
-          </Section>
-        </>
-      )}
+              <HistoryButton onClick={openHistoriqueMode}>
+                <FaHistory />
+                <span>Voir l'historique des transferts</span>
+              </HistoryButton>
+            </ActionButtonsContainer>
+          </ExpandableSection>
+        </Section>
+      </>
+    )}
+  </>  
+)}
       
       {/* Modal de confirmation de suppression */}
       <Modal

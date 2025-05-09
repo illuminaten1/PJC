@@ -29,3 +29,9 @@ yarn-error.log*
 # Fichiers temporaires
 *.tmp
 *.swp
+
+# SSL certificates
+certbot/
+*.pem
+*.key
+*.crt

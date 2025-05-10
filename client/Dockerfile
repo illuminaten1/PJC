@@ -7,14 +7,14 @@ RUN npm install
 
 COPY . .
 
-# URL de l'API dans un environnement proxyfié
+# Créer le fichier .env avec la bonne URL
 RUN echo "REACT_APP_API_URL=/api" > .env
 
 RUN npm run build
 
 FROM nginx:alpine
 
-# Configuration nginx simple pour HTTP
+# Copier la configuration nginx basique
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/build /usr/share/nginx/html

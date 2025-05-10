@@ -12,7 +12,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password123
     networks:
       - pjc-network
-
   backend:
     build: ./backend
     container_name: pjc-backend
@@ -32,23 +31,23 @@ services:
       - ./backend/temp:/app/temp
     networks:
       - pjc-network
-
   frontend:
     build: ./client
     container_name: pjc-frontend
     restart: always
     ports:
       - "80:80"
+      - "443:443"  # Ajout du port 443 pour HTTPS
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=http://localhost:5002/api
+      - REACT_APP_API_URL=https://pjctest.online/api  # Changement vers HTTPS
+    volumes:
+      - ./ssl:/etc/ssl/private:ro  # Montage des certificats SSL
     networks:
       - pjc-network
-
 networks:
   pjc-network:
     driver: bridge
-
 volumes:
   mongodb_data:

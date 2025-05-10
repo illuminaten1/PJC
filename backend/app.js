@@ -17,11 +17,16 @@ const exportRoutes = require('./routes/export'); // Nouvelle route d'export Exce
 
 const app = express();
 
-// Configuration Middleware
-app.use(cors());
+app.use(cors({
+  origin: true, // Autorise toutes les origines
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Total-Count']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use('/.well-known/acme-challenge', express.static(path.join(__dirname, '.well-known/acme-challenge')));
 
 // Servir les fichiers statiques du frontend en production

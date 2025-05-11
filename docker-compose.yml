@@ -38,7 +38,7 @@ services:
     container_name: pjc-frontend
     restart: always
     ports:
-      - "3000:80"  # Changé : écoute sur port 3000
+      - "80:80"  # Écoute sur port 3000
     depends_on:
       - backend
     environment:

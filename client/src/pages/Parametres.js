@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
-import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft, FaDownload, FaUpload, FaUndo, FaUserPlus, FaUserEdit, FaKey } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft, FaDownload, FaUpload, FaUndo, FaUserPlus, FaUserEdit, FaKey, FaSave, FaGripVertical } from 'react-icons/fa';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { parametresAPI, templatesAPI } from '../utils/api';
 import { AuthContext } from '../contexts/AuthContext';

@@ -653,121 +653,96 @@ export const exportToPDF = async (element, data, options) => {
           pdf.setTextColor(0, 0, 0);
           pdf.text(`Suivi budgétaire ${options.annee}`, 20, yOffset);
           
-          // Vérifier si nous avons assez d'espace sur la page actuelle
-          if (yOffset > 120) { // Si espace insuffisant, ajouter une page
-            pdf.addPage();
-            yOffset = 15;
-            
-            pdf.setFontSize(14);
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(`Suivi budgétaire ${options.annee}`, 20, yOffset);
-            yOffset += 10;
-          }
+          // Capture d'abord le graphique et la synthèse
+          const budgetChart = budgetSection.querySelector('.budget-chart');
+          const budgetSummary = budgetSection.querySelector('.budget-summary');
+          const budgetTable = budgetSection.querySelector('.budget-detail-table');
           
-          // Essayer d'abord de capturer la section budget entière
-          try {
-            const budgetImgData = await captureElementOptimized(budgetSection, 1.2, 0.65);
+          // Capture le graphique (qualité légèrement meilleure)
+          if (budgetChart) {
+            const chartImgData = await captureElementOptimized(budgetChart, 1.5, 0.7);
             
-            if (budgetImgData) {
-              // Créer une image temporaire pour obtenir les dimensions
-              const img = new Image();
-              img.src = budgetImgData;
+            if (chartImgData) {
+              const chartImg = new Image();
+              chartImg.src = chartImgData;
               
               await new Promise(resolve => {
-                img.onload = resolve;
+                chartImg.onload = resolve;
               });
               
-              // Ajuster la taille
-              const budgetWidth = 260;
-              const budgetHeight = (img.height * budgetWidth) / img.width;
+              const chartWidth = 260;
+              const chartHeight = (chartImg.height * chartWidth) / chartImg.width;
               
-              // Si l'image est trop grande pour une page
-              if (budgetHeight > 180) {
-                // Diviser en éléments plus petits
-                const budgetChart = budgetSection.querySelector('.budget-chart');
-                const budgetSummary = budgetSection.querySelector('.budget-summary');
-                const budgetTable = budgetSection.querySelector('.budget-detail-table');
-                
-                // Capturons le graphique (qualité légèrement meilleure)
-                if (budgetChart) {
-                  const chartImgData = await captureElementOptimized(budgetChart, 1.5, 0.7);
-                  
-                  if (chartImgData) {
-                    const chartImg = new Image();
-                    chartImg.src = chartImgData;
-                    
-                    await new Promise(resolve => {
-                      chartImg.onload = resolve;
-                    });
-                    
-                    const chartWidth = 260;
-                    const chartHeight = (chartImg.height * chartWidth) / chartImg.width;
-                    
-                    pdf.addImage(chartImgData, 'JPEG', 20, yOffset, chartWidth, chartHeight);
-                    
-                    yOffset += chartHeight + 10;
-                  }
-                }
-                
-                // Vérifier si nous avons besoin d'une nouvelle page
-                if (yOffset > 180) {
-                  pdf.addPage();
-                  yOffset = 15;
-                }
-                
-                // Capturer le résumé
-                if (budgetSummary) {
-                  const summaryImgData = await captureElementOptimized(budgetSummary, 1.3, 0.7);
-                  
-                  if (summaryImgData) {
-                    const summaryImg = new Image();
-                    summaryImg.src = summaryImgData;
-                    
-                    await new Promise(resolve => {
-                      summaryImg.onload = resolve;
-                    });
-                    
-                    const summaryWidth = 260;
-                    const summaryHeight = (summaryImg.height * summaryWidth) / summaryImg.width;
-                    
-                    pdf.addImage(summaryImgData, 'JPEG', 20, yOffset, summaryWidth, summaryHeight);
-                    
-                    yOffset += summaryHeight + 10;
-                  }
-                }
-                
-                // Vérifier si nous avons besoin d'une nouvelle page
-                if (yOffset > 180) {
-                  pdf.addPage();
-                  yOffset = 15;
-                }
-                
-                // Capturer le tableau
-                if (budgetTable) {
-                  const tableImgData = await captureElementOptimized(budgetTable, 1.3, 0.7);
-                  
-                  if (tableImgData) {
-                    const tableImg = new Image();
-                    tableImg.src = tableImgData;
-                    
-                    await new Promise(resolve => {
-                      tableImg.onload = resolve;
-                    });
-                    
-                    const tableWidth = 260;
-                    const tableHeight = (tableImg.height * tableWidth) / tableImg.width;
-                    
-                    pdf.addImage(tableImgData, 'JPEG', 20, yOffset, tableWidth, tableHeight);
-                  }
-                }
-              } else {
-                // Si l'image tient sur une page, l'ajouter directement
-                pdf.addImage(budgetImgData, 'JPEG', 20, yOffset, budgetWidth, budgetHeight);
-              }
+              yOffset += 5;
+              pdf.addImage(chartImgData, 'JPEG', 20, yOffset, chartWidth, chartHeight);
+              
+              yOffset += chartHeight + 10;
             }
-          } catch (error) {
-            console.error("Erreur lors de la capture de la section budget:", error);
-            // En cas d'erreur, essayer une approche alternative de capture par éléments
+          }
+          
+          // Capture le résumé (cartes de synthèse)
+          if (budgetSummary) {
+            // Vérifier si nous avons assez d'espace sur la page actuelle
+            if (yOffset > 160) { // Si espace insuffisant après le graphique, ajouter une page
+              pdf.addPage();
+              yOffset = 20;
+            }
+            
+            const summaryImgData = await captureElementOptimized(budgetSummary, 1.3, 0.7);
+            
+            if (summaryImgData) {
+              const summaryImg = new Image();
+              summaryImg.src = summaryImgData;
+              
+              await new Promise(resolve => {
+                summaryImg.onload = resolve;
+              });
+              
+              const summaryWidth = 260;
+              const summaryHeight = (summaryImg.height * summaryWidth) / summaryImg.width;
+              
+              pdf.addImage(summaryImgData, 'JPEG', 20, yOffset, summaryWidth, summaryHeight);
+              
+              yOffset += summaryHeight + 10;
+            }
+          }
+          
+          // Toujours mettre le tableau sur une nouvelle page
+          if (budgetTable) {
+            pdf.addPage();
+            
+            // Titre de la page du tableau
+            pdf.setFontSize(16);
+            pdf.setTextColor(63, 81, 181);
+            pdf.text(`Détail mensuel du budget ${options.annee}`, 149, 15, { align: 'center' });
+            
+            pdf.setFontSize(10);
+            pdf.setTextColor(120, 120, 120);
+            const dateStr = new Date().toLocaleDateString('fr-FR', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            pdf.text(`Généré le ${dateStr}`, 149, 22, { align: 'center' });
+            
+            const tableImgData = await captureElementOptimized(budgetTable, 1.3, 0.75); // Légère augmentation de qualité
+            
+            if (tableImgData) {
+              const tableImg = new Image();
+              tableImg.src = tableImgData;
+              
+              await new Promise(resolve => {
+                tableImg.onload = resolve;
+              });
+              
+              const tableWidth = 260;
+              const tableHeight = (tableImg.height * tableWidth) / tableImg.width;
+              
+              // Centrer sur la page avec un peu plus d'espace en haut
+              pdf.addImage(tableImgData, 'JPEG', 20, 30, tableWidth, tableHeight);
+            }
           }
         }
         

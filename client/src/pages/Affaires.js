@@ -148,7 +148,7 @@ const Affaires = () => {
       }
     },
     {
-      Header: 'Lieu',
+      Header: 'Lieu des faits',
       accessor: 'lieu',
     },
     {

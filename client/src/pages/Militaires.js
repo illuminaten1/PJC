@@ -108,6 +108,14 @@ const Militaires = () => {
       accessor: 'nom',
     },
     {
+      Header: 'Unité', // Nouvelle colonne
+      accessor: 'unite',
+    },
+    {
+      Header: 'Région / Département', // Nouvelle colonne
+      accessor: row => `${row.region || '-'} / ${row.departement || '-'}`,
+    },
+    {
       Header: 'Circonstance',
       accessor: 'circonstance',
     },

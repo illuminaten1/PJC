@@ -4,15 +4,39 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 /**
- * Capture un élément HTML spécifique pour le PDF
+ * Capture un élément HTML spécifique pour le PDF avec compression optimisée
  * @param {HTMLElement} element L'élément à capturer
- * @param {number} scale Facteur d'échelle (plus élevé = meilleure qualité)
+ * @param {number} scale Facteur d'échelle (1 = taille originale)
+ * @param {number} quality Qualité de l'image (0-1)
  * @returns {Promise<string>} L'URL de données de l'image
  */
-const captureElement = async (element, scale = 2) => {
+const captureElementOptimized = async (element, scale = 1.5, quality = 0.6) => {
   if (!element) return null;
   
   try {
+    // Créer temporairement une copie allégée de l'élément si nécessaire
+    const tempElement = element.cloneNode(true);
+    
+    // Simplifier les styles pour la capture si nécessaire
+    const simplifyStyles = (el) => {
+      // Supprimer les ombres, animations et effets lourds pour la capture
+      const allElements = el.querySelectorAll('*');
+      allElements.forEach(node => {
+        if (node.style) {
+          node.style.boxShadow = 'none';
+          node.style.textShadow = 'none';
+          node.style.animation = 'none';
+          node.style.transition = 'none';
+        }
+      });
+    };
+    
+    // Appliquer les optimisations aux grands éléments seulement
+    if (element.offsetWidth > 500 || element.offsetHeight > 500) {
+      simplifyStyles(tempElement);
+    }
+    
+    // Utiliser une échelle réduite pour la capture
     const canvas = await html2canvas(element, {
       scale: scale,
       useCORS: true,
@@ -21,7 +45,9 @@ const captureElement = async (element, scale = 2) => {
       backgroundColor: '#ffffff'
     });
     
-    return canvas.toDataURL('image/png');
+    // Utiliser un format JPEG plutôt que PNG pour les grandes images
+    // (PNG est sans perte mais beaucoup plus lourd)
+    return canvas.toDataURL('image/jpeg', quality);
   } catch (error) {
     console.error("Erreur lors de la capture de l'élément:", error);
     return null;
@@ -513,7 +539,7 @@ export const exportToExcel = async (data, options) => {
 };
 
 /**
- * Exporte les données au format PDF
+ * Exporte les données au format PDF avec une taille optimisée
  * @param {HTMLElement} element L'élément HTML à capturer pour le PDF
  * @param {Object} data Les données exportées (pour les titres)
  * @param {Object} options Les options d'export
@@ -524,8 +550,13 @@ export const exportToPDF = async (element, data, options) => {
       throw new Error("Élément DOM non trouvé pour la capture PDF");
     }
     
-    // Créer un document PDF au format paysage A4
-    const pdf = new jsPDF('landscape', 'mm', 'a4');
+    // Créer un document PDF au format paysage A4 avec compression
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+      compress: true  // Activer la compression PDF
+    });
     
     // Ajouter un titre au document
     pdf.setFontSize(20);
@@ -544,7 +575,7 @@ export const exportToPDF = async (element, data, options) => {
     pdf.setTextColor(120, 120, 120); // Gris
     pdf.text(`Généré le ${dateStr}`, 149, 22, { align: 'center' });
     
-    // 1. Capture de la section des statistiques globales
+    // 1. Capture de la section des statistiques globales avec qualité réduite
     const globalStatsSection = element.querySelector('section');
     
     if (globalStatsSection) {
@@ -552,21 +583,24 @@ export const exportToPDF = async (element, data, options) => {
       pdf.setTextColor(0, 0, 0);
       pdf.text('Synthèse globale depuis la mise en place du dispositif', 20, 35);
       
-      const globalCanvas = await html2canvas(globalStatsSection, {
-        scale: 2, // Échelle plus élevée pour une meilleure qualité
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      });
+      // Utiliser une échelle inférieure et une compression d'image
+      const globalImgData = await captureElementOptimized(globalStatsSection, 1.5, 0.7);
       
-      const globalImgData = globalCanvas.toDataURL('image/png');
-      
-      // Ajuster la taille pour s'adapter à la page
-      const imgWidth = 260;
-      const imgHeight = (globalCanvas.height * imgWidth) / globalCanvas.width;
-      
-      pdf.addImage(globalImgData, 'PNG', 20, 40, imgWidth, imgHeight);
+      if (globalImgData) {
+        // Créer une image temporaire pour obtenir les dimensions
+        const img = new Image();
+        img.src = globalImgData;
+        
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+        
+        // Ajuster la taille pour s'adapter à la page
+        const imgWidth = 260;
+        const imgHeight = (img.height * imgWidth) / img.width;
+        
+        pdf.addImage(globalImgData, 'JPEG', 20, 40, imgWidth, imgHeight);
+      }
       
       // Si les stats annuelles sont demandées, ajouter une page
       if (options.includeAnnualStats) {
@@ -591,130 +625,194 @@ export const exportToPDF = async (element, data, options) => {
           pdf.setTextColor(0, 0, 0);
           pdf.text(`Synthèse des statistiques ${options.annee}`, 20, yOffset);
           
-          const summaryCanvas = await html2canvas(annualStatsSummary, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            allowTaint: true,
-            backgroundColor: '#ffffff'
-          });
+          const summaryImgData = await captureElementOptimized(annualStatsSummary, 1.5, 0.7);
           
-          const summaryImgData = summaryCanvas.toDataURL('image/png');
-          
-          // Ajuster la taille
-          const summaryWidth = 260;
-          const summaryHeight = (summaryCanvas.height * summaryWidth) / summaryCanvas.width;
-          
-          yOffset += 5;
-          pdf.addImage(summaryImgData, 'PNG', 20, yOffset, summaryWidth, summaryHeight);
-          
-          yOffset += summaryHeight + 15;
+          if (summaryImgData) {
+            // Créer une image temporaire pour obtenir les dimensions
+            const img = new Image();
+            img.src = summaryImgData;
+            
+            await new Promise(resolve => {
+              img.onload = resolve;
+            });
+            
+            // Ajuster la taille
+            const summaryWidth = 260;
+            const summaryHeight = (img.height * summaryWidth) / img.width;
+            
+            yOffset += 5;
+            pdf.addImage(summaryImgData, 'JPEG', 20, yOffset, summaryWidth, summaryHeight);
+            
+            yOffset += summaryHeight + 15;
+          }
         }
         
+        // Optimisation pour la section budget: capturer en une seule fois si possible
         if (budgetSection) {
           pdf.setFontSize(14);
           pdf.setTextColor(0, 0, 0);
           pdf.text(`Suivi budgétaire ${options.annee}`, 20, yOffset);
           
-          // Capturer séparément le graphique et le tableau
-          const budgetChart = budgetSection.querySelector('.budget-chart');
-          const budgetSummary = budgetSection.querySelector('.budget-summary');
-          const budgetTable = budgetSection.querySelector('.budget-detail-table');
-          
-          // 1. Ajouter le graphique (haute qualité)
-          if (budgetChart) {
-            const chartImgData = await captureElement(budgetChart, 3); // Échelle plus élevée pour les graphiques
+          // Vérifier si nous avons assez d'espace sur la page actuelle
+          if (yOffset > 120) { // Si espace insuffisant, ajouter une page
+            pdf.addPage();
+            yOffset = 15;
             
-            if (chartImgData) {
-              const chartAspectRatio = budgetChart.offsetHeight / budgetChart.offsetWidth;
-              const chartWidth = 260;
-              const chartHeight = chartWidth * chartAspectRatio;
-              
-              yOffset += 10;
-              pdf.addImage(chartImgData, 'PNG', 20, yOffset, chartWidth, chartHeight);
-              
-              yOffset += chartHeight + 15;
-            }
+            pdf.setFontSize(14);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`Suivi budgétaire ${options.annee}`, 20, yOffset);
+            yOffset += 10;
           }
           
-          // 2. Ajouter la synthèse
-          if (budgetSummary) {
-            const summaryImgData = await captureElement(budgetSummary);
+          // Essayer d'abord de capturer la section budget entière
+          try {
+            const budgetImgData = await captureElementOptimized(budgetSection, 1.2, 0.65);
             
-            if (summaryImgData) {
-              const summaryAspectRatio = budgetSummary.offsetHeight / budgetSummary.offsetWidth;
-              const summaryWidth = 260;
-              const summaryHeight = summaryWidth * summaryAspectRatio;
+            if (budgetImgData) {
+              // Créer une image temporaire pour obtenir les dimensions
+              const img = new Image();
+              img.src = budgetImgData;
               
-              pdf.addImage(summaryImgData, 'PNG', 20, yOffset, summaryWidth, summaryHeight);
+              await new Promise(resolve => {
+                img.onload = resolve;
+              });
               
-              yOffset += summaryHeight + 15;
+              // Ajuster la taille
+              const budgetWidth = 260;
+              const budgetHeight = (img.height * budgetWidth) / img.width;
+              
+              // Si l'image est trop grande pour une page
+              if (budgetHeight > 180) {
+                // Diviser en éléments plus petits
+                const budgetChart = budgetSection.querySelector('.budget-chart');
+                const budgetSummary = budgetSection.querySelector('.budget-summary');
+                const budgetTable = budgetSection.querySelector('.budget-detail-table');
+                
+                // Capturons le graphique (qualité légèrement meilleure)
+                if (budgetChart) {
+                  const chartImgData = await captureElementOptimized(budgetChart, 1.5, 0.7);
+                  
+                  if (chartImgData) {
+                    const chartImg = new Image();
+                    chartImg.src = chartImgData;
+                    
+                    await new Promise(resolve => {
+                      chartImg.onload = resolve;
+                    });
+                    
+                    const chartWidth = 260;
+                    const chartHeight = (chartImg.height * chartWidth) / chartImg.width;
+                    
+                    pdf.addImage(chartImgData, 'JPEG', 20, yOffset, chartWidth, chartHeight);
+                    
+                    yOffset += chartHeight + 10;
+                  }
+                }
+                
+                // Vérifier si nous avons besoin d'une nouvelle page
+                if (yOffset > 180) {
+                  pdf.addPage();
+                  yOffset = 15;
+                }
+                
+                // Capturer le résumé
+                if (budgetSummary) {
+                  const summaryImgData = await captureElementOptimized(budgetSummary, 1.3, 0.7);
+                  
+                  if (summaryImgData) {
+                    const summaryImg = new Image();
+                    summaryImg.src = summaryImgData;
+                    
+                    await new Promise(resolve => {
+                      summaryImg.onload = resolve;
+                    });
+                    
+                    const summaryWidth = 260;
+                    const summaryHeight = (summaryImg.height * summaryWidth) / summaryImg.width;
+                    
+                    pdf.addImage(summaryImgData, 'JPEG', 20, yOffset, summaryWidth, summaryHeight);
+                    
+                    yOffset += summaryHeight + 10;
+                  }
+                }
+                
+                // Vérifier si nous avons besoin d'une nouvelle page
+                if (yOffset > 180) {
+                  pdf.addPage();
+                  yOffset = 15;
+                }
+                
+                // Capturer le tableau
+                if (budgetTable) {
+                  const tableImgData = await captureElementOptimized(budgetTable, 1.3, 0.7);
+                  
+                  if (tableImgData) {
+                    const tableImg = new Image();
+                    tableImg.src = tableImgData;
+                    
+                    await new Promise(resolve => {
+                      tableImg.onload = resolve;
+                    });
+                    
+                    const tableWidth = 260;
+                    const tableHeight = (tableImg.height * tableWidth) / tableImg.width;
+                    
+                    pdf.addImage(tableImgData, 'JPEG', 20, yOffset, tableWidth, tableHeight);
+                  }
+                }
+              } else {
+                // Si l'image tient sur une page, l'ajouter directement
+                pdf.addImage(budgetImgData, 'JPEG', 20, yOffset, budgetWidth, budgetHeight);
+              }
             }
+          } catch (error) {
+            console.error("Erreur lors de la capture de la section budget:", error);
+            // En cas d'erreur, essayer une approche alternative de capture par éléments
           }
-          
-          // 3. Ajouter le tableau
-          if (budgetTable) {
-            if (yOffset > 180) { // Si l'espace est insuffisant, ajouter une page
-              pdf.addPage();
-              yOffset = 15;
-              
-              pdf.setFontSize(14);
-              pdf.setTextColor(0, 0, 0);
-              pdf.text(`Détail mensuel du budget ${options.annee}`, 20, yOffset);
-              yOffset += 10;
-            }
-            
-            const tableImgData = await captureElement(budgetTable);
-            
-            if (tableImgData) {
-              const tableAspectRatio = budgetTable.offsetHeight / budgetTable.offsetWidth;
-              const tableWidth = 260;
-              const tableHeight = tableWidth * tableAspectRatio;
-              
-              pdf.addImage(tableImgData, 'PNG', 20, yOffset, tableWidth, tableHeight);
-              
-              yOffset += tableHeight + 15;
-            }
-          }
-        } else {
-          // Capturer la section entière si on ne peut pas la découper
-          const budgetCanvas = await html2canvas(budgetSection, {
-            scale: 2,
-            useCORS: true,
-            logging: false
-          });
-          
-          const budgetImgData = budgetCanvas.toDataURL('image/png');
-          
-          // Ajuster la taille
-          const budgetWidth = 260;
-          const budgetHeight = (budgetCanvas.height * budgetWidth) / budgetCanvas.width;
-          
-          yOffset += 5;
-          pdf.addImage(budgetImgData, 'PNG', 20, yOffset, budgetWidth, budgetHeight);
-          
-          yOffset += budgetHeight + 15;
         }
         
         // Si demandé, ajouter les tableaux de répartition
         if (options.includeRedacteurTable || options.includeCirconstanceTable) {
-            // Toujours ajouter une nouvelle page pour les tableaux de répartition
-            pdf.addPage();
+          // Toujours ajouter une nouvelle page pour les tableaux de répartition
+          pdf.addPage();
+          
+          // Ajouter le titre en haut de la page avec un espacement suffisant
+          pdf.setFontSize(16);
+          pdf.setTextColor(63, 81, 181);
+          pdf.text('Répartitions détaillées', 149, 15, { align: 'center' });
+          
+          pdf.setFontSize(10);
+          pdf.setTextColor(120, 120, 120);
+          pdf.text(`Année ${options.annee}`, 149, 22, { align: 'center' });
+          
+          // Commencer les tableaux plus bas pour laisser de l'espace au titre
+          let yOffset = 35;
+          
+          // Optimisation: Capture combinée si les deux tableaux sont inclus
+          if (options.includeRedacteurTable && options.includeCirconstanceTable) {
+            const tableContainer = element.querySelector('.tables-container') || element.querySelector('.charts-container');
             
-            // Ajouter le titre en haut de la page avec un espacement suffisant
-            pdf.setFontSize(16);
-            pdf.setTextColor(63, 81, 181);
-            pdf.text('Répartitions détaillées', 149, 15, { align: 'center' });
-            
-            pdf.setFontSize(10);
-            pdf.setTextColor(120, 120, 120);
-            pdf.text(`Année ${options.annee}`, 149, 22, { align: 'center' });
-            
-            // Commencer les tableaux plus bas pour laisser de l'espace au titre
-            let yOffset = 35;
-            
-            // Disposition côte à côte si les deux tableaux sont inclus
-            if (options.includeRedacteurTable && options.includeCirconstanceTable) {
+            if (tableContainer) {
+              // Essayer de capturer les deux tableaux en une seule fois
+              const tableImgData = await captureElementOptimized(tableContainer, 1.2, 0.7);
+              
+              if (tableImgData) {
+                const img = new Image();
+                img.src = tableImgData;
+                
+                await new Promise(resolve => {
+                  img.onload = resolve;
+                });
+                
+                const tableWidth = 260;
+                const tableHeight = (img.height * tableWidth) / img.width;
+                
+                // Centrer sur la page
+                const xOffset = (297 - tableWidth) / 2;
+                pdf.addImage(tableImgData, 'JPEG', xOffset, yOffset, tableWidth, tableHeight);
+              }
+            } else {
+              // Fallback: capturer les tableaux séparément
               const redacteurTable = element.querySelector('.redacteur-table');
               const circonstanceTable = element.querySelector('.circonstance-table');
               
@@ -727,106 +825,77 @@ export const exportToPDF = async (element, data, options) => {
                 
                 yOffset += 10;
                 
-                // Capture et rendu des tableaux
-                const redacteurCanvas = await html2canvas(redacteurTable, {
-                  scale: 2,
-                  useCORS: true,
-                  logging: false,
-                  allowTaint: true,
-                  backgroundColor: '#ffffff',
-                  onclone: (clonedDoc) => {
-                    // Éventuellement, modifier le clone pour optimiser le rendu
-                    const clonedTable = clonedDoc.querySelector('.redacteur-table');
-                    if (clonedTable) {
-                      // Ajuster la hauteur ou d'autres propriétés si nécessaire
-                    }
-                  }
-                });
+                // Capture et rendu des tableaux avec compression
+                const redacteurImgData = await captureElementOptimized(redacteurTable, 1.2, 0.7);
+                const circonstanceImgData = await captureElementOptimized(circonstanceTable, 1.2, 0.7);
                 
-                const circonstanceCanvas = await html2canvas(circonstanceTable, {
-                  scale: 2,
-                  useCORS: true,
-                  logging: false,
-                  allowTaint: true,
-                  backgroundColor: '#ffffff'
-                });
-                
-                // Calculer les dimensions optimales pour les tableaux côte à côte
-                const redacteurWidth = 120;
-                const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
-                
-                const circonstanceWidth = 120;
-                const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
-                
-                // Ajouter les images avec un espacement horizontal
-                const redacteurImgData = redacteurCanvas.toDataURL('image/png');
-                pdf.addImage(redacteurImgData, 'PNG', 10, yOffset, redacteurWidth, redacteurHeight);
-                
-                const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
-                pdf.addImage(circonstanceImgData, 'PNG', 170, yOffset, circonstanceWidth, circonstanceHeight);
-                
-                // Si un tableau est beaucoup plus long que l'autre et déborde sur une nouvelle page,
-                // nous pourrions ajouter une nouvelle page automatiquement
-                const maxHeight = Math.max(redacteurHeight, circonstanceHeight);
-                if (yOffset + maxHeight > 190) { // Près de la fin de la page
-                  // Gérer la pagination si nécessaire
+                if (redacteurImgData && circonstanceImgData) {
+                  // Créer des images temporaires pour obtenir les dimensions
+                  const redImg = new Image();
+                  redImg.src = redacteurImgData;
+                  
+                  const circImg = new Image();
+                  circImg.src = circonstanceImgData;
+                  
+                  await Promise.all([
+                    new Promise(resolve => { redImg.onload = resolve; }),
+                    new Promise(resolve => { circImg.onload = resolve; })
+                  ]);
+                  
+                  // Calculer les dimensions optimales pour les tableaux côte à côte
+                  const redacteurWidth = 120;
+                  const redacteurHeight = (redImg.height * redacteurWidth) / redImg.width;
+                  
+                  const circonstanceWidth = 120;
+                  const circonstanceHeight = (circImg.height * circonstanceWidth) / circImg.width;
+                  
+                  // Ajouter les images avec un espacement horizontal
+                  pdf.addImage(redacteurImgData, 'JPEG', 10, yOffset, redacteurWidth, redacteurHeight);
+                  pdf.addImage(circonstanceImgData, 'JPEG', 170, yOffset, circonstanceWidth, circonstanceHeight);
                 }
               }
-            } 
-            // Si un seul tableau est inclus, le centrer sur la page
-            else if (options.includeRedacteurTable) {
-              const redacteurTable = element.querySelector('.redacteur-table');
+            }
+          } 
+          // Traiter un seul tableau
+          else {
+            // Trouver le tableau à inclure
+            const table = options.includeRedacteurTable 
+              ? element.querySelector('.redacteur-table') 
+              : element.querySelector('.circonstance-table');
+            
+            const tableTitle = options.includeRedacteurTable 
+              ? 'Répartition par rédacteur' 
+              : 'Répartition par circonstance';
+            
+            if (table) {
+              pdf.setFontSize(14);
+              pdf.setTextColor(0, 0, 0);
+              pdf.text(tableTitle, 149, yOffset, { align: 'center' });
               
-              if (redacteurTable) {
-                pdf.setFontSize(14);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text('Répartition par rédacteur', 149, yOffset, { align: 'center' });
+              yOffset += 10;
+              
+              const tableImgData = await captureElementOptimized(table, 1.3, 0.7);
+              
+              if (tableImgData) {
+                const img = new Image();
+                img.src = tableImgData;
                 
-                yOffset += 10;
-                
-                const redacteurCanvas = await html2canvas(redacteurTable, {
-                  scale: 2,
-                  useCORS: true,
-                  logging: false,
-                  allowTaint: true,
-                  backgroundColor: '#ffffff'
+                await new Promise(resolve => {
+                  img.onload = resolve;
                 });
                 
-                const redacteurWidth = 200;
-                const redacteurHeight = (redacteurCanvas.height * redacteurWidth) / redacteurCanvas.width;
+                const tableWidth = 200;
+                const tableHeight = (img.height * tableWidth) / img.width;
                 
-                const redacteurImgData = redacteurCanvas.toDataURL('image/png');
-                pdf.addImage(redacteurImgData, 'PNG', (297 - redacteurWidth) / 2, yOffset, redacteurWidth, redacteurHeight);
-              }
-            } 
-            else if (options.includeCirconstanceTable) {
-              const circonstanceTable = element.querySelector('.circonstance-table');
-              
-              if (circonstanceTable) {
-                pdf.setFontSize(14);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text('Répartition par circonstance', 149, yOffset, { align: 'center' });
-                
-                yOffset += 10;
-                
-                const circonstanceCanvas = await html2canvas(circonstanceTable, {
-                  scale: 2,
-                  useCORS: true,
-                  logging: false,
-                  allowTaint: true,
-                  backgroundColor: '#ffffff'
-                });
-                
-                const circonstanceWidth = 200;
-                const circonstanceHeight = (circonstanceCanvas.height * circonstanceWidth) / circonstanceCanvas.width;
-                
-                const circonstanceImgData = circonstanceCanvas.toDataURL('image/png');
-                pdf.addImage(circonstanceImgData, 'PNG', (297 - circonstanceWidth) / 2, yOffset, circonstanceWidth, circonstanceHeight);
+                // Centrer sur la page
+                const xOffset = (297 - tableWidth) / 2;
+                pdf.addImage(tableImgData, 'JPEG', xOffset, yOffset, tableWidth, tableHeight);
               }
             }
           }
         }
-    }  
+      }
+    }
     
     // Télécharger le PDF
     pdf.save(`statistiques_pjc_${options.includeAnnualStats ? `avec_${options.annee}_` : ''}${new Date().toISOString().split('T')[0]}.pdf`);

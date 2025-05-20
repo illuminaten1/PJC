@@ -56,20 +56,44 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
   const [errors, setErrors] = useState({});
   const [circonstances, setCirconstances] = useState([]);
   const [redacteurs, setRedacteurs] = useState([]);
-  
-  // Récupérer la liste des circonstances depuis l'API
+  const [regions, setRegions] = useState([]);
+  const [departements, setDepartements] = useState([]);
+
+
+// Récupérer les listes depuis l'API
   useEffect(() => {
-    const fetchCirconstances = async () => {
+    const fetchData = async () => {
       try {
-        const response = await parametresAPI.getByType('circonstances');
-        setCirconstances(response.data);
+        // Fetch circonstances
+        const responseCirconstances = await parametresAPI.getByType('circonstances');
+        setCirconstances(responseCirconstances.data);
+        
+        // Fetch régions
+        const responseRegions = await parametresAPI.getByType('regions');
+        // Si des régions existent dans les paramètres, utiliser celles-ci
+        if (responseRegions.data && responseRegions.data.length > 0) {
+          setRegions(responseRegions.data);
+        }
+        
+        // Fetch départements
+        const responseDepartements = await parametresAPI.getByType('departements');
+        // Si des départements existent dans les paramètres, utiliser ceux-ci
+        if (responseDepartements.data && responseDepartements.data.length > 0) {
+          setDepartements(responseDepartements.data);
+        }
       } catch (error) {
-        console.error("Erreur lors de la récupération des circonstances", error);
+        console.error("Erreur lors de la récupération des données", error);
       }
     };
     
-    fetchCirconstances();
+    fetchData();
   }, []);
+
+  // Les régions hardcodées serviront de fallback si aucune n'est trouvée dans les paramètres
+  const regionsHardcoded = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne', 'Centre-Val-de-Loire', 'Corse', 'Grand Est', 'Hauts-de-France', 'Ile-de-France', 'Nouvelle-Aquitaine', 'Normandie', 'Occitanie', 'Pays-de-la-Loire', 'Provence-Alpes-Côte-d\'Azur', 'Guadeloupe', 'Guyane', 'Martinique', 'Mayotte', 'Nouvelle-Calédonie', 'Wallis-et-Futuna', 'Polynésie française', 'La Réunion', 'Saint-Pierre-et-Miquelon', 'IGAG', 'IGGN', 'DGGN', 'GR', 'GIGN', 'COMSOPGN', 'PJGN', 'CEGN', 'CGOM', 'CRJ', 'ANFSI', 'COSSEN', 'COMCYBER-MI', 'CESAN', 'SAILMI', 'GSAN', 'GTA', 'GARM', 'CFAGN', 'GMAR', 'GAIR'];
+  
+  // Les départements hardcodés serviront de fallback si aucun n'est trouvé dans les paramètres
+  const departementsHardcoded = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '2A', '2B', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '971', '972', '973', '974', '976', '986', '987', '988', '975', '978', 'GGM I/3', 'GGM I/5', 'GGM I/6', 'GGM I/7', 'GGM I/9', 'GGM II/1', 'GGM II/2', 'GGM II/3', 'GGM II/5', 'GGM II/6', 'GGM II/7', 'GGM III/3', 'GGM III/6', 'GGM III/7', 'GGM IV/2', 'GGM IV/3', 'GGM IV/7', 'GBGM'];
 
   // Récupérer la liste des rédacteurs lorsque l'option de créer un bénéficiaire est cochée
   useEffect(() => {
@@ -224,7 +248,8 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
           type="select"
           value={militaire.region}
           onChange={handleChange}
-          options={regions}
+          // Utiliser les régions des paramètres si disponibles, sinon utiliser les hardcodées
+          options={regions.length > 0 ? regions : regionsHardcoded}
           error={errors.region}
         />
         
@@ -234,7 +259,8 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
           type="select"
           value={militaire.departement}
           onChange={handleChange}
-          options={departements}
+          // Utiliser les départements des paramètres si disponibles, sinon utiliser les hardcodés
+          options={departements.length > 0 ? departements : departementsHardcoded}
           error={errors.departement}
         />
       </FormRow>

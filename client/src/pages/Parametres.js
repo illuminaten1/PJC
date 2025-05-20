@@ -63,6 +63,55 @@ const Parametres = () => {
     password: ''
   });
 
+  // États pour la gestion des régions et départements
+  const [regionInput, setRegionInput] = useState('');
+  const [departementInput, setDepartementInput] = useState('');
+
+  // Fonction de gestion des régions
+  const handleAddRegion = async () => {
+  if (!regionInput.trim()) return;
+  
+  try {
+    await parametresAPI.addValue('regions', regionInput);
+    setRegionInput('');
+    showSuccessMessage('Région ajoutée avec succès');
+    fetchParametres();
+  } catch (err) {
+    console.error("Erreur lors de l'ajout de la région", err);
+    setError("Impossible d'ajouter la région");
+  }
+};
+
+// Fonction de gestion des départements
+const handleAddDepartement = async () => {
+  if (!departementInput.trim()) return;
+  
+  try {
+    await parametresAPI.addValue('departements', departementInput);
+    setDepartementInput('');
+    showSuccessMessage('Département ajouté avec succès');
+    fetchParametres();
+  } catch (err) {
+    console.error("Erreur lors de l'ajout du département", err);
+    setError("Impossible d'ajouter le département");
+  }
+};
+
+// Gestionnaires pour la touche Entrée
+const handleRegionKeyDown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleAddRegion();
+  }
+};
+
+const handleDepartementKeyDown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleAddDepartement();
+  }
+};
+
   // Récupérer le contexte d'authentification pour vérifier si l'utilisateur est admin
   const { user, isAdmin } = useContext(AuthContext);
 
@@ -988,6 +1037,70 @@ const handleTransferPortfolio = async () => {
                 placeholder="Nouvelle circonstance..."
               />
               <AddButton onClick={handleAddCirconstance}>
+                <FaPlus />
+                <span>Ajouter</span>
+              </AddButton>
+            </AddParameterForm>
+          </ExpandableSection>
+        </Section>
+        
+        <Section>
+          <ExpandableSection
+            title="Régions (voir la documentation avant de modifier)"
+            defaultExpanded={true}
+          >
+            <ParametersList>
+              {parametres.regions && parametres.regions.map((region, index) => (
+                <ParameterItem key={index}>
+                  <ParameterText>{region}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('regions', index, region)}>
+                    <FaTrash />
+                  </DeleteButton>
+                </ParameterItem>
+              ))}
+            </ParametersList>
+            
+            <AddParameterForm>
+              <AddParameterInput
+                type="text"
+                value={regionInput}
+                onChange={(e) => setRegionInput(e.target.value)}
+                onKeyDown={handleRegionKeyDown}
+                placeholder="Nouvelle région..."
+              />
+              <AddButton onClick={handleAddRegion}>
+                <FaPlus />
+                <span>Ajouter</span>
+              </AddButton>
+            </AddParameterForm>
+          </ExpandableSection>
+        </Section>
+
+        <Section>
+          <ExpandableSection
+            title="Départements (voir la documentation avant de modifier)"
+            defaultExpanded={true}
+          >
+            <ParametersList>
+              {parametres.departements && parametres.departements.map((departement, index) => (
+                <ParameterItem key={index}>
+                  <ParameterText>{departement}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('departements', index, departement)}>
+                    <FaTrash />
+                  </DeleteButton>
+                </ParameterItem>
+              ))}
+            </ParametersList>
+            
+            <AddParameterForm>
+              <AddParameterInput
+                type="text"
+                value={departementInput}
+                onChange={(e) => setDepartementInput(e.target.value)}
+                onKeyDown={handleDepartementKeyDown}
+                placeholder="Nouveau département..."
+              />
+              <AddButton onClick={handleAddDepartement}>
                 <FaPlus />
                 <span>Ajouter</span>
               </AddButton>

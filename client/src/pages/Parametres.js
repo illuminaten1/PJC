@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft, FaDownload, FaUpload, FaUndo, FaUserPlus, FaUserEdit, FaKey } from 'react-icons/fa';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { parametresAPI, templatesAPI } from '../utils/api';
 import { AuthContext } from '../contexts/AuthContext';
 import PageHeader from '../components/common/PageHeader';
@@ -67,6 +68,12 @@ const Parametres = () => {
   const [regionInput, setRegionInput] = useState('');
   const [departementInput, setDepartementInput] = useState('');
 
+  // États pour le mode de réorganisation
+  const [reorderingRegions, setReorderingRegions] = useState(false);
+  const [reorderingDepartements, setReorderingDepartements] = useState(false);
+  const [hasReorderedRegions, setHasReorderedRegions] = useState(false);
+  const [hasReorderedDepartements, setHasReorderedDepartements] = useState(false);
+
   // Fonction de gestion des régions
   const handleAddRegion = async () => {
   if (!regionInput.trim()) return;
@@ -111,6 +118,57 @@ const handleDepartementKeyDown = (e) => {
     handleAddDepartement();
   }
 };
+
+  // Fonction pour gérer la fin du drag & drop
+  const handleDragEnd = (result, type) => {
+    // Abandonner si dropped ailleurs que dans une zone valide
+    if (!result.destination) return;
+    
+    // Ne rien faire si l'élément est déposé à la même position
+    if (result.destination.index === result.source.index) return;
+    
+    // Créer une copie du tableau des valeurs
+    const items = Array.from(parametres[type]);
+    
+    // Retirer l'élément de sa position d'origine
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    
+    // Insérer l'élément à sa nouvelle position
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    // Mettre à jour l'état local
+    setParametres(prev => ({
+      ...prev,
+      [type]: items
+    }));
+    
+    // Indiquer qu'il y a eu des modifications
+    if (type === 'regions') {
+      setHasReorderedRegions(true);
+    } else if (type === 'departements') {
+      setHasReorderedDepartements(true);
+    }
+  };
+  
+  // Fonction pour sauvegarder le nouvel ordre
+  const saveReorderedValues = async (type) => {
+    try {
+      await parametresAPI.reorderValues(type, parametres[type]);
+      showSuccessMessage(`Ordre des ${type === 'regions' ? 'régions' : 'départements'} sauvegardé avec succès`);
+      
+      // Réinitialiser les drapeaux de modification
+      if (type === 'regions') {
+        setReorderingRegions(false);
+        setHasReorderedRegions(false);
+      } else if (type === 'departements') {
+        setReorderingDepartements(false);
+        setHasReorderedDepartements(false);
+      }
+    } catch (err) {
+      console.error(`Erreur lors de la sauvegarde de l'ordre des ${type}:`, err);
+      setError(`Impossible de sauvegarder l'ordre des ${type === 'regions' ? 'régions' : 'départements'}`);
+    }
+  };
 
   // Récupérer le contexte d'authentification pour vérifier si l'utilisateur est admin
   const { user, isAdmin } = useContext(AuthContext);
@@ -1049,30 +1107,79 @@ const handleTransferPortfolio = async () => {
             title="Régions (voir la documentation avant de modifier)"
             defaultExpanded={true}
           >
-            <ParametersList>
-              {parametres.regions && parametres.regions.map((region, index) => (
-                <ParameterItem key={index}>
-                  <ParameterText>{region}</ParameterText>
-                  <DeleteButton onClick={() => openDeleteConfirmation('regions', index, region)}>
-                    <FaTrash />
-                  </DeleteButton>
-                </ParameterItem>
-              ))}
-            </ParametersList>
+            <SectionHeader>
+              <SectionTitle>Liste des régions</SectionTitle>
+              <ReorderToggle 
+                active={reorderingRegions}
+                onClick={() => setReorderingRegions(!reorderingRegions)}
+              >
+                {reorderingRegions ? 'Annuler' : 'Réorganiser'}
+              </ReorderToggle>
+              
+              {hasReorderedRegions && (
+                <SaveOrderButton onClick={() => saveReorderedValues('regions')}>
+                  <FaSave style={{ marginRight: '8px' }} />
+                  Sauvegarder l'ordre
+                </SaveOrderButton>
+              )}
+            </SectionHeader>
             
-            <AddParameterForm>
-              <AddParameterInput
-                type="text"
-                value={regionInput}
-                onChange={(e) => setRegionInput(e.target.value)}
-                onKeyDown={handleRegionKeyDown}
-                placeholder="Nouvelle région..."
-              />
-              <AddButton onClick={handleAddRegion}>
-                <FaPlus />
-                <span>Ajouter</span>
-              </AddButton>
-            </AddParameterForm>
+            {reorderingRegions ? (
+              <DragDropContext onDragEnd={(result) => handleDragEnd(result, 'regions')}>
+                <Droppable droppableId="regions-list">
+                  {(provided) => (
+                    <DraggableList
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      {parametres.regions && parametres.regions.map((region, index) => (
+                        <Draggable key={region} draggableId={`region-${region}`} index={index}>
+                          {(provided) => (
+                            <DraggableItem
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                            >
+                              <DragHandle {...provided.dragHandleProps}>
+                                <FaGripVertical />
+                              </DragHandle>
+                              <ItemText>{region}</ItemText>
+                            </DraggableItem>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </DraggableList>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <>
+                <ParametersList>
+                  {parametres.regions && parametres.regions.map((region, index) => (
+                    <ParameterItem key={index}>
+                      <ParameterText>{region}</ParameterText>
+                      <DeleteButton onClick={() => openDeleteConfirmation('regions', index, region)}>
+                        <FaTrash />
+                      </DeleteButton>
+                    </ParameterItem>
+                  ))}
+                </ParametersList>
+                
+                <AddParameterForm>
+                  <AddParameterInput
+                    type="text"
+                    value={regionInput}
+                    onChange={(e) => setRegionInput(e.target.value)}
+                    onKeyDown={handleRegionKeyDown}
+                    placeholder="Nouvelle région..."
+                  />
+                  <AddButton onClick={handleAddRegion}>
+                    <FaPlus />
+                    <span>Ajouter</span>
+                  </AddButton>
+                </AddParameterForm>
+              </>
+            )}
           </ExpandableSection>
         </Section>
 
@@ -1081,30 +1188,79 @@ const handleTransferPortfolio = async () => {
             title="Départements (voir la documentation avant de modifier)"
             defaultExpanded={true}
           >
-            <ParametersList>
-              {parametres.departements && parametres.departements.map((departement, index) => (
-                <ParameterItem key={index}>
-                  <ParameterText>{departement}</ParameterText>
-                  <DeleteButton onClick={() => openDeleteConfirmation('departements', index, departement)}>
-                    <FaTrash />
-                  </DeleteButton>
-                </ParameterItem>
-              ))}
-            </ParametersList>
+            <SectionHeader>
+              <SectionTitle>Liste des départements</SectionTitle>
+              <ReorderToggle 
+                active={reorderingDepartements}
+                onClick={() => setReorderingDepartements(!reorderingDepartements)}
+              >
+                {reorderingDepartements ? 'Annuler' : 'Réorganiser'}
+              </ReorderToggle>
+              
+              {hasReorderedDepartements && (
+                <SaveOrderButton onClick={() => saveReorderedValues('departements')}>
+                  <FaSave style={{ marginRight: '8px' }} />
+                  Sauvegarder l'ordre
+                </SaveOrderButton>
+              )}
+            </SectionHeader>
             
-            <AddParameterForm>
-              <AddParameterInput
-                type="text"
-                value={departementInput}
-                onChange={(e) => setDepartementInput(e.target.value)}
-                onKeyDown={handleDepartementKeyDown}
-                placeholder="Nouveau département..."
-              />
-              <AddButton onClick={handleAddDepartement}>
-                <FaPlus />
-                <span>Ajouter</span>
-              </AddButton>
-            </AddParameterForm>
+            {reorderingDepartements ? (
+              <DragDropContext onDragEnd={(result) => handleDragEnd(result, 'departements')}>
+                <Droppable droppableId="departements-list">
+                  {(provided) => (
+                    <DraggableList
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      {parametres.departements && parametres.departements.map((departement, index) => (
+                        <Draggable key={departement} draggableId={`departement-${departement}`} index={index}>
+                          {(provided) => (
+                            <DraggableItem
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                            >
+                              <DragHandle {...provided.dragHandleProps}>
+                                <FaGripVertical />
+                              </DragHandle>
+                              <ItemText>{departement}</ItemText>
+                            </DraggableItem>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </DraggableList>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <>
+                <ParametersList>
+                  {parametres.departements && parametres.departements.map((departement, index) => (
+                    <ParameterItem key={index}>
+                      <ParameterText>{departement}</ParameterText>
+                      <DeleteButton onClick={() => openDeleteConfirmation('departements', index, departement)}>
+                        <FaTrash />
+                      </DeleteButton>
+                    </ParameterItem>
+                  ))}
+                </ParametersList>
+                
+                <AddParameterForm>
+                  <AddParameterInput
+                    type="text"
+                    value={departementInput}
+                    onChange={(e) => setDepartementInput(e.target.value)}
+                    onKeyDown={handleDepartementKeyDown}
+                    placeholder="Nouveau département..."
+                  />
+                  <AddButton onClick={handleAddDepartement}>
+                    <FaPlus />
+                    <span>Ajouter</span>
+                  </AddButton>
+                </AddParameterForm>
+              </>
+            )}
           </ExpandableSection>
         </Section>
         
@@ -2043,6 +2199,87 @@ const FormHelpText = styled.div`
   font-size: 12px;
   color: #757575;
   margin-top: 4px;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+`;
+
+const ReorderToggle = styled.button`
+  background-color: ${props => props.active ? '#f44336' : '#3f51b5'};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: ${props => props.active ? '#d32f2f' : '#303f9f'};
+  }
+`;
+
+const SaveOrderButton = styled.button`
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  
+  &:hover {
+    background-color: #388e3c;
+  }
+`;
+
+const DraggableList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+`;
+
+const DraggableItem = styled.li`
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  
+  &:hover {
+    background-color: #eeeeee;
+  }
+`;
+
+const DragHandle = styled.div`
+  color: #757575;
+  cursor: grab;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+const ItemText = styled.span`
+  font-size: 16px;
+  color: #333;
+  flex: 1;
 `;
 
 export default Parametres;

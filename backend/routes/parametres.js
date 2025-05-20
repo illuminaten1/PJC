@@ -229,4 +229,51 @@ router.delete('/:type/:index', async (req, res) => {
   }
 });
 
+// PATCH - Réorganiser les valeurs d'un type de paramètre
+router.patch('/:type/reorder', async (req, res) => {
+  try {
+    const { type } = req.params;
+    const { valeurs } = req.body;
+    
+    // Vérifier que le type est valide
+    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'].includes(type)) {
+      return res.status(400).json({ message: 'Type de paramètre invalide' });
+    }
+    
+    // Vérifier que le tableau de valeurs est fourni
+    if (!Array.isArray(valeurs)) {
+      return res.status(400).json({ message: 'Un tableau de valeurs est requis' });
+    }
+    
+    // Récupérer le paramètre existant
+    let parametre = await Parametre.findOne({ type });
+    
+    if (!parametre) {
+      return res.status(404).json({ message: 'Paramètre non trouvé' });
+    }
+    
+    // Vérifier que toutes les valeurs actuelles sont présentes dans le nouveau tableau
+    const valeurActuelles = new Set(parametre.valeurs);
+    const valeursManquantes = parametre.valeurs.filter(v => !valeurs.includes(v));
+    
+    if (valeursManquantes.length > 0) {
+      return res.status(400).json({ 
+        message: 'Certaines valeurs existantes ne sont pas présentes dans le nouveau tableau',
+        valeursManquantes
+      });
+    }
+    
+    // Mettre à jour l'ordre des valeurs
+    parametre.valeurs = valeurs;
+    parametre.derniereMiseAJour = new Date();
+    
+    await parametre.save();
+    
+    res.json(parametre.valeurs);
+  } catch (error) {
+    console.error('Erreur dans la route PATCH /:type/reorder:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

@@ -93,7 +93,9 @@ const Avocats = () => {
       result = result.filter(avocat => 
         `${avocat.nom} ${avocat.prenom}`.toLowerCase().includes(term) ||
         avocat.email.toLowerCase().includes(term) ||
-        (avocat.cabinet && avocat.cabinet.toLowerCase().includes(term))
+        (avocat.cabinet && avocat.cabinet.toLowerCase().includes(term)) ||
+        (avocat.villesIntervention && Array.isArray(avocat.villesIntervention) && 
+        avocat.villesIntervention.some(ville => ville.toLowerCase().includes(term)))
       );
     }
     

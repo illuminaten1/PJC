@@ -47,6 +47,9 @@ const Statistiques = () => {
     const startYear = 2023;
     const years = [];
     
+    // option "Toutes les années" avec la valeur spéciale -1
+    years.push(-1);
+
     for (let year = startYear; year <= currentYear + 1; year++) {
       years.push(year);
     }
@@ -67,8 +70,83 @@ const Statistiques = () => {
   const fetchStatistiques = async () => {
     setLoading(true);
     try {
-      const response = await statistiquesAPI.getByAnnee(annee);
-      setStatistiques(response.data);
+      let response;
+      
+      if (annee === -1) {
+        // Si "Toutes les années" est sélectionné, appeler l'API sans paramètre d'année
+        response = await statistiquesAPI.getAll();
+        
+        // Traitement des données retournées pour les adapter au format attendu par le composant
+        // Convertir le format global en format similaire à celui d'une année
+        if (response.data) {
+          // Construction d'un objet compatible avec le format annuel
+          const allYearsData = {
+            annee: "Toutes",
+            affaires: { 
+              total: response.data.affaires || 0 
+            },
+            finances: {
+              montantGage: Object.values(response.data.finances || {})
+                .reduce((sum, year) => sum + (year.montantGage || 0), 0),
+              montantPaye: Object.values(response.data.finances || {})
+                .reduce((sum, year) => sum + (year.montantPaye || 0), 0),
+              nbConventions: Object.values(response.data.finances || {})
+                .reduce((sum, year) => sum + (year.nbConventions || 0), 0),
+              nbPaiements: Object.values(response.data.finances || {})
+                .reduce((sum, year) => sum + (year.nbPaiements || 0), 0)
+            },
+            // Agréger les statistiques par rédacteur de toutes les années
+            parRedacteur: {},
+            // Agréger les statistiques par circonstance de toutes les années
+            parCirconstance: {},
+            // Agréger les statistiques par région de toutes les années
+            parRegion: {}
+          };
+          
+          // Récupérer les données détaillées pour chaque année pour construire 
+          // les agrégations par rédacteur, circonstance et région
+          for (const year of years.filter(y => y !== -1)) {
+            try {
+              const yearStats = await statistiquesAPI.getByAnnee(year);
+              if (yearStats.data) {
+                // Agréger les rédacteurs
+                if (yearStats.data.parRedacteur) {
+                  Object.entries(yearStats.data.parRedacteur).forEach(([redacteur, count]) => {
+                    allYearsData.parRedacteur[redacteur] = (allYearsData.parRedacteur[redacteur] || 0) + count;
+                  });
+                }
+                
+                // Agréger les circonstances
+                if (yearStats.data.parCirconstance) {
+                  Object.entries(yearStats.data.parCirconstance).forEach(([circonstance, count]) => {
+                    allYearsData.parCirconstance[circonstance] = (allYearsData.parCirconstance[circonstance] || 0) + count;
+                  });
+                }
+                
+                // Agréger les régions
+                if (yearStats.data.parRegion) {
+                  Object.entries(yearStats.data.parRegion).forEach(([region, data]) => {
+                    if (!allYearsData.parRegion[region]) {
+                      allYearsData.parRegion[region] = { nbMilitaires: 0, nbBeneficiaires: 0 };
+                    }
+                    allYearsData.parRegion[region].nbMilitaires += data.nbMilitaires || 0;
+                    allYearsData.parRegion[region].nbBeneficiaires += data.nbBeneficiaires || 0;
+                  });
+                }
+              }
+            } catch (yearError) {
+              console.error(`Erreur lors de la récupération des statistiques pour l'année ${year}:`, yearError);
+            }
+          }
+          
+          setStatistiques(allYearsData);
+        }
+      } else {
+        // Si une année spécifique est sélectionnée, utiliser le code existant
+        response = await statistiquesAPI.getByAnnee(annee);
+        setStatistiques(response.data);
+      }
+      
       setError(null);
     } catch (err) {
       console.error("Erreur lors de la récupération des statistiques", err);
@@ -246,16 +324,18 @@ const Statistiques = () => {
         affaires: statistiques?.affaires || {},
         parRedacteur: options.includeRedacteurTable ? statistiques?.parRedacteur || {} : {},
         parCirconstance: options.includeCirconstanceTable ? statistiques?.parCirconstance || {} : {},
+        parRegion: options.includeRegionTable ? statistiques?.parRegion || {} : {},
         budget: null // Initialisé à null
       } : null,
-      annee: annee,
+      annee: options.isAllYears ? "Toutes" : options.annee,
+      isAllYears: options.isAllYears,
       dataWithVariations: dataWithVariations
     };
     
-    // Si les statistiques annuelles sont demandées, récupérer les données budgétaires
-    if (options.includeAnnualStats) {
+    // Si les statistiques annuelles sont demandées et ce n'est pas "Toutes les années"
+    if (options.includeAnnualStats && !options.isAllYears) {
       try {
-        const budgetResponse = await statistiquesAPI.getBudgetByAnnee(annee);
+        const budgetResponse = await statistiquesAPI.getBudgetByAnnee(options.annee);
         exportData.annual.budget = budgetResponse.data;
       } catch (err) {
         console.error("Erreur lors de la récupération des statistiques budgétaires pour l'export", err);
@@ -501,7 +581,9 @@ const Statistiques = () => {
               onChange={(e) => setAnnee(parseInt(e.target.value))}
             >
               {years.map(year => (
-                <option key={year} value={year}>{year}</option>
+                <option key={year} value={year}>
+                  {year === -1 ? "Toutes les années" : year}
+                </option>
               ))}
             </Select>
           </YearSelector>
@@ -560,11 +642,18 @@ const Statistiques = () => {
           <SectionHeader>
             <SectionTitle>
               <FaChartBar />
-              <span>Suivi budgétaire {annee}</span>
+              <span>Suivi budgétaire {annee === -1 ? "toutes années" : annee}</span>
             </SectionTitle>
           </SectionHeader>
           
-          <StatistiquesBudget annee={annee} />
+          {annee === -1 ? (
+            <InfoMessage>
+              <p>Le suivi budgétaire mensuel n'est pas disponible pour l'option "Toutes les années".</p>
+              <p>Veuillez sélectionner une année spécifique pour visualiser le suivi budgétaire mensuel.</p>
+            </InfoMessage>
+          ) : (
+            <StatistiquesBudget annee={annee} />
+          )}
         </Section>
         
         <ChartsSection>
@@ -653,12 +742,13 @@ const Statistiques = () => {
         </ChartsSection>
       </div> {/* Fermeture de la div ref={statsRef} */}
       
-      {/* Modale d'export */}
+      {/* Modal d'export avec mise à jour pour supporter l'option "Toutes les années" */}
       <ExportModal
         show={showExportModal}
         onClose={() => setShowExportModal(false)}
         onExport={handleExport}
         annee={annee}
+        isAllYears={annee === -1}
       />
     </Container>
   );
@@ -1054,6 +1144,19 @@ const ExportButton = styled.button`
   
   &:active {
     background-color: #2e7d32;
+  }
+`;
+
+const InfoMessage = styled.div`
+  padding: 20px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  color: #2e7d32;
+  text-align: center;
+  font-size: 16px;
+  
+  p {
+    margin: 8px 0;
   }
 `;
 

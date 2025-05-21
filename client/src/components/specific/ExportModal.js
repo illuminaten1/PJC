@@ -5,30 +5,31 @@ import { FaFileExcel, FaFilePdf, FaTimes, FaToggleOn, FaToggleOff, FaFileExport 
 /**
  * Composant de modal pour configurer l'export des statistiques
  */
-const ExportModal = ({ show, onClose, onExport, annee }) => {
+const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => {
   // États pour les options d'export
   const [format, setFormat] = useState('excel');
   const [includeAnnualStats, setIncludeAnnualStats] = useState(true);
   const [includeRedacteurTable, setIncludeRedacteurTable] = useState(true);
   const [includeCirconstanceTable, setIncludeCirconstanceTable] = useState(true);
-  
+  const [includeRegionTable, setIncludeRegionTable] = useState(true);
+
   // État pour le chargement
   const [isExporting, setIsExporting] = useState(false);
   
   // Gestionnaire pour lancer l'export
   const handleExport = () => {
-    setIsExporting(true); // Activer l'indicateur de chargement
+    setIsExporting(true);
     
-    // Préparer les options d'export
     const exportOptions = {
       format,
       includeAnnualStats,
       includeRedacteurTable: includeAnnualStats && includeRedacteurTable,
       includeCirconstanceTable: includeAnnualStats && includeCirconstanceTable,
-      annee
+      includeRegionTable: includeAnnualStats && includeRegionTable,
+      annee,
+      isAllYears // Passer cette information aux fonctions d'export
     };
     
-    // Lancer l'export et gérer la fin du processus
     onExport(exportOptions)
       .then(() => {
         setIsExporting(false);
@@ -108,7 +109,10 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
                 {includeAnnualStats ? <FaToggleOn /> : <FaToggleOff />}
               </ToggleIcon>
               <label onClick={() => !isExporting && setIncludeAnnualStats(!includeAnnualStats)}>
-                Inclure les statistiques de l'année {annee}
+                {isAllYears 
+                  ? "Inclure les statistiques détaillées pour toutes les années" 
+                  : `Inclure les statistiques de l'année ${annee}`
+                }
               </label>
             </ToggleField>
             
@@ -135,6 +139,19 @@ const ExportModal = ({ show, onClose, onExport, annee }) => {
                   </ToggleIcon>
                   <label onClick={() => !isExporting && setIncludeCirconstanceTable(!includeCirconstanceTable)}>
                     Inclure la répartition par circonstance
+                  </label>
+                </SubToggleField>
+                
+                {/* Nouvelle option pour la répartition par région */}
+                <SubToggleField disabled={isExporting}>
+                  <ToggleIcon 
+                    checked={includeRegionTable}
+                    onClick={() => !isExporting && setIncludeRegionTable(!includeRegionTable)}
+                  >
+                    {includeRegionTable ? <FaToggleOn /> : <FaToggleOff />}
+                  </ToggleIcon>
+                  <label onClick={() => !isExporting && setIncludeRegionTable(!includeRegionTable)}>
+                    Inclure la répartition par région
                   </label>
                 </SubToggleField>
               </IndentedSection>

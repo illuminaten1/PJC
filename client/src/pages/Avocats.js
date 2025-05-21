@@ -260,15 +260,6 @@ const Avocats = () => {
     setSelectedAvocatId(avocatId);
     setDeleteModalOpen(true);
   };
-  
-  const getRegionLabel = (region) => {
-    if (!region) return '';
-    if (region.startsWith('Nouvelle-')) return 'N. ' + region.substring(9);
-    if (region.startsWith('Provence-')) return 'PACA';
-    if (region.startsWith('Auvergne-')) return 'Auv. R-A';
-    if (region.startsWith('Bourgogne-')) return 'B. F-C';
-    return region;
-  };
 
   if (loading && avocats.length === 0) {
     return (
@@ -441,8 +432,8 @@ const Avocats = () => {
                     <Td><HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} /></Td>
                     <Td>
                       {avocat.region ? (
-                        <RegionBadge title={avocat.region}>
-                          {getRegionLabel(avocat.region)}
+                        <RegionBadge>
+                          {avocat.region}
                         </RegionBadge>
                       ) : (
                         '-'

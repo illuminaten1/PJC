@@ -7,6 +7,14 @@ import Modal from '../components/common/Modal';
 import AvocatForm from '../components/forms/AvocatForm';
 import AvocatDetail from '../components/specific/AvocatDetail';
 
+// Fonction utilitaire pour surligner le terme dans le texte
+const highlightMatch = (text, term) => {
+  if (!text || !term || term.trim() === '') return text;
+
+  const regex = new RegExp(`(${term.trim()})`, 'gi');
+  return text.replace(regex, '<span class="highlight">$1</span>');
+};
+
 const HighlightedText = ({ text, searchTerm }) => {
   if (!searchTerm.trim() || !text) return text;
   
@@ -261,13 +269,6 @@ const Avocats = () => {
     if (region.startsWith('Auvergne-')) return 'Auv. R-A';
     if (region.startsWith('Bourgogne-')) return 'B. F-C';
     return region;
-  };
-
-  const highlightMatch = (text, term) => {
-    if (!text || !term || term.trim() === '') return text;
-  
-    const regex = new RegExp(`(${term.trim()})`, 'gi');
-    return text.replace(regex, '<span class="highlight">$1</span>');
   };
 
   if (loading && avocats.length === 0) {
@@ -796,6 +797,12 @@ const Td = styled.td`
   padding: 12px 16px;
   font-size: 14px;
   color: #333;
+  
+  .highlight {
+    background-color: #ffc107;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
 `;
 
 const TdActions = styled.td`
@@ -965,15 +972,6 @@ const VilleTag = styled.span`
     background-color: #ffc107;
     padding: 0 2px;
     border-radius: 2px;
-  }
-`;
-
-const HighlightStyle = styled.span`
-  .highlight {
-    background-color: #ffc107;
-    padding: 0 2px;
-    border-radius: 2px;
-    font-weight: 500;
   }
 `;
 

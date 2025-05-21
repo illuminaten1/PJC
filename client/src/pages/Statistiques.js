@@ -266,7 +266,9 @@ const Statistiques = () => {
     if (!statsGlobales || !statsGlobales.parAnnee) return [];
     
     // Tri des années dans l'ordre croissant
-    const sortedYears = [...years].sort((a, b) => a - b);
+    const sortedYears = [...years]
+      .filter(year => year !== -1) // Filtrer l'année -1
+      .sort((a, b) => a - b);
     
     return sortedYears.map((year, index) => {
       const yearData = statsGlobales.parAnnee[year] || {};

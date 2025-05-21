@@ -367,7 +367,7 @@ const DetailAffaire = () => {
             
             <StatsCard>
               <StatsTitle>Finances</StatsTitle>
-              <StatsValue>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT engagés</StatsValue>
+              <StatsValue>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatsValue>
               <StatsDetails>
                 <StatDetail>
                   <StatDetailLabel>Engagé :</StatDetailLabel>

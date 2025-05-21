@@ -934,12 +934,20 @@ const TableTitle = styled.div`
 
 const TablesRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
   
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
   @media (max-width: 992px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   @media (max-width: 768px) {
@@ -957,26 +965,46 @@ const TableCard = styled.div`
   width: 100%;
   height: 100%;
   border: 2px solid #ddd;
+  
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    
+    table {
+      min-width: 450px; /* Garantir une largeur minimale en mobile */
+    }
+  }
 `;
 
 const CompactTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  table-layout: auto;
+  table-layout: fixed;
   
   .bg-header {
     background-color: #f5f5f5;
   }
+  
+  @media (max-width: 1400px) {
+    font-size: 12px;
+  }
 `;
 
 const Th = styled.th`
-  padding: 12px 16px;
+  padding: 12px 8px;
   color: #555;
   font-weight: 600;
   font-size: 12px;
   border-bottom: 2px solid #ddd;
-  text-align: left; /* Tous les en-têtes alignés à gauche */
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media (max-width: 1400px) {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
 `;
 
 const Tr = styled.tr`
@@ -988,29 +1016,43 @@ const Tr = styled.tr`
 `;
 
 const YearCell = styled.td`
-  padding: 12px 16px;
+  padding: 12px 8px;
   font-weight: 600;
   font-size: 16px;
   color: #3f51b5;
   border-bottom: 1px solid #eee;
   text-align: left;
+  
+  @media (max-width: 1400px) {
+    padding: 10px 6px;
+    font-size: 14px;
+  }
 `;
 
 const Td = styled.td`
-  padding: 12px 16px;
+  padding: 12px 8px;
   color: #333;
   border-bottom: 1px solid #eee;
-  text-align: left; /* Alignement à gauche pour toutes les cellules */
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   
   /* Container pour les valeurs et variations */
   .value-container {
     display: flex;
     align-items: center;
+    flex-wrap: nowrap;
   }
   
-  /* Valeur numérique avec largeur fixe */
+  /* Valeur numérique avec largeur adaptative */
   .value {
-    min-width: 100px; /* Largeur minimale pour garantir l'alignement */
+    min-width: unset;
+    margin-right: 4px;
+  }
+  
+  @media (max-width: 1400px) {
+    padding: 10px 6px;
   }
 `;
 
@@ -1020,11 +1062,18 @@ const TotalRow = styled.tr`
 `;
 
 const TotalCell = styled.td`
-  padding: 14px 16px;
+  padding: 14px 8px;
   color: #333;
   border-top: 2px solid #ddd;
-  text-align: left; /* Alignement à gauche */
+  text-align: left;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media (max-width: 1400px) {
+    padding: 12px 6px;
+  }
 `;
 
 // Styles pour les tableaux des répartitions
@@ -1089,29 +1138,37 @@ const Container = styled.div`
 
 const VariationUp = styled.span`
   color: #4caf50;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  margin-left: 8px;
+  margin-left: 4px;
   display: inline-flex;
   align-items: center;
-  min-width: 45px; /* Largeur minimale pour garantir l'alignement */
+  min-width: unset;
   
   &.significant {
     font-weight: 600;
+  }
+  
+  @media (max-width: 1400px) {
+    font-size: 10px;
   }
 `;
 
 const VariationDown = styled.span`
   color: #f44336;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  margin-left: 8px;
+  margin-left: 4px;
   display: inline-flex;
   align-items: center;
-  min-width: 45px; /* Largeur minimale pour garantir l'alignement */
+  min-width: unset;
   
   &.significant {
     font-weight: 600;
+  }
+  
+  @media (max-width: 1400px) {
+    font-size: 10px;
   }
 `;
 

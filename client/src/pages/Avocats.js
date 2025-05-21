@@ -7,6 +7,16 @@ import Modal from '../components/common/Modal';
 import AvocatForm from '../components/forms/AvocatForm';
 import AvocatDetail from '../components/specific/AvocatDetail';
 
+const HighlightedText = ({ text, searchTerm }) => {
+  if (!searchTerm.trim() || !text) return text;
+  
+  // Créer le HTML avec les termes surlignés
+  const highlightedHTML = highlightMatch(text, searchTerm.trim());
+  
+  // Utiliser dangerouslySetInnerHTML pour interpréter les balises HTML
+  return <span dangerouslySetInnerHTML={{ __html: highlightedHTML }} />;
+};
+
 const Avocats = () => {
   const [avocats, setAvocats] = useState([]);
   const [filteredAvocats, setFilteredAvocats] = useState([]);
@@ -253,6 +263,13 @@ const Avocats = () => {
     return region;
   };
 
+  const highlightMatch = (text, term) => {
+    if (!text || !term || term.trim() === '') return text;
+  
+    const regex = new RegExp(`(${term.trim()})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  };
+
   if (loading && avocats.length === 0) {
     return (
       <Container>
@@ -419,9 +436,9 @@ const Avocats = () => {
                     onClick={() => handleOpenDetailModal(avocat)}
                     className="clickable-row"
                   >
-                    <Td>{avocat.nom}</Td>
-                    <Td>{avocat.prenom}</Td>
-                    <Td>{avocat.cabinet || '-'}</Td>
+                    <Td><HighlightedText text={avocat.nom} searchTerm={searchTerm} /></Td>
+                    <Td><HighlightedText text={avocat.prenom} searchTerm={searchTerm} /></Td>
+                    <Td><HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} /></Td>
                     <Td>
                       {avocat.region ? (
                         <RegionBadge title={avocat.region}>
@@ -435,14 +452,24 @@ const Avocats = () => {
                       {avocat.villesIntervention && avocat.villesIntervention.length > 0 ? (
                         <VillesContainer>
                           {avocat.villesIntervention.slice(0, 2).map((ville, index) => (
-                            <VilleTag key={index}>{ville}</VilleTag>
+                            <VilleTag 
+                              key={index}
+                              className={searchTerm.trim() !== "" && ville.toLowerCase().includes(searchTerm.toLowerCase()) ? "highlighted" : ""}
+                            >
+                              <HighlightedText text={ville} searchTerm={searchTerm} />
+                            </VilleTag>
                           ))}
                           {avocat.villesIntervention.length > 2 && (
-                            <VilleTag className="more">+{avocat.villesIntervention.length - 2}</VilleTag>
+                            <VilleTag className="more">
+                              +{avocat.villesIntervention.length - 2}
+                              {searchTerm.trim() !== "" && 
+                              avocat.villesIntervention.slice(2).some(v => v.toLowerCase().includes(searchTerm.toLowerCase())) && 
+                              " (✓)"}
+                            </VilleTag>
                           )}
                         </VillesContainer>
                       ) : '-'}
-                    </Td>                    <Td>
+                    </Td>                   <Td>
                       {avocat.specialisationRPC && (
                         <RPCTag>RPC</RPCTag>
                       )}
@@ -926,6 +953,27 @@ const VilleTag = styled.span`
   &.more {
     background-color: #f5f5f5;
     color: #757575;
+  }
+  
+  /* Ajoutez ces styles */
+  &.highlighted {
+    border: 1px solid #ffc107;
+    background-color: #fff8e1;
+  }
+  
+  .highlight {
+    background-color: #ffc107;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+`;
+
+const HighlightStyle = styled.span`
+  .highlight {
+    background-color: #ffc107;
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: 500;
   }
 `;
 

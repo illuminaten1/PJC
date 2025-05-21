@@ -649,7 +649,7 @@ const Statistiques = () => {
           {annee === -1 ? (
             <InfoMessage>
               <p>Le suivi budgétaire mensuel n'est pas disponible pour l'option "Toutes les années".</p>
-              <p>Veuillez sélectionner une année spécifique pour visualiser le suivi budgétaire mensuel.</p>
+              <p>Veuillez sélectionner une année spécifique pour visualiser le graphique.</p>
             </InfoMessage>
           ) : (
             <StatistiquesBudget annee={annee} />

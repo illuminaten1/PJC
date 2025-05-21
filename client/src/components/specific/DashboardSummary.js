@@ -87,7 +87,7 @@ const DashboardSummary = ({ statistiques = {} }) => {
             <FaMoneyBill />
           </IconContainer>
           <StatContent>
-            <StatValue>{currentYearFinances.montantGage.toLocaleString('fr-FR')} €</StatValue>
+            <StatValue>{currentYearFinances.montantGage.toLocaleString('fr-FR')} € HT engagés</StatValue>
             <StatLabel>Budget {currentYear}</StatLabel>
             <StatDetail>
               <DetailItem>

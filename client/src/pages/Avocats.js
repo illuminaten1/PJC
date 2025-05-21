@@ -460,7 +460,11 @@ const Avocats = () => {
                             </VilleTag>
                           ))}
                           {avocat.villesIntervention.length > 2 && (
-                            <VilleTag className="more">
+                            <VilleTag 
+                              className={`more ${searchTerm.trim() !== "" && 
+                                avocat.villesIntervention.slice(2).some(v => v.toLowerCase().includes(searchTerm.toLowerCase())) 
+                                ? "highlighted" : ""}`}
+                            >
                               +{avocat.villesIntervention.length - 2}
                               {searchTerm.trim() !== "" && 
                               avocat.villesIntervention.slice(2).some(v => v.toLowerCase().includes(searchTerm.toLowerCase())) && 
@@ -956,9 +960,15 @@ const VilleTag = styled.span`
   color: #1976d2;
   white-space: nowrap;
   
- &.more {
+  &.more {
     background-color: #f5f5f5;
     color: #757575;
+    
+    &.highlighted {
+      background-color: #fff8e1;
+      border: 1px solid #ffc107;
+      color: #1976d2;
+    }
     
     .match-indicator {
       color: #ffc107;

@@ -110,7 +110,6 @@ const Avocats = () => {
       const term = searchTerm.toLowerCase();
       result = result.filter(avocat => 
         `${avocat.nom} ${avocat.prenom}`.toLowerCase().includes(term) ||
-        avocat.email.toLowerCase().includes(term) ||
         (avocat.cabinet && avocat.cabinet.toLowerCase().includes(term)) ||
         (avocat.villesIntervention && Array.isArray(avocat.villesIntervention) && 
         avocat.villesIntervention.some(ville => ville.toLowerCase().includes(term)))
@@ -298,7 +297,7 @@ const Avocats = () => {
             <SearchIcon><FaSearch /></SearchIcon>
             <SearchInput
               type="text"
-              placeholder="Rechercher un avocat..."
+              placeholder="Rechercher par nom, cabinet ou ville..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

@@ -621,6 +621,35 @@ const Statistiques = () => {
             </tbody>
           </ResponsiveTable>
         </ChartCard>
+
+        <ChartCard className="region-table">
+          <BlockTitle>Répartition par région</BlockTitle>
+          <ResponsiveTable>
+            <thead>
+              <tr>
+                <TableHeader>Région</TableHeader>
+                <TableHeader>Militaires</TableHeader>
+                <TableHeader>Bénéficiaires</TableHeader>
+                <TableHeader>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parRegion || {}).sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires).map(([region, data]) => {
+                const totalMilitaires = Object.values(statistiques?.parRegion || {}).reduce((a, b) => a + b.nbMilitaires, 0);
+                const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`region-${region}`}>
+                    <TableDataCell>{region}</TableDataCell>
+                    <TableDataCell>{data.nbMilitaires}</TableDataCell>
+                    <TableDataCell>{data.nbBeneficiaires}</TableDataCell>
+                    <TableDataCell>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
         </ChartsSection>
       </div> {/* Fermeture de la div ref={statsRef} */}
       

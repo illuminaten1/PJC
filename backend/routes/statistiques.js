@@ -243,6 +243,39 @@ const statsByRedacteur = await Beneficiaire.aggregate([
         count: { $sum: 1 } 
       } }
     ]);
+
+    // Statistiques par région
+    const statsByRegion = await Militaire.aggregate([
+      // Joindre l'affaire
+      { $lookup: {
+        from: 'affaires',
+        localField: 'affaire',
+        foreignField: '_id',
+        as: 'affaireInfo'
+      } },
+      { $unwind: { path: "$affaireInfo", preserveNullAndEmptyArrays: false } },
+      // Filtrer par année
+      { $match: { 'affaireInfo.dateFaits': { $gte: debutAnnee, $lt: finAnnee } }},
+      // Joindre les bénéficiaires pour chaque militaire
+      { $lookup: {
+        from: 'beneficiaires',
+        localField: '_id',
+        foreignField: 'militaire',
+        as: 'beneficiairesInfo'
+      } },
+      // Grouper par région
+      { $group: { 
+        _id: "$region", 
+        nbMilitaires: { $sum: 1 },
+        nbBeneficiaires: { $sum: { $size: "$beneficiairesInfo" } }
+      } },
+      // Gérer les régions non définies
+      { $addFields: {
+        region: { $ifNull: ["$_id", "Non spécifiée"] }
+      } },
+      // Trier par nombre de militaires décroissant
+      { $sort: { nbMilitaires: -1 } }
+    ]);
     
     res.json({
       annee: anneeInt,
@@ -261,6 +294,15 @@ const statsByRedacteur = await Beneficiaire.aggregate([
       }, {}),
       parCirconstance: statsByCirconstance.reduce((acc, stat) => {
         acc[stat._id] = stat.count;
+        return acc;
+      }, {}),
+      parRegion: statsByRegion.reduce((acc, stat) => {
+        // Utiliser "Non spécifiée" si la région est null ou undefined
+        const regionKey = stat._id || "Non spécifiée";
+        acc[regionKey] = {
+          nbMilitaires: stat.nbMilitaires,
+          nbBeneficiaires: stat.nbBeneficiaires
+        };
         return acc;
       }, {})
     });

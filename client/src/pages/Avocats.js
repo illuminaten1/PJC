@@ -714,7 +714,9 @@ const ResetButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   transition: background-color 0.2s;
+  height: 40px; /* Même hauteur que les autres contrôles */
   
   &:hover {
     background-color: #d32f2f;

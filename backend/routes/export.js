@@ -146,18 +146,18 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     
     // ------------------ ONGLET BÉNÉFICIAIRES ------------------
     const wsBeneficiaires = workbook.addWorksheet('Bénéficiaires');
-    
-    // Définir les en-têtes de l'onglet Bénéficiaires
+
+    // Définir les en-têtes de l'onglet Bénéficiaires (avec nouvelles colonnes)
     const beneficiairesHeaders = [
-      'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Affaire',
-      'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
+      'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Unité', 'Région', 'Département',
+      'Affaire', 'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
       'Avocats', 'Rédacteur', 'Nb. Conventions', 'Nb. Paiements', 'Date de création'
     ];
-    
+
     // Appliquer les en-têtes
     applyHeaderRow(wsBeneficiaires, beneficiairesHeaders);
-    
-    // Ajouter les données
+
+    // Ajouter les données (avec nouvelles colonnes)
     beneficiaires.forEach(b => {
       const militaire = b.militaire || {};
       const affaire = militaire._id ? militaireAffaireMap[militaire._id.toString()] || {} : {};
@@ -167,6 +167,9 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
         b.nom || '',
         b.qualite || '',
         militaire ? `${militaire.grade || ''} ${militaire.prenom || ''} ${militaire.nom || ''}`.trim() : '',
+        militaire.unite || '',
+        militaire.region || '',
+        militaire.departement || '',
         affaire.nom || '',
         formatDate(affaire.dateFaits),
         affaire.lieu || '',
@@ -180,7 +183,7 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
         formatDate(b.dateCreation)
       ]);
     });
-    
+
     // Appliquer les styles aux cellules de données
     applyDataStyles(wsBeneficiaires);
     

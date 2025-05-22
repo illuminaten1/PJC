@@ -146,17 +146,17 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     
     // ------------------ ONGLET BÉNÉFICIAIRES ------------------
     const wsBeneficiaires = workbook.addWorksheet('Bénéficiaires');
-
+    
     // Définir les en-têtes de l'onglet Bénéficiaires (avec nouvelles colonnes)
     const beneficiairesHeaders = [
       'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Unité', 'Région', 'Département',
       'Affaire', 'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
       'Avocats', 'Rédacteur', 'Nb. Conventions', 'Nb. Paiements', 'Date de création'
     ];
-
+    
     // Appliquer les en-têtes
     applyHeaderRow(wsBeneficiaires, beneficiairesHeaders);
-
+    
     // Ajouter les données (avec nouvelles colonnes)
     beneficiaires.forEach(b => {
       const militaire = b.militaire || {};
@@ -183,23 +183,23 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
         formatDate(b.dateCreation)
       ]);
     });
-
+    
     // Appliquer les styles aux cellules de données
     applyDataStyles(wsBeneficiaires);
     
     // ------------------ ONGLET CONVENTIONS ------------------
     const wsConventions = workbook.addWorksheet('Conventions');
-
+    
     // Définir les en-têtes de l'onglet Conventions
     const conventionsHeaders = [
       'Bénéficiaire', 'Qualité', 'Militaire', 'Avocat', 'Cabinet',
       'Montant', 'Pourcentage Résultats', 'Date Envoi Avocat',
       'Date Envoi Bénéficiaire', 'Date Validation FMG'
     ];
-
+    
     // Appliquer les en-têtes
     applyHeaderRow(wsConventions, conventionsHeaders);
-
+    
     // Ajouter les données avec formatage correct des nombres
     beneficiaires.forEach(b => {
       if (b.conventions && b.conventions.length > 0) {
@@ -207,63 +207,67 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
           const avocat = c.avocat && b.avocats ? 
             b.avocats.find(a => a._id.toString() === c.avocat.toString()) : null;
           
-          const row = wsConventions.addRow([
+          wsConventions.addRow([
             `${b.prenom || ''} ${b.nom || ''}`.trim(),
             b.qualite || '',
             b.militaire ? `${b.militaire.grade || ''} ${b.militaire.prenom || ''} ${b.militaire.nom || ''}`.trim() : '',
             avocat ? `${avocat.prenom || ''} ${avocat.nom || ''}`.trim() : '',
             avocat ? avocat.cabinet || '' : '',
-            c.montant || null,  // Valeur numérique
-            c.pourcentageResultats || null,  // Valeur numérique
+            c.montant || 0,  // Valeur numérique
+            c.pourcentageResultats || 0,  // Valeur numérique (garder le nombre original)
             formatDate(c.dateEnvoiAvocat),
             formatDate(c.dateEnvoiBeneficiaire),
             formatDate(c.dateValidationFMG)
           ]);
-          
-          // Formatage spécifique pour les colonnes numériques
-          const montantCell = row.getCell(6); // Colonne Montant
-          const pourcentageCell = row.getCell(7); // Colonne Pourcentage
-          
-          if (c.montant) {
-            montantCell.value = c.montant;
-            montantCell.numFmt = '#,##0.00 "€"'; // Format monétaire euro
-          }
-          
-          if (c.pourcentageResultats) {
-            pourcentageCell.value = c.pourcentageResultats / 100; // Convertir en décimal pour Excel
-            pourcentageCell.numFmt = '0.00%'; // Format pourcentage
-          }
         });
       }
     });
-
-    // Appliquer les styles aux cellules de données
+    
+    // Appliquer d'abord les styles de base
     applyDataStyles(wsConventions);
-
+    
+    // PUIS appliquer le formatage spécifique aux colonnes numériques
+    for (let i = 2; i <= wsConventions.rowCount; i++) {
+      const row = wsConventions.getRow(i);
+      
+      // Colonne 6 : Montant (format euro)
+      const montantCell = row.getCell(6);
+      if (montantCell.value && typeof montantCell.value === 'number') {
+        montantCell.numFmt = '#,##0.00 "€"';
+      }
+      
+      // Colonne 7 : Pourcentage (format pourcentage)
+      const pourcentageCell = row.getCell(7);
+      if (pourcentageCell.value && typeof pourcentageCell.value === 'number') {
+        // Convertir en décimal pour Excel (15 devient 0.15)
+        pourcentageCell.value = pourcentageCell.value / 100;
+        pourcentageCell.numFmt = '0.00%';
+      }
+    }
+    
     // ------------------ ONGLET PAIEMENTS ------------------
     const wsPaiements = workbook.addWorksheet('Paiements');
-
-    // Définir les en-têtes de l'onglet Paiements (avec colonnes HT et TTC séparées)
+    
+    // Définir les en-têtes de l'onglet Paiements (retour à une seule colonne montant)
     const paiementsHeaders = [
-      'Bénéficiaire', 'Qualité', 'Type', 'Montant HT', 'Montant TTC', 'Date',
+      'Bénéficiaire', 'Qualité', 'Type', 'Montant', 'Date',
       'Qualité Destinataire', 'Identité Destinataire', 'Référence Pièce',
       'Adresse Destinataire', 'SIRET/RIDET', 'Titulaire Compte',
       'Code Établissement', 'Code Guichet', 'Numéro Compte', 'Clé Vérification'
     ];
-
+    
     // Appliquer les en-têtes
     applyHeaderRow(wsPaiements, paiementsHeaders);
-
-    // Ajouter les données avec formatage correct des montants
+    
+    // Ajouter les données
     beneficiaires.forEach(b => {
       if (b.paiements && b.paiements.length > 0) {
         b.paiements.forEach(p => {
-          const row = wsPaiements.addRow([
+          wsPaiements.addRow([
             `${b.prenom || ''} ${b.nom || ''}`.trim(),
             b.qualite || '',
             p.type || '',
-            p.montantHT || null,  // Valeur numérique HT
-            p.montantTTC || null, // Valeur numérique TTC
+            p.montant || 0,  // Valeur numérique
             formatDate(p.date),
             p.qualiteDestinataire || '',
             p.identiteDestinataire || '',
@@ -276,26 +280,23 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
             p.numeroCompte || '',
             p.cleVerification || ''
           ]);
-          
-          // Formatage spécifique pour les colonnes montants
-          const montantHTCell = row.getCell(4); // Colonne Montant HT
-          const montantTTCCell = row.getCell(5); // Colonne Montant TTC
-          
-          if (p.montantHT) {
-            montantHTCell.value = p.montantHT;
-            montantHTCell.numFmt = '#,##0.00 "€"'; // Format monétaire euro
-          }
-          
-          if (p.montantTTC) {
-            montantTTCCell.value = p.montantTTC;
-            montantTTCCell.numFmt = '#,##0.00 "€"'; // Format monétaire euro
-          }
         });
       }
     });
-
-    // Appliquer les styles aux cellules de données
+    
+    // Appliquer d'abord les styles de base
     applyDataStyles(wsPaiements);
+    
+    // PUIS appliquer le formatage spécifique à la colonne montant
+    for (let i = 2; i <= wsPaiements.rowCount; i++) {
+      const row = wsPaiements.getRow(i);
+      
+      // Colonne 4 : Montant (format euro)
+      const montantCell = row.getCell(4);
+      if (montantCell.value && typeof montantCell.value === 'number') {
+        montantCell.numFmt = '#,##0.00 "€"';
+      }
+    }
     
     // Générer le fichier et l'envoyer comme réponse HTTP
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

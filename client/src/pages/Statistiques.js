@@ -402,9 +402,15 @@ const Statistiques = () => {
               <CompactTable>
                 <thead>
                   <tr className="bg-header">
-                    <Th>Année</Th>
-                    <Th>Nombre de bénéficiaires</Th>
-                    <Th>Nombre de conventions</Th>
+                    <SummaryTableHeader>Année</SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Nombre de bénéficiaires</span>
+                      <span className="short-text">Bénéficiaires</span>
+                    </SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Nombre de conventions</span>
+                      <span className="short-text">Conventions</span>
+                    </SummaryTableHeader>
                   </tr>
                 </thead>
                 <tbody>
@@ -455,9 +461,15 @@ const Statistiques = () => {
               <CompactTable>
                 <thead>
                   <tr className="bg-header">
-                    <Th>Année</Th>
-                    <Th>Montant total gagé HT</Th>
-                    <Th>Montant total gagé TTC</Th>
+                    <SummaryTableHeader>Année</SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Montant total gagé HT</span>
+                      <span className="short-text">Gagé HT</span>
+                    </SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Montant total gagé TTC</span>
+                      <span className="short-text">Gagé TTC</span>
+                    </SummaryTableHeader>
                   </tr>
                 </thead>
                 <tbody>
@@ -513,9 +525,15 @@ const Statistiques = () => {
               <CompactTable>
                 <thead>
                   <tr className="bg-header">
-                    <Th>Année</Th>
-                    <Th>Nombre de règlements</Th>
-                    <Th>Montant total ordonné TTC</Th>
+                    <SummaryTableHeader>Année</SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Nombre de règlements</span>
+                      <span className="short-text">Règlements</span>
+                    </SummaryTableHeader>
+                    <SummaryTableHeader>
+                      <span className="full-text">Montant total ordonné TTC</span>
+                      <span className="short-text">Ordonné TTC</span>
+                    </SummaryTableHeader>
                   </tr>
                 </thead>
                 <tbody>
@@ -1216,6 +1234,44 @@ const InfoMessage = styled.div`
   
   p {
     margin: 8px 0;
+  }
+`;
+
+const SummaryTableHeader = styled.th`
+  padding: 12px 8px;
+  color: #555;
+  font-weight: 600;
+  font-size: 12px;
+  border-bottom: 2px solid #ddd;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  .full-text {
+    display: inline;
+  }
+  
+  .short-text {
+    display: none;
+  }
+  
+  @media (max-width: 1400px) {
+    padding: 10px 6px;
+    font-size: 11px;
+    
+    .full-text {
+      display: none;
+    }
+    
+    .short-text {
+      display: inline;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    padding: 8px 4px;
+    font-size: 10px;
   }
 `;
 

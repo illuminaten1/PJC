@@ -147,17 +147,17 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     // ------------------ ONGLET BÉNÉFICIAIRES ------------------
     const wsBeneficiaires = workbook.addWorksheet('Bénéficiaires');
     
-    // Définir les en-têtes de l'onglet Bénéficiaires (avec nouvelles colonnes)
+    // Définir les en-têtes de l'onglet Bénéficiaires
     const beneficiairesHeaders = [
-      'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Unité', 'Région', 'Département',
-      'Affaire', 'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
+      'Prénom', 'NOM', 'Qualité', 'Militaire créateur de droit', 'Affaire',
+      'Date des faits', 'Lieu des faits', 'N° de décision', 'Date de décision',
       'Avocats', 'Rédacteur', 'Nb. Conventions', 'Nb. Paiements', 'Date de création'
     ];
     
     // Appliquer les en-têtes
     applyHeaderRow(wsBeneficiaires, beneficiairesHeaders);
     
-    // Ajouter les données (avec nouvelles colonnes)
+    // Ajouter les données
     beneficiaires.forEach(b => {
       const militaire = b.militaire || {};
       const affaire = militaire._id ? militaireAffaireMap[militaire._id.toString()] || {} : {};
@@ -167,9 +167,6 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
         b.nom || '',
         b.qualite || '',
         militaire ? `${militaire.grade || ''} ${militaire.prenom || ''} ${militaire.nom || ''}`.trim() : '',
-        militaire.unite || '',        // Nouvelle colonne
-        militaire.region || '',       // Nouvelle colonne
-        militaire.departement || '',  // Nouvelle colonne
         affaire.nom || '',
         formatDate(affaire.dateFaits),
         affaire.lieu || '',
@@ -200,7 +197,7 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     // Appliquer les en-têtes
     applyHeaderRow(wsConventions, conventionsHeaders);
     
-    // Ajouter les données avec formatage correct des nombres
+    // Ajouter les données
     beneficiaires.forEach(b => {
       if (b.conventions && b.conventions.length > 0) {
         b.conventions.forEach(c => {
@@ -213,8 +210,8 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
             b.militaire ? `${b.militaire.grade || ''} ${b.militaire.prenom || ''} ${b.militaire.nom || ''}`.trim() : '',
             avocat ? `${avocat.prenom || ''} ${avocat.nom || ''}`.trim() : '',
             avocat ? avocat.cabinet || '' : '',
-            c.montant || 0,  // Valeur numérique
-            c.pourcentageResultats || 0,  // Valeur numérique (garder le nombre original)
+            c.montant ? `${c.montant.toLocaleString('fr-FR')} €` : '',
+            c.pourcentageResultats ? `${c.pourcentageResultats}%` : '',
             formatDate(c.dateEnvoiAvocat),
             formatDate(c.dateEnvoiBeneficiaire),
             formatDate(c.dateValidationFMG)
@@ -223,32 +220,13 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
       }
     });
     
-    // Appliquer d'abord les styles de base
+    // Appliquer les styles aux cellules de données
     applyDataStyles(wsConventions);
-    
-    // PUIS appliquer le formatage spécifique aux colonnes numériques
-    for (let i = 2; i <= wsConventions.rowCount; i++) {
-      const row = wsConventions.getRow(i);
-      
-      // Colonne 6 : Montant (format euro)
-      const montantCell = row.getCell(6);
-      if (montantCell.value && typeof montantCell.value === 'number') {
-        montantCell.numFmt = '#,##0.00 "€"';
-      }
-      
-      // Colonne 7 : Pourcentage (format pourcentage)
-      const pourcentageCell = row.getCell(7);
-      if (pourcentageCell.value && typeof pourcentageCell.value === 'number') {
-        // Convertir en décimal pour Excel (15 devient 0.15)
-        pourcentageCell.value = pourcentageCell.value / 100;
-        pourcentageCell.numFmt = '0.00%';
-      }
-    }
     
     // ------------------ ONGLET PAIEMENTS ------------------
     const wsPaiements = workbook.addWorksheet('Paiements');
     
-    // Définir les en-têtes de l'onglet Paiements (retour à une seule colonne montant)
+    // Définir les en-têtes de l'onglet Paiements
     const paiementsHeaders = [
       'Bénéficiaire', 'Qualité', 'Type', 'Montant', 'Date',
       'Qualité Destinataire', 'Identité Destinataire', 'Référence Pièce',
@@ -267,7 +245,7 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
             `${b.prenom || ''} ${b.nom || ''}`.trim(),
             b.qualite || '',
             p.type || '',
-            p.montant || 0,  // Valeur numérique
+            p.montant ? `${p.montant.toLocaleString('fr-FR')} €` : '',
             formatDate(p.date),
             p.qualiteDestinataire || '',
             p.identiteDestinataire || '',
@@ -284,19 +262,8 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
       }
     });
     
-    // Appliquer d'abord les styles de base
+    // Appliquer les styles aux cellules de données
     applyDataStyles(wsPaiements);
-    
-    // PUIS appliquer le formatage spécifique à la colonne montant
-    for (let i = 2; i <= wsPaiements.rowCount; i++) {
-      const row = wsPaiements.getRow(i);
-      
-      // Colonne 4 : Montant (format euro)
-      const montantCell = row.getCell(4);
-      if (montantCell.value && typeof montantCell.value === 'number') {
-        montantCell.numFmt = '#,##0.00 "€"';
-      }
-    }
     
     // Générer le fichier et l'envoyer comme réponse HTTP
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

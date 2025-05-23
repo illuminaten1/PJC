@@ -301,14 +301,13 @@ const Login = () => {
           <FormFooter>
             <HelpText>
               En cas de difficultés de connexion, contactez l'administrateur système.<br />
-              <strong>Support technique :</strong> admin@pjc.defense.gouv.fr
             </HelpText>
           </FormFooter>
           
           <SecurityNotice>
             <strong>CONFIDENTIEL</strong><br />
             Accès réservé au personnel autorisé.<br />
-            Toutes les connexions sont enregistrées et surveillées.
+            Toutes les connexions sont enregistrées.
           </SecurityNotice>
         </LoginForm>
       </LoginCard>

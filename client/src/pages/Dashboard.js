@@ -4,7 +4,7 @@ import { statistiquesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DashboardSummary from '../components/specific/DashboardSummary';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
-import { FaChartBar } from 'react-icons/fa';
+import { FaChartBar, FaSpinner } from 'react-icons/fa';
 
 const Dashboard = () => {
   const [statistiques, setStatistiques] = useState(null);
@@ -32,89 +32,248 @@ const Dashboard = () => {
   
   if (loading) {
     return (
-      <Container>
+      <DashboardContainer>
         <PageHeader title="Tableau de bord" />
-        <Loading>Chargement du tableau de bord...</Loading>
-      </Container>
+        <LoadingCard>
+          <LoadingContent>
+            <LoadingSpinner>
+              <FaSpinner />
+            </LoadingSpinner>
+            <LoadingText>Chargement du tableau de bord...</LoadingText>
+          </LoadingContent>
+        </LoadingCard>
+      </DashboardContainer>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <DashboardContainer>
         <PageHeader title="Tableau de bord" />
-        <Error>{error}</Error>
-      </Container>
+        <ErrorCard>
+          <ErrorMessage>{error}</ErrorMessage>
+          <RetryButton onClick={fetchStatistiques}>
+            Réessayer
+          </RetryButton>
+        </ErrorCard>
+      </DashboardContainer>
     );
   }
   
   return (
-    <Container>
-      <PageHeader 
-        title="Tableau de bord" 
-        subtitle="Aperçu général de la protection juridique"
-      />
+    <DashboardContainer>
+      <DashboardHeader>
+        <HeaderContent>
+          <Title>Tableau de bord</Title>
+          <Subtitle>Aperçu général de la protection juridique</Subtitle>
+        </HeaderContent>
+      </DashboardHeader>
       
-      <DashboardSummary statistiques={statistiques} />
-      
-      <Section>
-        <SectionHeader>
-          <SectionTitle>
-            <FaChartBar />
-            <span>Suivi budgétaire {anneeActuelle}</span>
-          </SectionTitle>
-        </SectionHeader>
+      <DashboardContent>
+        <DashboardSummary statistiques={statistiques} />
         
-        <StatistiquesBudget annee={anneeActuelle} />
-      </Section>
-    </Container>
+        <Section>
+          <SectionCard>
+            <SectionHeader>
+              <SectionTitle>
+                <IconContainer>
+                  <FaChartBar />
+                </IconContainer>
+                <span>Suivi budgétaire {anneeActuelle}</span>
+              </SectionTitle>
+            </SectionHeader>
+            
+            <SectionContent>
+              <StatistiquesBudget annee={anneeActuelle} />
+            </SectionContent>
+          </SectionCard>
+        </Section>
+      </DashboardContent>
+    </DashboardContainer>
   );
 };
 
-const Container = styled.div`
-  padding: 20px;
+const DashboardContainer = styled.div`
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #212529;
+`;
+
+const DashboardHeader = styled.div`
+  background: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+  padding: 32px 20px;
+  margin-bottom: 20px;
+`;
+
+const HeaderContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const Title = styled.h1`
+  font-size: 28px;
+  color: #212529;
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+`;
+
+const Subtitle = styled.p`
+  color: #6c757d;
+  font-size: 16px;
+  line-height: 1.4;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
+const DashboardContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 const Section = styled.section`
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+`;
+
+const SectionCard = styled.div`
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 `;
 
 const SectionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  padding: 24px 24px 0;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 0;
 `;
 
 const SectionTitle = styled.h2`
   font-size: 18px;
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: #212529;
   display: flex;
   align-items: center;
-  
-  svg {
-    margin-right: 8px;
-    color: #3f51b5;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+`;
+
+const IconContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #495057;
+  color: #ffffff;
+  border-radius: 4px;
+  margin-right: 12px;
+  font-size: 14px;
+`;
+
+const SectionContent = styled.div`
+  padding: 24px;
+`;
+
+const LoadingCard = styled.div`
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin: 20px;
+
+  @media (min-width: 768px) {
+    margin: 20px auto;
   }
 `;
 
-const Loading = styled.div`
-  padding: 40px;
+const LoadingContent = styled.div`
+  padding: 64px 24px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-const Error = styled.div`
-  padding: 20px;
-  text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+const LoadingSpinner = styled.div`
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #495057;
+  font-size: 20px;
+
+  svg {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.p`
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
+`;
+
+const ErrorCard = styled.div`
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 0 20px;
+  max-width: 1200px;
+  padding: 48px 24px;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    margin: 20px auto;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  background: #f8d7da;
+  color: #721c24;
+  padding: 16px 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  font-size: 14px;
+`;
+
+const RetryButton = styled.button`
+  background: #495057;
+  color: #ffffff;
+  border: 1px solid #495057;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: #343a40;
+    border-color: #343a40;
+  }
 `;
 
 export default Dashboard;

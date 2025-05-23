@@ -65,6 +65,7 @@ const Dashboard = () => {
       <PageHeader 
         title="Tableau de bord" 
         subtitle="Aperçu général de la protection juridique"
+        style={{ padding: '32px 44px' }}
       />
       
       <DashboardContent>

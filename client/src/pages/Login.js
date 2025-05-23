@@ -173,20 +173,6 @@ const LoginButton = styled.button`
   }
 `;
 
-const FormFooter = styled.div`
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e9ecef;
-`;
-
-const HelpText = styled.p`
-  color: #6c757d;
-  font-size: 13px;
-  line-height: 1.4;
-  margin: 0;
-`;
-
 const SecurityNotice = styled.div`
   background: #f8f9fa;
   border: 1px solid #dee2e6;
@@ -297,12 +283,6 @@ const Login = () => {
           >
             {isLoading ? '' : 'Se connecter'}
           </LoginButton>
-          
-          <FormFooter>
-            <HelpText>
-              En cas de difficultés de connexion, contactez l'administrateur système.<br />
-            </HelpText>
-          </FormFooter>
           
           <SecurityNotice>
             <strong>CONFIDENTIEL</strong><br />

@@ -60,14 +60,12 @@ const Dashboard = () => {
     );
   }
   
-  return (
+    return (
     <DashboardContainer>
-      <DashboardHeader>
-        <HeaderContent>
-          <Title>Tableau de bord</Title>
-          <Subtitle>Aperçu général de la protection juridique</Subtitle>
-        </HeaderContent>
-      </DashboardHeader>
+      <PageHeader 
+        title="Tableau de bord" 
+        subtitle="Aperçu général de la protection juridique"
+      />
       
       <DashboardContent>
         <DashboardSummary statistiques={statistiques} />
@@ -100,44 +98,7 @@ const DashboardContainer = styled.div`
   color: #212529;
 `;
 
-const DashboardHeader = styled.div`
-  background: #ffffff;
-  border-bottom: 1px solid #dee2e6;
-  padding: 32px 20px;
-  margin-bottom: 20px;
-`;
-
-const HeaderContent = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const Title = styled.h1`
-  font-size: 28px;
-  color: #212529;
-  margin-bottom: 8px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-
-  @media (max-width: 768px) {
-    font-size: 24px;
-  }
-`;
-
-const Subtitle = styled.p`
-  color: #6c757d;
-  font-size: 16px;
-  line-height: 1.4;
-  margin: 0;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
 const DashboardContent = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 0 20px;
 `;
 

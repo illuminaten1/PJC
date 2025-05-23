@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Bar } from 'react-chartjs-2';
+import { FaSpinner } from 'react-icons/fa';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -46,15 +47,33 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   };
   
   if (loading) {
-    return <Loading>Chargement des statistiques...</Loading>;
+    return (
+      <LoadingContainer>
+        <LoadingSpinner>
+          <FaSpinner />
+        </LoadingSpinner>
+        <LoadingText>Chargement des statistiques...</LoadingText>
+      </LoadingContainer>
+    );
   }
   
   if (error) {
-    return <Error>{error}</Error>;
+    return (
+      <ErrorContainer>
+        <ErrorMessage>{error}</ErrorMessage>
+        <RetryButton onClick={fetchStatistiques}>
+          Réessayer
+        </RetryButton>
+      </ErrorContainer>
+    );
   }
   
   if (!statistiques) {
-    return <Empty>Aucune donnée disponible</Empty>;
+    return (
+      <EmptyContainer>
+        <EmptyText>Aucune donnée disponible pour l'année {annee}</EmptyText>
+      </EmptyContainer>
+    );
   }
   
   // Préparation des données pour le graphique
@@ -64,16 +83,18 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
       {
         label: 'Montants engagés (€)',
         data: statistiques.parMois.map(mois => mois.gage.montant),
-        backgroundColor: 'rgba(63, 81, 181, 0.6)',
-        borderColor: 'rgba(63, 81, 181, 1)',
+        backgroundColor: '#495057',
+        borderColor: '#495057',
         borderWidth: 1,
+        borderRadius: 2,
       },
       {
         label: 'Montants payés (€)',
         data: statistiques.parMois.map(mois => mois.paye.montant),
-        backgroundColor: 'rgba(76, 175, 80, 0.6)',
-        borderColor: 'rgba(76, 175, 80, 1)',
+        backgroundColor: '#28a745',
+        borderColor: '#28a745',
         borderWidth: 1,
+        borderRadius: 2,
       }
     ]
   };
@@ -84,19 +105,59 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
     plugins: {
       legend: {
         position: 'top',
-      },
-      title: {
-        display: true,
-        text: `Répartition budgétaire par mois - ${annee}`,
-        font: {
-          size: 16
+        labels: {
+          font: {
+            family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+            size: 12
+          },
+          color: '#495057',
+          usePointStyle: true,
+          pointStyle: 'rect'
         }
       },
+      title: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: '#ffffff',
+        titleColor: '#212529',
+        bodyColor: '#495057',
+        borderColor: '#dee2e6',
+        borderWidth: 1,
+        cornerRadius: 4,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + context.parsed.y.toLocaleString('fr-FR') + ' €';
+          }
+        }
+      }
     },
     scales: {
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+            size: 11
+          },
+          color: '#6c757d'
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: '#e9ecef',
+          borderDash: [2, 2]
+        },
         ticks: {
+          font: {
+            family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+            size: 11
+          },
+          color: '#6c757d',
           callback: function(value) {
             return value.toLocaleString('fr-FR') + ' €';
           }
@@ -106,90 +167,110 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   };
   
   return (
-    <Container className="budget-section">
-      <FullWidthChartContainer className="budget-chart">
-        <Bar data={chartData} options={chartOptions} />
-      </FullWidthChartContainer>
+    <Container>
+      <ChartSection>
+        <ChartContainer>
+          <Bar data={chartData} options={chartOptions} />
+        </ChartContainer>
+      </ChartSection>
       
-      <SummaryContainer>
+      <SummarySection>
         <SummaryTitle>Synthèse annuelle {annee}</SummaryTitle>
         
-        <SummaryGrid className="budget-summary">
+        <SummaryGrid>
           <SummaryCard>
-            <SummaryLabel>Total engagé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} € HT</SummaryValue>
+            <CardHeader>
+              <SummaryLabel>Total engagé</SummaryLabel>
+              <SummaryValue primary>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</SummaryValue>
+              <SummaryUnit>HT</SummaryUnit>
+            </CardHeader>
           </SummaryCard>
           
           <SummaryCard>
-            <SummaryLabel>Total payé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} € TTC</SummaryValue>
+            <CardHeader>
+              <SummaryLabel>Total payé</SummaryLabel>
+              <SummaryValue success>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</SummaryValue>
+              <SummaryUnit>TTC</SummaryUnit>
+            </CardHeader>
           </SummaryCard>
           
           <SummaryCard>
-            <SummaryLabel>Ratio payé/engagé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.ratio.toFixed(2)} %</SummaryValue>
+            <CardHeader>
+              <SummaryLabel>Ratio payé/engagé</SummaryLabel>
+              <SummaryValue>{statistiques.totaux.ratio.toFixed(1)} %</SummaryValue>
+              <SummaryUnit>Réalisation</SummaryUnit>
+            </CardHeader>
           </SummaryCard>
         </SummaryGrid>
-      </SummaryContainer>
+      </SummarySection>
       
-      <DetailTable className="budget-detail-table">
-        <thead>
-          <tr>
-            <th>Mois</th>
-            <th>Montant engagé HT</th>
-            <th>Nombre de conventions</th>
-            <th>Montant payé TTC</th>
-            <th>Nombre de paiements</th>
-          </tr>
-        </thead>
-        <tbody>
-          {statistiques.parMois.map((mois, index) => (
-            <tr key={index}>
-              <td>{mois.nomMois}</td>
-              <td>{mois.gage.montant.toLocaleString('fr-FR')} € HT</td>
-              <td>{mois.gage.nombre}</td>
-              <td>{mois.paye.montant.toLocaleString('fr-FR')} € TTC</td>
-              <td>{mois.paye.nombre}</td>
-            </tr>
-          ))}
-          <tr className="total-row">
-            <td>Total</td>
-            <td>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</td>
-            <td>{statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}</td>
-            <td>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</td>
-            <td>{statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}</td>
-          </tr>
-        </tbody>
-      </DetailTable>
+      <TableSection>
+        <TableTitle>Détail mensuel</TableTitle>
+        <TableContainer>
+          <DetailTable>
+            <thead>
+              <tr>
+                <th>Mois</th>
+                <th>Engagé (HT)</th>
+                <th>Conventions</th>
+                <th>Payé (TTC)</th>
+                <th>Paiements</th>
+              </tr>
+            </thead>
+            <tbody>
+              {statistiques.parMois.map((mois, index) => (
+                <tr key={index}>
+                  <td><strong>{mois.nomMois}</strong></td>
+                  <td>{mois.gage.montant.toLocaleString('fr-FR')} €</td>
+                  <td>{mois.gage.nombre}</td>
+                  <td>{mois.paye.montant.toLocaleString('fr-FR')} €</td>
+                  <td>{mois.paye.nombre}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</strong></td>
+                <td><strong>{statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}</strong></td>
+                <td><strong>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</strong></td>
+                <td><strong>{statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}</strong></td>
+              </tr>
+            </tfoot>
+          </DetailTable>
+        </TableContainer>
+      </TableSection>
     </Container>
   );
 };
 
 const Container = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 24px;
-  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
 `;
 
-const FullWidthChartContainer = styled.div`
-  margin-bottom: 24px;
+const ChartSection = styled.div`
+  margin-bottom: 32px;
+`;
+
+const ChartContainer = styled.div`
   height: 400px;
   width: 100%;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
 `;
 
-const SummaryContainer = styled.div`
-  margin-bottom: 24px;
-  width: 100%;
+const SummarySection = styled.div`
+  margin-bottom: 32px;
 `;
 
 const SummaryTitle = styled.h3`
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 16px;
-  color: #333;
+  color: #212529;
+  letter-spacing: -0.025em;
 `;
 
 const SummaryGrid = styled.div`
@@ -199,22 +280,62 @@ const SummaryGrid = styled.div`
 `;
 
 const SummaryCard = styled.div`
-  background-color: #f5f5f5;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
   border-radius: 4px;
-  padding: 16px;
+  overflow: hidden;
+`;
+
+const CardHeader = styled.div`
+  padding: 20px;
   text-align: center;
 `;
 
 const SummaryLabel = styled.div`
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #6c757d;
   margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const SummaryValue = styled.div`
   font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: -0.025em;
+  
+  ${props => props.primary && `color: #495057;`}
+  ${props => props.success && `color: #28a745;`}
+  ${props => !props.primary && !props.success && `color: #212529;`}
+`;
+
+const SummaryUnit = styled.div`
+  font-size: 11px;
+  color: #6c757d;
   font-weight: 500;
-  color: #3f51b5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const TableSection = styled.div`
+  margin-bottom: 32px;
+`;
+
+const TableTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #212529;
+  letter-spacing: -0.025em;
+`;
+
+const TableContainer = styled.div`
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
 `;
 
 const DetailTable = styled.table`
@@ -222,48 +343,121 @@ const DetailTable = styled.table`
   border-collapse: collapse;
   font-size: 14px;
   
-  th, td {
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-  
   th {
-    background-color: #f5f5f5;
-    font-weight: 500;
-    color: #333;
+    background: #f8f9fa;
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
-  tr:hover {
-    background-color: #f9f9f9;
+  td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
   }
   
-  .total-row {
-    font-weight: 500;
-    background-color: #f5f5f5;
+  tbody tr:hover {
+    background: #f8f9fa;
+  }
+  
+  tfoot tr {
+    background: #f8f9fa;
+    
+    td {
+      border-bottom: none;
+      color: #212529;
+    }
   }
 `;
 
-const Loading = styled.div`
-  padding: 20px;
+const LoadingContainer = styled.div`
+  padding: 64px 24px;
   text-align: center;
-  color: #757575;
-`;
-
-const Error = styled.div`
-  padding: 20px;
-  text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
   border-radius: 4px;
 `;
 
-const Empty = styled.div`
-  padding: 20px;
-  text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
+const LoadingSpinner = styled.div`
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #495057;
+  font-size: 20px;
+
+  svg {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.p`
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
+`;
+
+const ErrorContainer = styled.div`
+  padding: 48px 24px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+`;
+
+const ErrorMessage = styled.div`
+  background: #f8d7da;
+  color: #721c24;
+  padding: 16px 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  font-size: 14px;
+`;
+
+const RetryButton = styled.button`
+  background: #495057;
+  color: #ffffff;
+  border: 1px solid #495057;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: #343a40;
+    border-color: #343a40;
+  }
+`;
+
+const EmptyContainer = styled.div`
+  padding: 48px 24px;
+  text-align: center;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+`;
+
+const EmptyText = styled.p`
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
 `;
 
 export default StatistiquesBudget;

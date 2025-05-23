@@ -65,7 +65,6 @@ const Dashboard = () => {
       <PageHeader 
         title="Tableau de bord" 
         subtitle="Aperçu général de la protection juridique"
-        style={{ padding: '32px 44px' }}
       />
       
       <DashboardContent>
@@ -100,11 +99,11 @@ const DashboardContainer = styled.div`
 `;
 
 const DashboardContent = styled.div`
-  padding: 0 20px;
+  padding: 0;
 `;
 
 const Section = styled.section`
-  margin-bottom: 32px;
+  margin: 0 20px 32px 20px;
 `;
 
 const SectionCard = styled.div`

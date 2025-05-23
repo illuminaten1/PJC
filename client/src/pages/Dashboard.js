@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { statistiquesAPI } from '../utils/api';
-import PageHeader from '../components/common/PageHeader';
 import DashboardSummary from '../components/specific/DashboardSummary';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
 import { FaChartBar, FaSpinner } from 'react-icons/fa';
@@ -33,7 +32,12 @@ const Dashboard = () => {
   if (loading) {
     return (
       <DashboardContainer>
-        <PageHeader title="Tableau de bord" />
+        <DashboardHeader>
+          <HeaderContent>
+            <Title>Tableau de bord</Title>
+            <Subtitle>Aperçu général de la protection juridique</Subtitle>
+          </HeaderContent>
+        </DashboardHeader>
         <LoadingCard>
           <LoadingContent>
             <LoadingSpinner>
@@ -49,7 +53,12 @@ const Dashboard = () => {
   if (error) {
     return (
       <DashboardContainer>
-        <PageHeader title="Tableau de bord" />
+        <DashboardHeader>
+          <HeaderContent>
+            <Title>Tableau de bord</Title>
+            <Subtitle>Aperçu général de la protection juridique</Subtitle>
+          </HeaderContent>
+        </DashboardHeader>
         <ErrorCard>
           <ErrorMessage>{error}</ErrorMessage>
           <RetryButton onClick={fetchStatistiques}>
@@ -108,8 +117,7 @@ const DashboardHeader = styled.div`
 `;
 
 const HeaderContent = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
+  text-align: left;
 `;
 
 const Title = styled.h1`
@@ -190,13 +198,6 @@ const LoadingCard = styled.div`
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   margin: 0 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  margin: 20px;
-
-  @media (min-width: 768px) {
-    margin: 20px auto;
-  }
 `;
 
 const LoadingContent = styled.div`
@@ -238,13 +239,8 @@ const ErrorCard = styled.div`
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   margin: 0 20px;
-  max-width: 1200px;
   padding: 48px 24px;
   text-align: center;
-
-  @media (min-width: 768px) {
-    margin: 20px auto;
-  }
 `;
 
 const ErrorMessage = styled.div`

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ConventionForm = ({ onSubmit, initialData = {}, isEditing = false, avocats = [] }) => {
-  // Fonction pour extraire la partie YYYY-MM-DD d'une date ISO
+  const { colors } = useTheme();
+  
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     
-    // Si la date est déjà au format ISO, extraire juste la partie YYYY-MM-DD
     if (typeof dateString === 'string' && dateString.includes('T')) {
       return dateString.split('T')[0];
     }
     
     try {
-      // Dans les autres cas, essayer de convertir et formater
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return '';
       return date.toISOString().split('T')[0];
@@ -69,7 +69,6 @@ const ConventionForm = ({ onSubmit, initialData = {}, isEditing = false, avocats
     e.preventDefault();
     
     if (validateForm()) {
-      // Convertir les dates et autres données au bon format
       const formattedData = {
         ...convention,
         dateEnvoiAvocat: convention.dateEnvoiAvocat ? new Date(convention.dateEnvoiAvocat) : undefined,
@@ -82,7 +81,7 @@ const ConventionForm = ({ onSubmit, initialData = {}, isEditing = false, avocats
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} colors={colors}>
       <FormRow>
         <FormField
           label="Montant (HT)"
@@ -146,13 +145,13 @@ const ConventionForm = ({ onSubmit, initialData = {}, isEditing = false, avocats
         />
       </FormRow>
       
-      <FormHelpText>
+      <FormHelpText colors={colors}>
         <InfoIcon>ℹ️</InfoIcon>
         La date de validation FMG détermine quand la convention est prise en compte dans le budget.
       </FormHelpText>
       
       <ButtonGroup>
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" colors={colors}>
           {isEditing ? 'Mettre à jour la convention' : 'Ajouter la convention'}
         </SubmitButton>
       </ButtonGroup>
@@ -164,6 +163,11 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FormRow = styled.div`
@@ -177,10 +181,12 @@ const FormHelpText = styled.div`
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: #e3f2fd;
+  background-color: ${props => props.colors.primary}15;
+  border: 1px solid ${props => props.colors.primary}30;
   border-radius: 4px;
-  color: #0d47a1;
+  color: ${props => props.colors.primary};
   font-size: 14px;
+  transition: all 0.3s ease;
 `;
 
 const InfoIcon = styled.span`
@@ -194,17 +200,19 @@ const ButtonGroup = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 

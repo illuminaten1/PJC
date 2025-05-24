@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
 import { militairesAPI } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, militaireId = null }) => {
-  // Formatage de la date pour l'input
+  const { colors } = useTheme();
+  
   const formatDateForInput = (date) => {
     if (!date) return '';
     const dateObj = new Date(date);
@@ -13,15 +15,12 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
   };
 
   const [beneficiaire, setBeneficiaire] = useState({
-    // On étale d'abord les propriétés de initialData
     ...initialData,
-    // Ensuite, on écrase avec les valeurs formatées ou les valeurs par défaut
     prenom: initialData.prenom || '',
     nom: initialData.nom || '',
     qualite: initialData.qualite || 'Militaire',
     militaire: initialData.militaire || militaireId || '',
     numeroDecision: initialData.numeroDecision || '',
-    // Format correct pour l'input de type date (YYYY-MM-DD)
     dateDecision: formatDateForInput(initialData.dateDecision),
     avocats: Array.isArray(initialData.avocats) ? initialData.avocats : []
   });
@@ -29,7 +28,6 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
   const [errors, setErrors] = useState({});
   const [militaire, setMilitaire] = useState(null);
   
-  // Récupérer les informations du militaire pour préremplir les champs
   useEffect(() => {
     if (militaireId) {
       const fetchMilitaire = async () => {
@@ -37,7 +35,6 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
           const response = await militairesAPI.getById(militaireId);
           setMilitaire(response.data);
           
-          // Préremplir nom et prénom si qualité est "Militaire"
           if (beneficiaire.qualite === 'Militaire') {
             setBeneficiaire(prev => ({
               ...prev,
@@ -81,7 +78,6 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
     const { name, value } = e.target;
     
     if (name === 'qualite' && value === 'Militaire' && militaire) {
-      // Si qualité devient "Militaire", préremplir nom et prénom
       setBeneficiaire(prev => ({
         ...prev,
         qualite: value,
@@ -100,7 +96,6 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
     e.preventDefault();
     
     if (validateForm()) {
-      // Créer un nouvel objet avec les dates converties si nécessaire
       const formattedData = {
         ...beneficiaire,
         dateDecision: beneficiaire.dateDecision ? new Date(beneficiaire.dateDecision) : undefined
@@ -111,8 +106,7 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
-      {/* Qualité d'abord */}
+    <Form onSubmit={handleSubmit} colors={colors}>
       <FormField
         label="Qualité"
         name="qualite"
@@ -176,7 +170,7 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
       </FormRow>
       
       <ButtonGroup>
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" colors={colors}>
           {isEditing ? 'Mettre à jour' : 'Créer le bénéficiaire'}
         </SubmitButton>
       </ButtonGroup>
@@ -184,30 +178,21 @@ const BeneficiaireForm = ({ onSubmit, initialData = {}, isEditing = false, milit
   );
 };
 
-// Styles
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FormRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-`;
-
-const Section = styled.section`
-  margin-top: 16px;
-  border-top: 1px solid #eee;
-  padding-top: 16px;
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  color: #333;
 `;
 
 const ButtonGroup = styled.div`
@@ -218,35 +203,19 @@ const ButtonGroup = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
-  }
-`;
-
-const AddButton = styled.button`
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 

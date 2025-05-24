@@ -2,18 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import FormField from '../common/FormField';
+import { useTheme } from '../../contexts/ThemeContext';
 
-/**
- * Formulaire pour créer ou modifier un utilisateur
- * 
- * @param {Object} props - Propriétés du composant
- * @param {Object} props.initialData - Données initiales (vide pour création, rempli pour modification)
- * @param {Function} props.onSubmit - Fonction appelée à la soumission du formulaire
- * @param {Function} props.onCancel - Fonction appelée à l'annulation
- * @param {boolean} props.loading - Indique si une opération est en cours
- */
 const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) => {
-  // État local pour les données du formulaire
+  const { colors } = useTheme();
+  
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -21,22 +14,19 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
     role: 'redacteur'
   });
   
-  // État pour les erreurs de validation
   const [errors, setErrors] = useState({});
   
-  // Mettre à jour l'état local lorsque les données initiales changent
   useEffect(() => {
     if (initialData) {
       setFormData({
         username: initialData.username || '',
-        password: '', // Ne pas pré-remplir le mot de passe pour des raisons de sécurité
+        password: '',
         nom: initialData.nom || '',
         role: initialData.role || 'redacteur'
       });
     }
   }, [initialData]);
   
-  // Gérer les changements dans les champs du formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -44,7 +34,6 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
       [name]: value
     }));
     
-    // Effacer l'erreur pour ce champ s'il y en avait une
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -53,7 +42,6 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
     }
   };
   
-  // Valider le formulaire avant soumission
   const validateForm = () => {
     const newErrors = {};
     
@@ -61,7 +49,6 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
       newErrors.username = "Le nom d'utilisateur est requis";
     }
     
-    // Le mot de passe est requis uniquement pour un nouvel utilisateur
     if (!initialData?._id && !formData.password.trim()) {
       newErrors.password = "Le mot de passe est requis";
     }
@@ -74,7 +61,6 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
     return Object.keys(newErrors).length === 0;
   };
   
-  // Gérer la soumission du formulaire
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -84,7 +70,7 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
   };
   
   return (
-    <FormContainer onSubmit={handleSubmit}>
+    <FormContainer onSubmit={handleSubmit} colors={colors}>
       <FormField
         label="Nom d'utilisateur"
         type="text"
@@ -122,18 +108,19 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
       />
       
       <FormGroup>
-        <Label htmlFor="role">Rôle</Label>
+        <Label htmlFor="role" colors={colors}>Rôle</Label>
         <Select
           id="role"
           name="role"
           value={formData.role}
           onChange={handleChange}
           disabled={loading}
+          colors={colors}
         >
           <option value="redacteur">Rédacteur</option>
           <option value="administrateur">Administrateur</option>
         </Select>
-        <HelpText>
+        <HelpText colors={colors}>
           Les administrateurs peuvent gérer les utilisateurs et accéder à toutes les fonctionnalités.
           Les rédacteurs ne peuvent pas gérer les utilisateurs.
         </HelpText>
@@ -144,12 +131,14 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
           type="button" 
           onClick={onCancel}
           disabled={loading}
+          colors={colors}
         >
           Annuler
         </CancelButton>
         <SubmitButton 
           type="submit"
           disabled={loading}
+          colors={colors}
         >
           {loading ? 'Chargement...' : initialData?._id ? 'Modifier' : 'Créer'}
         </SubmitButton>
@@ -165,12 +154,16 @@ UtilisateurForm.propTypes = {
   loading: PropTypes.bool
 };
 
-// Styles
 const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FormGroup = styled.div`
@@ -181,30 +174,41 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const Select = styled.select`
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 1rem;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: #3f51b5;
-    box-shadow: 0 0 0 1px #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.colors.primary};
   }
   
   &:disabled {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.background};
     cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const HelpText = styled.div`
   font-size: 0.875rem;
-  color: #666;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
 `;
 
 const ButtonGroup = styled.div`
@@ -220,6 +224,7 @@ const Button = styled.button`
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:disabled {
     opacity: 0.7;
@@ -228,20 +233,24 @@ const Button = styled.button`
 `;
 
 const CancelButton = styled(Button)`
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: ${props => props.colors.background};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   
   &:hover:not(:disabled) {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.surfaceHover};
+    transform: translateY(-1px);
   }
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   
   &:hover:not(:disabled) {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 

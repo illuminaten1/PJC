@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { avocatsAPI } from '../../utils/api';
 import { FaPlus, FaTimes } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
+  const { colors } = useTheme();
+  
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -32,7 +35,6 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
   const [showCabinetsSuggestions, setShowCabinetsSuggestions] = useState(false);
   const [showVillesSuggestions, setShowVillesSuggestions] = useState(false);
 
-  // Liste des régions de France y compris les Outre-mers
   const regions = [
     'Auvergne-Rhône-Alpes',
     'Bourgogne-Franche-Comté',
@@ -61,7 +63,6 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
   ];
   
   useEffect(() => {
-    // Charger les cabinets existants
     const fetchCabinets = async () => {
       try {
         const response = await avocatsAPI.getCabinets();
@@ -71,7 +72,6 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
       }
     };
     
-    // Charger les villes d'intervention existantes
     const fetchVilles = async () => {
       try {
         const response = await avocatsAPI.getVilles();
@@ -116,12 +116,10 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
     if (!formData.prenom.trim()) newErrors.prenom = 'Le prénom est requis';
     if (!formData.email.trim()) newErrors.email = 'L\'email est requis';
     
-    // Validation basique de l'email si présent
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Format d\'email invalide';
     }
     
-    // Validation téléphone si présent (format français)
     const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
     
     if (formData.telephonePublic1 && !phoneRegex.test(formData.telephonePublic1)) {
@@ -136,7 +134,6 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
       newErrors.telephonePrive = 'Format de téléphone invalide';
     }
     
-    // Validation SIRET/RIDET si présent
     if (formData.siretRidet && !/^[0-9]{9,14}$/.test(formData.siretRidet.replace(/\s/g, ''))) {
       newErrors.siretRidet = 'Format de SIRET/RIDET invalide (9 à 14 chiffres)';
     }
@@ -148,22 +145,17 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // Traitement spécial pour les champs checkbox
     if (type === 'checkbox') {
       setFormData(prev => ({
         ...prev,
         [name]: checked
       }));
-    }
-    // Si le champ modifié est "nom", convertir en majuscules
-    else if (name === 'nom') {
+    } else if (name === 'nom') {
       setFormData(prev => ({
         ...prev,
         [name]: value.toUpperCase()
       }));
-    }
-    // Si le champ est dans l'objet adresse
-    else if (name.startsWith('adresse.')) {
+    } else if (name.startsWith('adresse.')) {
       const adresseField = name.split('.')[1];
       setFormData(prev => ({
         ...prev,
@@ -172,24 +164,19 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
           [adresseField]: value
         }
       }));
-    }
-    // Pour le cabinet, afficher les suggestions
-    else if (name === 'cabinet') {
+    } else if (name === 'cabinet') {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
       setShowCabinetsSuggestions(true);
-    }
-    // Pour les autres champs
-    else {
+    } else {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
     }
     
-    // Effacer l'erreur lorsque l'utilisateur modifie le champ
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -257,12 +244,12 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
-      <FormSection>
-        <SectionTitle>Identité</SectionTitle>
+    <Form onSubmit={handleSubmit} colors={colors}>
+      <FormSection colors={colors}>
+        <SectionTitle colors={colors}>Identité</SectionTitle>
         <FormRow>
           <FormGroup>
-            <Label htmlFor="nom">NOM <Required>*</Required></Label>
+            <Label htmlFor="nom" colors={colors}>NOM <Required>*</Required></Label>
             <Input
               type="text"
               id="nom"
@@ -270,12 +257,13 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               value={formData.nom}
               onChange={handleChange}
               error={!!errors.nom}
+              colors={colors}
             />
-            {errors.nom && <ErrorText>{errors.nom}</ErrorText>}
+            {errors.nom && <ErrorText colors={colors}>{errors.nom}</ErrorText>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="prenom">Prénom <Required>*</Required></Label>
+            <Label htmlFor="prenom" colors={colors}>Prénom <Required>*</Required></Label>
             <Input
               type="text"
               id="prenom"
@@ -283,13 +271,14 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               value={formData.prenom}
               onChange={handleChange}
               error={!!errors.prenom}
+              colors={colors}
             />
-            {errors.prenom && <ErrorText>{errors.prenom}</ErrorText>}
+            {errors.prenom && <ErrorText colors={colors}>{errors.prenom}</ErrorText>}
           </FormGroup>
         </FormRow>
         
         <FormGroup>
-          <Label htmlFor="email">Email <Required>*</Required></Label>
+          <Label htmlFor="email" colors={colors}>Email <Required>*</Required></Label>
           <Input
             type="email"
             id="email"
@@ -297,12 +286,13 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             value={formData.email}
             onChange={handleChange}
             error={!!errors.email}
+            colors={colors}
           />
-          {errors.email && <ErrorText>{errors.email}</ErrorText>}
+          {errors.email && <ErrorText colors={colors}>{errors.email}</ErrorText>}
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="cabinet">Cabinet</Label>
+          <Label htmlFor="cabinet" colors={colors}>Cabinet</Label>
           <div style={{ position: 'relative' }}>
             <Input
               type="text"
@@ -312,13 +302,15 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               onChange={handleChange}
               onFocus={() => setShowCabinetsSuggestions(true)}
               onBlur={() => setTimeout(() => setShowCabinetsSuggestions(false), 200)}
+              colors={colors}
             />
             {showCabinetsSuggestions && getFilteredCabinetsSuggestions().length > 0 && (
-              <SuggestionList>
+              <SuggestionList colors={colors}>
                 {getFilteredCabinetsSuggestions().map((suggestion, index) => (
                   <SuggestionItem 
                     key={index} 
                     onClick={() => handleCabinetSuggestionClick(suggestion)}
+                    colors={colors}
                   >
                     {suggestion}
                   </SuggestionItem>
@@ -329,12 +321,13 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="region">Région</Label>
+          <Label htmlFor="region" colors={colors}>Région</Label>
           <Select
             id="region"
             name="region"
             value={formData.region}
             onChange={handleChange}
+            colors={colors}
           >
             <option value="">Sélectionnez une région</option>
             {regions.map((region, index) => (
@@ -344,7 +337,7 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="siretRidet">SIRET/RIDET</Label>
+          <Label htmlFor="siretRidet" colors={colors}>SIRET/RIDET</Label>
           <Input
             type="text"
             id="siretRidet"
@@ -353,16 +346,17 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             onChange={handleChange}
             error={!!errors.siretRidet}
             placeholder="Ex: 123 456 789 00012"
+            colors={colors}
           />
-          {errors.siretRidet && <ErrorText>{errors.siretRidet}</ErrorText>}
+          {errors.siretRidet && <ErrorText colors={colors}>{errors.siretRidet}</ErrorText>}
         </FormGroup>
       </FormSection>
       
-      <FormSection>
-        <SectionTitle>Villes d'intervention</SectionTitle>
+      <FormSection colors={colors}>
+        <SectionTitle colors={colors}>Villes d'intervention</SectionTitle>
         <FormRow>
           <FormGroup flex={3}>
-            <Label htmlFor="nouvelleVille">Ajouter une ville d'intervention</Label>
+            <Label htmlFor="nouvelleVille" colors={colors}>Ajouter une ville d'intervention</Label>
             <div style={{ position: 'relative' }}>
               <Input
                 type="text"
@@ -372,13 +366,15 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
                 onFocus={() => setShowVillesSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowVillesSuggestions(false), 200)}
                 placeholder="Saisissez le nom d'une ville"
+                colors={colors}
               />
               {showVillesSuggestions && getFilteredVillesSuggestions().length > 0 && (
-                <SuggestionList>
+                <SuggestionList colors={colors}>
                   {getFilteredVillesSuggestions().map((suggestion, index) => (
                     <SuggestionItem 
                       key={index} 
                       onClick={() => handleVilleSuggestionClick(suggestion)}
+                      colors={colors}
                     >
                       {suggestion}
                     </SuggestionItem>
@@ -388,84 +384,88 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             </div>
           </FormGroup>
           <FormGroup flex={1} style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <AddButton type="button" onClick={addVille}>
+            <AddButton type="button" onClick={addVille} colors={colors}>
               <FaPlus />
               <span>Ajouter</span>
             </AddButton>
           </FormGroup>
         </FormRow>
         
-        <VillesContainer>
+        <VillesContainer colors={colors}>
           {formData.villesIntervention.map((ville, index) => (
-            <VilleTag key={index}>
+            <VilleTag key={index} colors={colors}>
               {ville}
-              <RemoveButton type="button" onClick={() => removeVille(index)}>
+              <RemoveButton type="button" onClick={() => removeVille(index)} colors={colors}>
                 <FaTimes />
               </RemoveButton>
             </VilleTag>
           ))}
           {formData.villesIntervention.length === 0 && (
-            <EmptyVilles>Aucune ville d'intervention ajoutée</EmptyVilles>
+            <EmptyVilles colors={colors}>Aucune ville d'intervention ajoutée</EmptyVilles>
           )}
         </VillesContainer>
       </FormSection>
       
-      <FormSection>
-        <SectionTitle>Adresse</SectionTitle>
+      <FormSection colors={colors}>
+        <SectionTitle colors={colors}>Adresse</SectionTitle>
         <FormRow>
           <FormGroup flex={1}>
-            <Label htmlFor="adresse.numero">N°</Label>
+            <Label htmlFor="adresse.numero" colors={colors}>N°</Label>
             <Input
               type="text"
               id="adresse.numero"
               name="adresse.numero"
               value={formData.adresse.numero}
               onChange={handleChange}
+              colors={colors}
             />
           </FormGroup>
           
           <FormGroup flex={3}>
-            <Label htmlFor="adresse.rue">Rue</Label>
+            <Label htmlFor="adresse.rue" colors={colors}>Rue</Label>
             <Input
               type="text"
               id="adresse.rue"
               name="adresse.rue"
               value={formData.adresse.rue}
               onChange={handleChange}
+              colors={colors}
             />
           </FormGroup>
         </FormRow>
         
         <FormRow>
           <FormGroup>
-            <Label htmlFor="adresse.codePostal">Code postal</Label>
+            <Label htmlFor="adresse.codePostal" colors={colors}>Code postal</Label>
             <Input
               type="text"
               id="adresse.codePostal"
               name="adresse.codePostal"
               value={formData.adresse.codePostal}
               onChange={handleChange}
+              colors={colors}
             />
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="adresse.ville">Ville</Label>
+            <Label htmlFor="adresse.ville" colors={colors}>Ville</Label>
             <Input
               type="text"
               id="adresse.ville"
               name="adresse.ville"
               value={formData.adresse.ville}
               onChange={handleChange}
+              colors={colors}
             />
           </FormGroup>
         </FormRow>
       </FormSection>
       
-      <FormSection>
-        <SectionTitle>Contacts</SectionTitle>
+      <FormSection colors={colors}>
+        <SectionTitle colors={colors}>Contacts</SectionTitle>
         <FormRow>
           <FormGroup>
-            <Label htmlFor="telephonePublic1">Téléphone public 1</Label>
+            <Label htmlFor="telephonePublic1" colors={colors}>Téléphone public 1</Label>
             <Input
               type="tel"
               id="telephonePublic1"
@@ -474,12 +474,13 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               onChange={handleChange}
               error={!!errors.telephonePublic1}
               placeholder="Ex: 06 12 34 56 78"
+              colors={colors}
             />
-            {errors.telephonePublic1 && <ErrorText>{errors.telephonePublic1}</ErrorText>}
+            {errors.telephonePublic1 && <ErrorText colors={colors}>{errors.telephonePublic1}</ErrorText>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="telephonePublic2">Téléphone public 2</Label>
+            <Label htmlFor="telephonePublic2" colors={colors}>Téléphone public 2</Label>
             <Input
               type="tel"
               id="telephonePublic2"
@@ -488,15 +489,16 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               onChange={handleChange}
               error={!!errors.telephonePublic2}
               placeholder="Ex: 01 23 45 67 89"
+              colors={colors}
             />
-            {errors.telephonePublic2 && <ErrorText>{errors.telephonePublic2}</ErrorText>}
+            {errors.telephonePublic2 && <ErrorText colors={colors}>{errors.telephonePublic2}</ErrorText>}
           </FormGroup>
         </FormRow>
         
         <FormGroup>
-          <Label htmlFor="telephonePrive">
+          <Label htmlFor="telephonePrive" colors={colors}>
             Téléphone privé
-            <PrivateNote> (non communiqué aux aux bénéficiaires)</PrivateNote>
+            <PrivateNote colors={colors}> (non communiqué aux bénéficiaires)</PrivateNote>
           </Label>
           <Input
             type="tel"
@@ -506,13 +508,14 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             onChange={handleChange}
             error={!!errors.telephonePrive}
             placeholder="Ex: 07 98 76 54 32"
+            colors={colors}
           />
-          {errors.telephonePrive && <ErrorText>{errors.telephonePrive}</ErrorText>}
+          {errors.telephonePrive && <ErrorText colors={colors}>{errors.telephonePrive}</ErrorText>}
         </FormGroup>
       </FormSection>
       
-      <FormSection>
-        <SectionTitle>Spécialisation et commentaires</SectionTitle>
+      <FormSection colors={colors}>
+        <SectionTitle colors={colors}>Spécialisation et commentaires</SectionTitle>
         <FormGroup inline>
           <CheckboxContainer>
             <Checkbox
@@ -522,17 +525,17 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               checked={formData.specialisationRPC}
               onChange={handleChange}
             />
-            <Label htmlFor="specialisationRPC" inline>
+            <Label htmlFor="specialisationRPC" inline colors={colors}>
               Spécialisé en réparation du préjudice corporel (RPC)
             </Label>
           </CheckboxContainer>
-          <SpecializationInfo>
+          <SpecializationInfo colors={colors}>
             Cette spécialisation sera affichée sous forme de badge.
           </SpecializationInfo>
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="commentaires">Commentaires</Label>
+          <Label htmlFor="commentaires" colors={colors}>Commentaires</Label>
           <Textarea
             id="commentaires"
             name="commentaires"
@@ -540,34 +543,37 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             onChange={handleChange}
             rows={4}
             placeholder="Informations complémentaires sur l'avocat..."
+            colors={colors}
           />
         </FormGroup>
       </FormSection>
       
-      <FloatingSubmitButton type="submit">
-      {isEditing ? 'Mettre à jour' : 'Ajouter'} l'avocat
-    </FloatingSubmitButton>
-  </Form>
+      <FloatingSubmitButton type="submit" colors={colors}>
+        {isEditing ? 'Mettre à jour' : 'Ajouter'} l'avocat
+      </FloatingSubmitButton>
+    </Form>
   );
 };
 
-// Styles
-
+// Styles thématisés
 const FormSection = styled.div`
   margin-bottom: 30px;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surface};
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const SectionTitle = styled.h3`
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 18px;
-  color: #333;
-  border-bottom: 1px solid #ddd;
+  color: ${props => props.colors.textPrimary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   padding-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const FormRow = styled.div`
@@ -595,6 +601,8 @@ const Label = styled.label`
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   ${props => props.inline && `
     margin-bottom: 0;
@@ -605,41 +613,65 @@ const Label = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? '#f44336' : '#ddd'};
+  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
   border-radius: 4px;
   font-size: 14px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? '#f44336' : '#3f51b5'};
+    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? '#f44336' : '#ddd'};
+  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
   border-radius: 4px;
   font-size: 14px;
-  background-color: white;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? '#f44336' : '#3f51b5'};
+    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? '#f44336' : '#ddd'};
+  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   resize: vertical;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? '#f44336' : '#3f51b5'};
+    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
@@ -656,49 +688,32 @@ const Checkbox = styled.input`
 
 const SpecializationInfo = styled.div`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   margin-top: 4px;
   margin-left: 24px;
+  transition: color 0.3s ease;
 `;
 
 const Required = styled.span`
-  color: #f44336;
+  color: ${props => props.colors.error};
 `;
 
 const PrivateNote = styled.span`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   font-style: italic;
+  transition: color 0.3s ease;
 `;
 
 const ErrorText = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
   font-size: 12px;
   margin-top: 4px;
-`;
-
-const FormActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-`;
-
-const SubmitButton = styled.button`
-  background-color: #3f51b5;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-weight: 500;
-  cursor: pointer;
-  
-  &:hover {
-    background-color: #303f9f;
-  }
+  transition: color 0.3s ease;
 `;
 
 const AddButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -708,9 +723,13 @@ const AddButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success};
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -720,38 +739,47 @@ const VillesContainer = styled.div`
   gap: 10px;
   margin-top: 10px;
   min-height: 40px;
+  padding: 10px;
+  background-color: ${props => props.colors.background};
+  border-radius: 4px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const VilleTag = styled.div`
   display: flex;
   align-items: center;
-  background-color: #e3f2fd;
+  background-color: ${props => props.colors.primary}20;
+  border: 1px solid ${props => props.colors.primary}40;
   border-radius: 16px;
   padding: 5px 10px;
   font-size: 14px;
-  color: #1976d2;
+  color: ${props => props.colors.primary};
+  transition: all 0.3s ease;
 `;
 
 const RemoveButton = styled.button`
   background: none;
   border: none;
-  color: #1976d2;
+  color: ${props => props.colors.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
   margin-left: 5px;
   padding: 0;
   font-size: 12px;
+  transition: color 0.3s ease;
   
   &:hover {
-    color: #f44336;
+    color: ${props => props.colors.error};
   }
 `;
 
 const EmptyVilles = styled.div`
-  color: #9e9e9e;
+  color: ${props => props.colors.textMuted};
   font-style: italic;
   font-size: 14px;
+  transition: color 0.3s ease;
 `;
 
 const SuggestionList = styled.ul`
@@ -759,30 +787,40 @@ const SuggestionList = styled.ul`
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-top: none;
   border-radius: 0 0 4px 4px;
-  background-color: white;
+  background-color: ${props => props.colors.surface};
   z-index: 10;
   margin: 0;
   padding: 0;
   list-style: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 const SuggestionItem = styled.li`
   padding: 8px 12px;
   cursor: pointer;
+  color: ${props => props.colors.textPrimary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
+  }
+  
+  &:last-child {
+    border-bottom: none;
   }
 `;
 
 const Form = styled.form`
   padding: 20px;
   position: relative;
-  padding-bottom: 60px; // Espace pour le bouton flottant
+  padding-bottom: 60px;
+  background-color: ${props => props.colors.background};
+  transition: background-color 0.3s ease;
 `;
 
 const FloatingSubmitButton = styled.button`
@@ -790,7 +828,7 @@ const FloatingSubmitButton = styled.button`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -800,10 +838,12 @@ const FloatingSubmitButton = styled.button`
   margin-top: 20px;
   width: 100%;
   z-index: 10;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  box-shadow: ${props => props.colors.shadowHover};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
   }
 `;
 

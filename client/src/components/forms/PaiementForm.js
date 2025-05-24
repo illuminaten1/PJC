@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
+  const { colors } = useTheme();
   const today = new Date().toISOString().split('T')[0];
   
-  // Fonction pour formater correctement les dates en YYYY-MM-DD pour les inputs HTML
   const formatDateForInput = (dateString) => {
     if (!dateString) return today;
     
-    // Si la date est déjà au format ISO, extraire juste la partie YYYY-MM-DD
     if (typeof dateString === 'string' && dateString.includes('T')) {
       return dateString.split('T')[0];
     }
     
     try {
-      // Dans les autres cas, essayer de convertir et formater
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return today;
       return date.toISOString().split('T')[0];
@@ -68,7 +67,6 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
       newErrors.identiteDestinataire = 'L\'identité du destinataire est requise';
     }
     
-    // Validation des coordonnées bancaires lorsqu'elles sont saisies
     if (paiement.codeEtablissement && !/^\d{5}$/.test(paiement.codeEtablissement)) {
       newErrors.codeEtablissement = 'Le code établissement doit comporter 5 chiffres';
     }
@@ -102,7 +100,6 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Convertir les dates si nécessaire
       const formattedData = {
         ...paiement,
         date: new Date(paiement.date)
@@ -113,7 +110,7 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} colors={colors}>
       <FormRow>
         <FormField
           label="Type de paiement"
@@ -153,8 +150,8 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
         error={errors.date}
       />
       
-      <Section>
-        <SectionTitle>Informations sur le destinataire</SectionTitle>
+      <Section colors={colors}>
+        <SectionTitle colors={colors}>Informations sur le destinataire</SectionTitle>
         
         <FormRow>
           <FormField
@@ -214,8 +211,8 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
         />
       </Section>
       
-      <Section>
-        <SectionTitle>Coordonnées bancaires</SectionTitle>
+      <Section colors={colors}>
+        <SectionTitle colors={colors}>Coordonnées bancaires</SectionTitle>
         
         <FormField
           label="Titulaire du compte"
@@ -268,7 +265,7 @@ const PaiementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
       </Section>
       
       <ButtonGroup>
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" colors={colors}>
           {isEditing ? 'Mettre à jour le paiement' : 'Ajouter le paiement'}
         </SubmitButton>
       </ButtonGroup>
@@ -280,6 +277,11 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FormRow = styled.div`
@@ -290,15 +292,17 @@ const FormRow = styled.div`
 
 const Section = styled.section`
   margin-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.colors.borderLight};
   padding-top: 16px;
+  transition: border-color 0.3s ease;
 `;
 
 const SectionTitle = styled.h3`
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const ButtonGroup = styled.div`
@@ -308,17 +312,19 @@ const ButtonGroup = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 

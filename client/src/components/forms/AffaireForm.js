@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
 import { parametresAPI } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
+  const { colors } = useTheme();
+  
   const [affaire, setAffaire] = useState({
     ...initialData,
     nom: initialData.nom || '',
@@ -11,13 +14,11 @@ const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
     lieu: initialData.lieu || '',
     dateFaits: initialData.dateFaits ? new Date(initialData.dateFaits).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     redacteur: initialData.redacteur || ''
-    // Note: Le champ notes est géré séparément sur la page de détail
   });
   
   const [errors, setErrors] = useState({});
   const [redacteurs, setRedacteurs] = useState([]);
   
-  // Récupérer la liste des rédacteurs depuis l'API
   useEffect(() => {
     const fetchRedacteurs = async () => {
       try {
@@ -66,7 +67,6 @@ const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Convertir la chaîne de date en objet Date pour dateFaits
       const formattedData = {
         ...affaire,
         dateFaits: new Date(affaire.dateFaits)
@@ -77,7 +77,7 @@ const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} colors={colors}>
       <FormField
         label="Nom de l'affaire"
         name="nom"
@@ -129,7 +129,7 @@ const AffaireForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
       />
       
       <ButtonGroup>
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" colors={colors}>
           {isEditing ? 'Mettre à jour' : 'Créer l\'affaire'}
         </SubmitButton>
       </ButtonGroup>
@@ -141,6 +141,11 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const ButtonGroup = styled.div`
@@ -150,17 +155,19 @@ const ButtonGroup = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 

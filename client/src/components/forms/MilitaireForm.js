@@ -3,8 +3,8 @@ import { FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import styled from 'styled-components';
 import FormField from '../common/FormField';
 import { parametresAPI } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
-// Liste des grades
 const grades = [
   'Général',
   'Colonel',
@@ -28,13 +28,9 @@ const grades = [
   'Autre'
 ];
 
-// Liste des régions
-const regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne', 'Centre-Val-de-Loire', 'Corse', 'Grand Est', 'Hauts-de-France', 'Ile-de-France', 'Nouvelle-Aquitaine', 'Normandie', 'Occitanie', 'Pays-de-la-Loire', 'Provence-Alpes-Côte-d\'Azur', 'Guadeloupe', 'Guyane', 'Martinique', 'Mayotte', 'Nouvelle-Calédonie', 'Wallis-et-Futuna', 'Polynésie française', 'La Réunion', 'Saint-Pierre-et-Miquelon', 'IGAG', 'IGGN', 'DGGN', 'GR', 'GIGN', 'COMSOPGN', 'PJGN', 'CEGN', 'CGOM', 'CRJ', 'ANFSI', 'COSSEN', 'COMCYBER-MI', 'CESAN', 'SAILMI', 'GSAN', 'GTA', 'GARM', 'CFAGN', 'GMAR', 'GAIR'];
-
-// Liste des départements
-const departements = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '2A', '2B', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '971', '972', '973', '974', '976', '986', '987', '988', '975', '978', 'GGM I/3', 'GGM I/5', 'GGM I/6', 'GGM I/7', 'GGM I/9', 'GGM II/1', 'GGM II/2', 'GGM II/3', 'GGM II/5', 'GGM II/6', 'GGM II/7', 'GGM III/3', 'GGM III/6', 'GGM III/7', 'GGM IV/2', 'GGM IV/3', 'GGM IV/7', 'GBGM'];
-
 const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireId = null, affairesList = [], affaireNom = '' }) => {
+  const { colors } = useTheme();
+  
   const [militaire, setMilitaire] = useState({
     grade: initialData.grade || '',
     prenom: initialData.prenom || '',
@@ -59,25 +55,18 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
   const [regions, setRegions] = useState([]);
   const [departements, setDepartements] = useState([]);
 
-
-// Récupérer les listes depuis l'API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch circonstances
         const responseCirconstances = await parametresAPI.getByType('circonstances');
         setCirconstances(responseCirconstances.data);
         
-        // Fetch régions
         const responseRegions = await parametresAPI.getByType('regions');
-        // Si des régions existent dans les paramètres, utiliser celles-ci
         if (responseRegions.data && responseRegions.data.length > 0) {
           setRegions(responseRegions.data);
         }
         
-        // Fetch départements
         const responseDepartements = await parametresAPI.getByType('departements');
-        // Si des départements existent dans les paramètres, utiliser ceux-ci
         if (responseDepartements.data && responseDepartements.data.length > 0) {
           setDepartements(responseDepartements.data);
         }
@@ -89,13 +78,10 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
     fetchData();
   }, []);
 
-  // Les régions hardcodées serviront de fallback si aucune n'est trouvée dans les paramètres
   const regionsHardcoded = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne', 'Centre-Val-de-Loire', 'Corse', 'Grand Est', 'Hauts-de-France', 'Ile-de-France', 'Nouvelle-Aquitaine', 'Normandie', 'Occitanie', 'Pays-de-la-Loire', 'Provence-Alpes-Côte-d\'Azur', 'Guadeloupe', 'Guyane', 'Martinique', 'Mayotte', 'Nouvelle-Calédonie', 'Wallis-et-Futuna', 'Polynésie française', 'La Réunion', 'Saint-Pierre-et-Miquelon', 'IGAG', 'IGGN', 'DGGN', 'GR', 'GIGN', 'COMSOPGN', 'PJGN', 'CEGN', 'CGOM', 'CRJ', 'ANFSI', 'COSSEN', 'COMCYBER-MI', 'CESAN', 'SAILMI', 'GSAN', 'GTA', 'GARM', 'CFAGN', 'GMAR', 'GAIR'];
   
-  // Les départements hardcodés serviront de fallback si aucun n'est trouvé dans les paramètres
   const departementsHardcoded = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '2A', '2B', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '971', '972', '973', '974', '976', '986', '987', '988', '975', '978', 'GGM I/3', 'GGM I/5', 'GGM I/6', 'GGM I/7', 'GGM I/9', 'GGM II/1', 'GGM II/2', 'GGM II/3', 'GGM II/5', 'GGM II/6', 'GGM II/7', 'GGM III/3', 'GGM III/6', 'GGM III/7', 'GGM IV/2', 'GGM IV/3', 'GGM IV/7', 'GBGM'];
 
-  // Récupérer la liste des rédacteurs lorsque l'option de créer un bénéficiaire est cochée
   useEffect(() => {
     if (militaire.creerBeneficiaire) {
       const fetchRedacteurs = async () => {
@@ -138,11 +124,6 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
       newErrors.itt = 'Le nombre de jours d\'ITT doit être un nombre positif';
     }
     
-    // Validation du rédacteur si l'option de créer un bénéficiaire est cochée (supprimé, le rédacteur est entré à la création de l'affaire)
-    // if (militaire.creerBeneficiaire && !militaire.redacteur) {
-    //   newErrors.redacteur = 'Le rédacteur est requis pour créer un bénéficiaire';
-    // }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -163,7 +144,6 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
     e.preventDefault();
     
     if (validateForm()) {
-      // Si affaireId est fourni, assurez-vous qu'il est bien inclus dans les données
       const dataToSubmit = {
         ...militaire,
         affaire: affaireId || militaire.affaire
@@ -174,18 +154,16 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
   };
   
   return (
-    <Form onSubmit={handleSubmit}>
-      {/* Affichage de l'affaire en haut */}
+    <Form onSubmit={handleSubmit} colors={colors}>
       {affaireId ? (
         <FormRow>
-          <InfoItem>
-            <InfoLabel>Affaire</InfoLabel>
-            <InfoValue>{affaireNom || 'Affaire actuelle'}</InfoValue>
+          <InfoItem colors={colors}>
+            <InfoLabel colors={colors}>Affaire</InfoLabel>
+            <InfoValue colors={colors}>{affaireNom || 'Affaire actuelle'}</InfoValue>
             <input type="hidden" name="affaire" value={affaireId} />
           </InfoItem>
         </FormRow>
       ) : (
-        // Sélecteur d'affaire normal
         <FormField
           label="Affaire"
           name="affaire"
@@ -248,7 +226,6 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
           type="select"
           value={militaire.region}
           onChange={handleChange}
-          // Utiliser les régions des paramètres si disponibles, sinon utiliser les hardcodées
           options={regions.length > 0 ? regions : regionsHardcoded}
           error={errors.region}
         />
@@ -259,7 +236,6 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
           type="select"
           value={militaire.departement}
           onChange={handleChange}
-          // Utiliser les départements des paramètres si disponibles, sinon utiliser les hardcodés
           options={departements.length > 0 ? departements : departementsHardcoded}
           error={errors.departement}
         />
@@ -315,28 +291,30 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
         />
       </FormRow>
 
-      {/* Option pour créer également comme bénéficiaire */}
       {!isEditing && (
-        <ToggleField>
+        <ToggleField colors={colors}>
           <ToggleIcon 
             checked={militaire.creerBeneficiaire}
             onClick={() => setMilitaire(prev => ({
               ...prev,
               creerBeneficiaire: !prev.creerBeneficiaire
             }))}
+            colors={colors}
           >
             {militaire.creerBeneficiaire ? <FaToggleOn /> : <FaToggleOff />}
           </ToggleIcon>
-          <label onClick={() => setMilitaire(prev => ({
-            ...prev,
-            creerBeneficiaire: !prev.creerBeneficiaire
-          }))}>
+          <ToggleLabel 
+            onClick={() => setMilitaire(prev => ({
+              ...prev,
+              creerBeneficiaire: !prev.creerBeneficiaire
+            }))}
+            colors={colors}
+          >
             Créer également comme bénéficiaire (seul un militaire blessé peut être bénéficiaire, en cas de décès ce sont ses ayants-droit qui le sont)
-          </label>
+          </ToggleLabel>
         </ToggleField>
       )}
 
-      {/* Afficher ces champs conditionnellement lorsque creerBeneficiaire est coché et qu'on est en création */}
       {militaire.creerBeneficiaire && !isEditing && (
         <FormRow>
           <FormField
@@ -358,7 +336,7 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
       )}
 
       <ButtonGroup>
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" colors={colors}>
           {isEditing ? 'Mettre à jour' : 'Créer le militaire'}
         </SubmitButton>
       </ButtonGroup>
@@ -370,6 +348,11 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: ${props => props.colors.surface};
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FormRow = styled.div`
@@ -381,28 +364,31 @@ const FormRow = styled.div`
     .checkbox-container {
       display: flex;
       align-items: center;
-      margin-top: 24px; /* Ajustez cette valeur pour aligner verticalement */
+      margin-top: 24px;
     }
   }
 `;
 
-// Styles pour l'affichage de l'affaire
 const InfoItem = styled.div`
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.background};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const InfoLabel = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 4px;
+  transition: color 0.3s ease;
 `;
 
 const InfoValue = styled.div`
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const ButtonGroup = styled.div`
@@ -412,17 +398,19 @@ const ButtonGroup = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -430,19 +418,27 @@ const ToggleField = styled.div`
   display: flex;
   align-items: center;
   margin: 10px 0;
-  
-  label {
-    margin-left: 10px;
-    cursor: pointer;
-  }
+  padding: 12px;
+  background-color: ${props => props.colors.background};
+  border: 1px solid ${props => props.colors.borderLight};
+  border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const ToggleIcon = styled.span`
   font-size: 24px;
-  color: ${props => props.checked ? '#3f51b5' : '#aaaaaa'};
+  color: ${props => props.checked ? props.colors.primary : props.colors.textMuted};
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
+`;
+
+const ToggleLabel = styled.label`
+  margin-left: 10px;
+  cursor: pointer;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 export default MilitaireForm;

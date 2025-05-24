@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft } from 'react-icons/fa';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft, FaGripVertical, FaSave } from 'react-icons/fa';
 import { parametresAPI } from '../../utils/api';
 import Modal from '../common/Modal';
 
@@ -10,6 +11,10 @@ const RedacteursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
   const [redacteurInput, setRedacteurInput] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState({ index: -1, value: '' });
+  
+  // États pour la réorganisation
+  const [reordering, setReordering] = useState(false);
+  const [hasReordered, setHasReordered] = useState(false);
   
   // États pour le modal de transfert de portefeuille
   const [transferModalOpen, setTransferModalOpen] = useState(false);
@@ -75,6 +80,32 @@ const RedacteursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
       console.error(`Erreur lors de la suppression`, err);
       setErrorMessage("Impossible de supprimer le rédacteur");
       setConfirmModalOpen(false);
+    }
+  };
+
+  // Fonction pour gérer la fin du drag & drop
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    if (result.destination.index === result.source.index) return;
+    
+    const newRedacteurs = Array.from(redacteurs);
+    const [reorderedItem] = newRedacteurs.splice(result.source.index, 1);
+    newRedacteurs.splice(result.destination.index, 0, reorderedItem);
+    
+    setRedacteurs(newRedacteurs);
+    setHasReordered(true);
+  };
+
+  // Fonction pour sauvegarder le nouvel ordre
+  const saveReorderedValues = async () => {
+    try {
+      await parametresAPI.reorderValues('redacteurs', redacteurs);
+      showSuccessMessage('Ordre des rédacteurs sauvegardé avec succès');
+      setReordering(false);
+      setHasReordered(false);
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde de l\'ordre:', err);
+      setErrorMessage('Impossible de sauvegarder l\'ordre des rédacteurs');
     }
   };
 
@@ -203,44 +234,103 @@ const RedacteursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
         Les rédacteurs sont utilisés pour assigner les affaires et générer les rapports.
       </Description>
 
-      <RedacteursList>
-        {redacteurs.map((redacteur, index) => (
-          <RedacteurItem key={index} colors={colors}>
-            <RedacteurText colors={colors}>{redacteur}</RedacteurText>
-            <DeleteButton onClick={() => openDeleteConfirmation(index, redacteur)} colors={colors}>
-              <FaTrash />
-            </DeleteButton>
-          </RedacteurItem>
-        ))}
-      </RedacteursList>
+      {/* En-tête de section avec bouton de réorganisation */}
+      <SectionHeader>
+        <SectionTitle colors={colors}>Liste des rédacteurs</SectionTitle>
+        <HeaderButtons>
+          <ReorderToggle 
+            active={reordering}
+            onClick={() => setReordering(!reordering)}
+            colors={colors}
+          >
+            {reordering ? 'Annuler' : 'Réorganiser'}
+          </ReorderToggle>
+          
+          {hasReordered && (
+            <SaveOrderButton onClick={saveReorderedValues} colors={colors}>
+              <FaSave style={{ marginRight: '8px' }} />
+              Sauvegarder l'ordre
+            </SaveOrderButton>
+          )}
+        </HeaderButtons>
+      </SectionHeader>
+
+      {/* Liste des rédacteurs avec drag & drop conditionnel */}
+      {reordering ? (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="redacteurs-list">
+            {(provided) => (
+              <DraggableList
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                colors={colors}
+              >
+                {redacteurs.map((redacteur, index) => (
+                  <Draggable key={redacteur} draggableId={`redacteur-${redacteur}`} index={index}>
+                    {(provided) => (
+                      <DraggableItem
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        colors={colors}
+                      >
+                        <DragHandle {...provided.dragHandleProps} colors={colors}>
+                          <FaGripVertical />
+                        </DragHandle>
+                        <RedacteurText colors={colors}>{redacteur}</RedacteurText>
+                      </DraggableItem>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </DraggableList>
+            )}
+          </Droppable>
+        </DragDropContext>
+      ) : (
+        <RedacteursList>
+          {redacteurs.map((redacteur, index) => (
+            <RedacteurItem key={index} colors={colors}>
+              <RedacteurText colors={colors}>{redacteur}</RedacteurText>
+              <DeleteButton onClick={() => openDeleteConfirmation(index, redacteur)} colors={colors}>
+                <FaTrash />
+              </DeleteButton>
+            </RedacteurItem>
+          ))}
+        </RedacteursList>
+      )}
       
-      <AddForm>
-        <AddInput
-          type="text"
-          value={redacteurInput}
-          onChange={(e) => setRedacteurInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Nouveau rédacteur..."
-          colors={colors}
-        />
-        <AddButton onClick={handleAddRedacteur} colors={colors}>
-          <FaPlus />
-          <span>Ajouter</span>
-        </AddButton>
-      </AddForm>
+      {/* Formulaire d'ajout (masqué en mode réorganisation) */}
+      {!reordering && (
+        <AddForm>
+          <AddInput
+            type="text"
+            value={redacteurInput}
+            onChange={(e) => setRedacteurInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Nouveau rédacteur..."
+            colors={colors}
+          />
+          <AddButton onClick={handleAddRedacteur} colors={colors}>
+            <FaPlus />
+            <span>Ajouter</span>
+          </AddButton>
+        </AddForm>
+      )}
       
-      {/* Boutons pour le transfert et l'historique */}
-      <ActionButtonsContainer>
-        <TransferButton onClick={openTransferModal} colors={colors}>
-          <FaExchangeAlt />
-          <span>Transférer un portefeuille</span>
-        </TransferButton>
-        
-        <HistoryButton onClick={openHistoriqueMode} colors={colors}>
-          <FaHistory />
-          <span>Voir l'historique des transferts</span>
-        </HistoryButton>
-      </ActionButtonsContainer>
+      {/* Boutons pour le transfert et l'historique (masqués en mode réorganisation) */}
+      {!reordering && (
+        <ActionButtonsContainer>
+          <TransferButton onClick={openTransferModal} colors={colors}>
+            <FaExchangeAlt />
+            <span>Transférer un portefeuille</span>
+          </TransferButton>
+          
+          <HistoryButton onClick={openHistoriqueMode} colors={colors}>
+            <FaHistory />
+            <span>Voir l'historique des transferts</span>
+          </HistoryButton>
+        </ActionButtonsContainer>
+      )}
 
       {/* Modal de confirmation de suppression */}
       <Modal
@@ -371,6 +461,64 @@ const Description = styled.div`
   transition: all 0.3s ease;
 `;
 
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const HeaderButtons = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const ReorderToggle = styled.button`
+  background-color: ${props => props.active ? props.colors.error : props.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.active ? props.colors.error + 'dd' : props.colors.primaryDark};
+    transform: translateY(-1px);
+  }
+`;
+
+const SaveOrderButton = styled.button`
+  background-color: ${props => props.colors.success};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
 const RedacteursList = styled.div`
   display: flex;
   flex-direction: column;
@@ -399,6 +547,7 @@ const RedacteurText = styled.span`
   font-size: 16px;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
+  flex: 1;
 `;
 
 const DeleteButton = styled.button`
@@ -512,6 +661,45 @@ const HistoryButton = styled.button`
     background-color: ${props => props.colors.textSecondary};
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
+// Styles pour le drag & drop
+const DraggableList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const DraggableItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 6px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
+  }
+`;
+
+const DragHandle = styled.div`
+  color: ${props => props.colors.textMuted};
+  cursor: grab;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+  
+  &:active {
+    cursor: grabbing;
+  }
+  
+  &:hover {
+    color: ${props => props.colors.primary};
   }
 `;
 

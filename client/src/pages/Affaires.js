@@ -7,7 +7,7 @@ import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import AffaireForm from '../components/forms/AffaireForm';
-
+import { useTheme } from '../contexts/ThemeContext';
 
 const Affaires = () => {
   const [affaires, setAffaires] = useState([]);
@@ -26,6 +26,7 @@ const Affaires = () => {
   const [archivedAffaires, setArchivedAffaires] = useState(0);
   
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   useEffect(() => {
     fetchAffaires();
@@ -40,7 +41,7 @@ const Affaires = () => {
       if (searchTerm) params.search = searchTerm;
       if (filterYear) params.year = filterYear;
       if (filterArchived !== '') params.archived = filterArchived;
-      if (filterRedacteur) params.redacteur = filterRedacteur; // Ajout de cette ligne
+      if (filterRedacteur) params.redacteur = filterRedacteur;
   
       // Récupérer les affaires filtrées
       const response = await affairesAPI.getAll(params);
@@ -172,35 +173,35 @@ const Affaires = () => {
       Header: 'Archive',
       accessor: row => row.archive ? 'Archivé' : 'Actif',
       Cell: ({ value }) => (
-        <StatusTag status={value === 'Archivé' ? 'archived' : 'active'}>
+        <StatusTag status={value === 'Archivé' ? 'archived' : 'active'} colors={colors}>
           {value}
         </StatusTag>
       ),
     },
-  ], []);
+  ], [colors]);
   
   return (
-    <Container>
-      <HeaderContainer>
+    <Container colors={colors}>
+      <HeaderContainer colors={colors}>
         <TitleArea>
-          <Title>Affaires</Title>
-          <Subtitle>Gestion des dossiers de protection juridique complémentaire</Subtitle>
+          <Title colors={colors}>Affaires</Title>
+          <Subtitle colors={colors}>Gestion des dossiers de protection juridique complémentaire</Subtitle>
           <StatPills>
-            <StatPill>{totalAffaires} au total</StatPill>
-            <StatPill className="active">{activesAffaires} actives</StatPill>
-            <StatPill className="archived">{archivedAffaires} archivées</StatPill>
+            <StatPill colors={colors}>{totalAffaires} au total</StatPill>
+            <StatPill className="active" colors={colors}>{activesAffaires} actives</StatPill>
+            <StatPill className="archived" colors={colors}>{archivedAffaires} archivées</StatPill>
           </StatPills>
         </TitleArea>
         
-        <ActionButton onClick={handleOpenModal}>
+        <ActionButton onClick={handleOpenModal} colors={colors}>
           <FaPlus />
           <span>Nouvelle affaire</span>
         </ActionButton>
       </HeaderContainer>
       
-      <FiltersContainer>
+      <FiltersContainer colors={colors}>
         <FiltersGroup>
-          <FilterLabel>
+          <FilterLabel colors={colors}>
             <FaFilter />
             <span>Filtres:</span>
           </FilterLabel>
@@ -208,6 +209,7 @@ const Affaires = () => {
           <Select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
+            colors={colors}
           >
             <option value="">Toutes les années</option>
             {generateYears().map(year => (
@@ -218,6 +220,7 @@ const Affaires = () => {
           <Select
             value={filterRedacteur}
             onChange={(e) => setFilterRedacteur(e.target.value)}
+            colors={colors}
           >
             <option value="">Tous les rédacteurs</option>
             {redacteurs.map((redacteur, index) => (
@@ -228,13 +231,14 @@ const Affaires = () => {
           <Select
             value={filterArchived}
             onChange={(e) => setFilterArchived(e.target.value)}
+            colors={colors}
           >
             <option value="false">Actives</option>
             <option value="true">Archivées</option>
             <option value="">Toutes</option>
           </Select>
 
-          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres" colors={colors}>
             Réinitialiser
           </ResetButton>
 
@@ -242,9 +246,9 @@ const Affaires = () => {
       </FiltersContainer>
       
       {loading ? (
-        <Loading>Chargement des affaires...</Loading>
+        <Loading colors={colors}>Chargement des affaires...</Loading>
       ) : error ? (
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       ) : (
         <DataTable
           columns={columns}
@@ -267,27 +271,98 @@ const Affaires = () => {
   );
 };
 
+// Styled Components avec thématisation
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+`;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+`;
+
+const TitleArea = styled.div`
+  flex: 1;
+`;
+
+const Title = styled.h1`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const Subtitle = styled.p`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  margin: 4px 0 0;
+  transition: color 0.3s ease;
+`;
+
+const StatPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const StatPill = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.colors.surfaceHover};
+  padding: 4px 12px;
+  border-radius: 12px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
+  
+  &.active {
+    background-color: ${props => props.colors.successBg};
+    color: ${props => props.colors.success};
+    border-color: ${props => props.colors.success}40;
+  }
+  
+  &.archived {
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
+    border-color: ${props => props.colors.borderLight};
+  }
 `;
 
 const ActionButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -297,6 +372,12 @@ const FiltersContainer = styled.div`
   gap: 16px;
   margin-bottom: 24px;
   align-items: center;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FiltersGroup = styled.div`
@@ -309,24 +390,60 @@ const FiltersGroup = styled.div`
 const FilterLabel = styled.div`
   display: flex;
   align-items: center;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
   
   svg {
-    margin-right: 4px;
+    margin-right: 6px;
+    color: ${props => props.colors.primary};
   }
 `;
 
 const Select = styled.select`
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
   min-width: 150px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &:hover {
+    border-color: ${props => props.colors.primary}80;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
+  }
+`;
+
+const ResetButton = styled.button`
+  background-color: ${props => props.colors.error};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  
+  &:hover {
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
@@ -336,101 +453,39 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const ResetButton = styled.button`
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: #d32f2f;
-  }
-`;
-
-const HeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-`;
-
-const TitleArea = styled.div`
-  flex: 1;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0;
-  color: #212121;
-`;
-
-const Subtitle = styled.p`
-  font-size: 14px;
-  color: #757575;
-  margin: 4px 0 0;
-`;
-
-const StatPills = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const StatPill = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  color: #424242;
-  background-color: #e0e0e0;
-  padding: 3px 10px;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-  &.active {
-    background-color: #c8e6c9;
-    color: #2e7d32;
-  }
-  
-  &.archived {
-    background-color: #e0e0e0;
-    color: #616161;
-    border: 1px solid #bdbdbd;
-  }
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default Affaires;

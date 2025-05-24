@@ -881,7 +881,7 @@ const handleTransferPortfolio = async () => {
         <Section>
           <ExpandableSection
             title="Templates de documents (voir la documentation avant de modifier)"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             <TemplatesList>
               {/* Template de convention */}
@@ -989,11 +989,11 @@ const handleTransferPortfolio = async () => {
           </ExpandableSection>
         </Section>
 
-        {/* Nouvelle section pour la gestion des utilisateurs (admin uniquement) */}
+        {/* Section pour la gestion des utilisateurs (admin uniquement) */}
         <Section>
           <ExpandableSection
             title="Gestion des utilisateurs"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             {utilisateursLoading ? (
               <Loading>Chargement des utilisateurs...</Loading>
@@ -1073,7 +1073,7 @@ const handleTransferPortfolio = async () => {
         <Section>
           <ExpandableSection
             title="Circonstances (voir la documentation avant de modifier)"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             <ParametersList>
               {parametres.circonstances && parametres.circonstances.map((circonstance, index) => (
@@ -1105,7 +1105,7 @@ const handleTransferPortfolio = async () => {
         <Section>
           <ExpandableSection
             title="Régions (voir la documentation avant de modifier)"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             <SectionHeader>
               <SectionTitle>Liste des régions</SectionTitle>
@@ -1186,7 +1186,7 @@ const handleTransferPortfolio = async () => {
         <Section>
           <ExpandableSection
             title="Départements (voir la documentation avant de modifier)"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             <SectionHeader>
               <SectionTitle>Liste des départements</SectionTitle>
@@ -1267,7 +1267,7 @@ const handleTransferPortfolio = async () => {
         <Section>
           <ExpandableSection
             title="Rédacteurs (voir la documentation avant de modifier)"
-            defaultExpanded={true}
+            defaultExpanded={false}
           >
             <ParametersList>
               {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (

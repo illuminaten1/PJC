@@ -202,37 +202,17 @@ const EmailMetaValue = styled.div`
 const EmailBody = styled.div`
   flex: 1;
   padding: 15px;
-  background-color: ${props => props.colors.surface};
+  background-color: #ffffff; /* Toujours blanc pour préserver les styles d'email */
   margin: 15px;
   border-radius: 4px;
   box-shadow: ${props => props.colors.shadow};
   overflow: auto;
   min-height: 0;
   border: 1px solid ${props => props.colors.borderLight};
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
   
-  /* Styles pour le contenu HTML de l'email */
-  p, div, span {
-    color: ${props => props.colors.textPrimary} !important;
-  }
-  
-  a {
-    color: ${props => props.colors.primary} !important;
-    
-    &:hover {
-      color: ${props => props.colors.primaryLight} !important;
-    }
-  }
-  
-  /* Forcer les couleurs pour les emails avec styles inline */
-  * {
-    color: ${props => props.colors.textPrimary} !important;
-  }
-  
-  /* Exception pour les liens */
-  a, a * {
-    color: ${props => props.colors.primary} !important;
-  }
+  /* Préserver les styles originaux des emails */
+  /* Ne pas forcer les couleurs - laisser les emails avec leurs styles natifs */
 `;
 
 const EmailAttachments = styled.div`

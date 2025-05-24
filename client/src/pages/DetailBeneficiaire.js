@@ -245,36 +245,6 @@ const DetailBeneficiaire = () => {
   const totalPaiements = beneficiaire.paiements.reduce((sum, paiement) => sum + (paiement.montant || 0), 0);
   const paiementRatio = totalConventions > 0 ? (totalPaiements / totalConventions) * 100 : 0;
 
-// Styled Components de base
-const Container = styled.div`
-  padding: 20px;
-  background-color: ${props => props.colors.background};
-  min-height: 100vh;
-  transition: background-color 0.3s ease;
-`;
-
-const Loading = styled.div`
-  padding: 40px;
-  text-align: center;
-  color: ${props => props.colors.textSecondary};
-  background-color: ${props => props.colors.surface};
-  border-radius: 8px;
-  box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props => props.colors.border};
-  transition: all 0.3s ease;
-`;
-
-const Error = styled.div`
-  padding: 20px;
-  text-align: center;
-  color: ${props => props.colors.error};
-  background-color: ${props => props.colors.errorBg};
-  border-radius: 8px;
-  box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props => props.colors.error}40;
-  transition: all 0.3s ease;
-`;
-
 return (
     <Container colors={colors}>
       <PageHeader 
@@ -680,6 +650,36 @@ return (
     </Container>
   );
 };
+
+// Styled Components de base
+const Container = styled.div`
+  padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+`;
+
+const Loading = styled.div`
+  padding: 40px;
+  text-align: center;
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+`;
+
+const Error = styled.div`
+  padding: 20px;
+  text-align: center;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
+`;
 
 // Styled Components avec thématisation complète
 

@@ -245,7 +245,7 @@ const DetailBeneficiaire = () => {
   const totalPaiements = beneficiaire.paiements.reduce((sum, paiement) => sum + (paiement.montant || 0), 0);
   const paiementRatio = totalConventions > 0 ? (totalPaiements / totalConventions) * 100 : 0;
 
-return (
+  return (
     <Container colors={colors}>
       <PageHeader 
         title={`${beneficiaire.prenom} ${beneficiaire.nom}`}

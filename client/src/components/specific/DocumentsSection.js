@@ -7,104 +7,7 @@ import ExpandableSection from '../common/ExpandableSection';
 import Modal from '../common/Modal';
 import api, { fichiersAPI } from '../../utils/api';
 import EmailPreview from './EmailPreview';
-
-const FileUploadArea = styled.div`
-  border: 2px dashed #ccc;
-  border-radius: 5px;
-  padding: 20px;
-  text-align: center;
-  margin-bottom: 20px;
-  cursor: pointer;
-  transition: all 0.3s;
-  
-  &:hover, &.drag-active {
-    border-color: #0056b3;
-    background-color: rgba(0, 86, 179, 0.05);
-  }
-`;
-
-const FileList = styled.div`
-  margin-top: 20px;
-`;
-
-const FileItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  
-  &:hover {
-    background-color: #f8f9fa;
-  }
-`;
-
-const FileIcon = styled.div`
-  margin-right: 15px;
-  font-size: 24px;
-  color: ${props => props.color || '#666'};
-`;
-
-const FileInfo = styled.div`
-  flex-grow: 1;
-  cursor: pointer;
-`;
-
-const FileName = styled.div`
-  font-weight: 500;
-`;
-
-const FileDetails = styled.div`
-  font-size: 12px;
-  color: #666;
-`;
-
-const FileActions = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const ActionButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  font-size: 16px;
-  padding: 5px;
-  
-  &:hover {
-    color: ${props => props.danger ? '#dc3545' : '#0056b3'};
-  }
-`;
-
-const PreviewContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  flex: 1;
-  
-  iframe {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 20px;
-  color: #666;
-`;
-
-const UploadForm = styled.div`
-  margin-top: 20px;
-`;
-
-const FileInput = styled.input`
-  display: none;
-`;
+import { useTheme } from '../../contexts/ThemeContext';
 
 const DocumentsSection = ({ beneficiaireId }) => {
   const [files, setFiles] = useState([]);
@@ -119,6 +22,7 @@ const DocumentsSection = ({ beneficiaireId }) => {
   const [editDescription, setEditDescription] = useState('');
   
   const fileInputRef = useRef(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (beneficiaireId) {
@@ -283,15 +187,15 @@ const DocumentsSection = ({ beneficiaireId }) => {
   const getFileIcon = (contentType) => {
     switch (contentType) {
       case 'application/pdf':
-        return <FaFilePdf color="#e74c3c" />;
+        return <FaFilePdf color={colors.error} />;
       case 'application/vnd.oasis.opendocument.text':
       case 'application/odt':
-        return <FaFileAlt color="#3498db" />;
+        return <FaFileAlt color={colors.cardIcon.affaires.color} />;
       case 'message/rfc822':
       case 'message/eml':
-        return <FaEnvelope color="#2ecc71" />;
+        return <FaEnvelope color={colors.success} />;
       default:
-        return <FaFile color="#95a5a6" />;
+        return <FaFile color={colors.textMuted} />;
     }
   };
 
@@ -313,14 +217,18 @@ const DocumentsSection = ({ beneficiaireId }) => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current.click()}
+        colors={colors}
+        dragActive={dragActive}
       >
-        <FaPlus style={{ fontSize: '24px', marginBottom: '10px' }} />
-        <div>
+        <UploadIcon colors={colors}>
+          <FaPlus />
+        </UploadIcon>
+        <UploadText colors={colors}>
           Glissez-déposez un fichier ici ou cliquez pour sélectionner
-          <div style={{ fontSize: '12px', marginTop: '5px' }}>
+          <UploadSubtext colors={colors}>
             Formats acceptés: PDF, ODT, EML
-          </div>
-        </div>
+          </UploadSubtext>
+        </UploadText>
         <FileInput 
           type="file" 
           ref={fileInputRef} 
@@ -328,52 +236,54 @@ const DocumentsSection = ({ beneficiaireId }) => {
           accept=".pdf,.odt,.eml,application/pdf,application/vnd.oasis.opendocument.text,message/rfc822"
         />
         <UploadForm>
-          <input
+          <DescriptionInput
             type="text"
             placeholder="Description (optionnelle)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            style={{ padding: '8px', width: '100%', maxWidth: '300px', marginTop: '10px' }}
+            colors={colors}
           />
         </UploadForm>
         {uploadProgress > 0 && uploadProgress < 100 && (
-          <div style={{ marginTop: '10px', width: '100%' }}>
-            <progress value={uploadProgress} max="100" style={{ width: '100%', maxWidth: '300px' }} />
-            <div>{uploadProgress}%</div>
-          </div>
+          <ProgressContainer>
+            <ProgressBar value={uploadProgress} max="100" colors={colors} />
+            <ProgressText colors={colors}>{uploadProgress}%</ProgressText>
+          </ProgressContainer>
         )}
       </FileUploadArea>
       
-      {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      {error && <ErrorMessage colors={colors}>{error}</ErrorMessage>}
       
-      <FileList>
+      <FileList colors={colors}>
         {loading ? (
-          <div>Chargement des fichiers...</div>
+          <LoadingMessage colors={colors}>Chargement des fichiers...</LoadingMessage>
         ) : files.length === 0 ? (
-          <EmptyState>
-            <FaFile style={{ fontSize: '32px', opacity: 0.5, marginBottom: '10px' }} />
-            <div>Aucun document disponible</div>
+          <EmptyState colors={colors}>
+            <EmptyIcon colors={colors}>
+              <FaFile />
+            </EmptyIcon>
+            <EmptyText colors={colors}>Aucun document disponible</EmptyText>
           </EmptyState>
         ) : (
           files.map((file) => (
-            <FileItem key={file._id} onClick={() => handleFileClick(file)}>
+            <FileItem key={file._id} onClick={() => handleFileClick(file)} colors={colors}>
               <FileIcon>{getFileIcon(file.contentType)}</FileIcon>
               <FileInfo>
-                <FileName>{file.originalname}</FileName>
-                <FileDetails>
+                <FileName colors={colors}>{file.originalname}</FileName>
+                <FileDetails colors={colors}>
                   {file.description && `${file.description} - `}
                   {formatFileSize(file.size)} - Ajouté le {format(new Date(file.uploadDate), 'dd MMMM yyyy', { locale: fr })}
                 </FileDetails>
               </FileInfo>
               <FileActions>
-                <ActionButton onClick={(e) => handleEditDescription(file, e)} title="Modifier la description">
+                <ActionButton onClick={(e) => handleEditDescription(file, e)} title="Modifier la description" colors={colors}>
                   <FaEdit />
                 </ActionButton>
-                <ActionButton onClick={(e) => handleDownload(file._id, e)} title="Télécharger">
+                <ActionButton onClick={(e) => handleDownload(file._id, e)} title="Télécharger" colors={colors}>
                   <FaDownload />
                 </ActionButton>
-                <ActionButton danger onClick={(e) => handleDelete(file._id, e)} title="Supprimer">
+                <ActionButton danger onClick={(e) => handleDelete(file._id, e)} title="Supprimer" colors={colors}>
                   <FaTrash />
                 </ActionButton>
               </FileActions>
@@ -387,64 +297,45 @@ const DocumentsSection = ({ beneficiaireId }) => {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           title={selectedFile.originalname}
-          size="fullscreen"  // utiliser fullscreen pour une meilleure prévisualisation
+          size="fullscreen"
           headerContent={
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <ActionButton onClick={(e) => handleDownload(selectedFile._id, e)} title="Télécharger">
+            <HeaderActions>
+              <ActionButton onClick={(e) => handleDownload(selectedFile._id, e)} title="Télécharger" colors={colors}>
                 <FaDownload /> Télécharger
               </ActionButton>
-            </div>
+            </HeaderActions>
           }
-          noPadding={true}  // Supprimer le padding pour la prévisualisation
-          isPreview={true}  // Indiquer que c'est une prévisualisation
+          noPadding={true}
+          isPreview={true}
         >
-          <PreviewContainer>
+          <PreviewContainer colors={colors}>
           {selectedFile.contentType === 'application/pdf' ? (
-            <div style={{
-              width: '100%',
-              height: '100%',
-              position: 'relative',
-              flex: 1
-            }}>
+            <IframeContainer>
               <iframe
                 src={`/api/fichiers/preview/${selectedFile._id}`}
                 title={`Aperçu de ${selectedFile.originalname}`}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  border: 'none'
-                }}
               />
-            </div>
+            </IframeContainer>
           ) : selectedFile.contentType === 'message/rfc822' || selectedFile.contentType === 'message/eml' ? (
             <EmailPreview fileId={selectedFile._id} />
             ) : selectedFile.contentType === 'application/vnd.oasis.opendocument.text' || selectedFile.contentType === 'application/odt' ? (
-              <div style={{ 
-                padding: '20px', 
-                textAlign: 'center', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%'
-              }}>
-                <FaFileAlt style={{ fontSize: '48px', color: '#3498db', marginBottom: '20px' }} />
-                <h3>Aperçu ODT</h3>
-                <p>La prévisualisation des fichiers ODT n'est pas disponible directement dans le navigateur.</p>
-                <p>
-                  <button 
-                    onClick={(e) => handleDownload(selectedFile._id, e)}
-                    style={{ padding: '10px 15px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    <FaDownload style={{ marginRight: '5px' }} /> Télécharger le fichier
-                  </button>
-                </p>
-              </div>
+              <OdtPreview colors={colors}>
+                <OdtIcon colors={colors}>
+                  <FaFileAlt />
+                </OdtIcon>
+                <OdtTitle colors={colors}>Aperçu ODT</OdtTitle>
+                <OdtDescription colors={colors}>
+                  La prévisualisation des fichiers ODT n'est pas disponible directement dans le navigateur.
+                </OdtDescription>
+                <OdtButton 
+                  onClick={(e) => handleDownload(selectedFile._id, e)}
+                  colors={colors}
+                >
+                  <FaDownload style={{ marginRight: '5px' }} /> Télécharger le fichier
+                </OdtButton>
+              </OdtPreview>
             ) : (
-              <div>Impossible de prévisualiser ce type de fichier</div>
+              <NoPreview colors={colors}>Impossible de prévisualiser ce type de fichier</NoPreview>
             )}
           </PreviewContainer>
         </Modal>
@@ -459,35 +350,392 @@ const DocumentsSection = ({ beneficiaireId }) => {
           size="small"
           actions={
             <>
-              <button 
+              <CancelButton 
                 onClick={() => setEditingFile(null)}
-                style={{ padding: '8px 16px', background: '#f5f5f5', border: 'none', borderRadius: '4px', marginRight: '8px', cursor: 'pointer' }}
+                colors={colors}
               >
                 Annuler
-              </button>
-              <button 
+              </CancelButton>
+              <SaveButton 
                 onClick={saveDescription}
-                style={{ padding: '8px 16px', background: '#3f51b5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                colors={colors}
               >
                 Enregistrer
-              </button>
+              </SaveButton>
             </>
           }
         >
-          <div style={{ padding: '16px 0' }}>
-            <label htmlFor="description" style={{ display: 'block', marginBottom: '8px' }}>Description</label>
-            <textarea
+          <EditForm colors={colors}>
+            <EditLabel colors={colors} htmlFor="description">Description</EditLabel>
+            <EditTextarea
               id="description"
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
-              style={{ width: '100%', padding: '8px', minHeight: '100px', borderRadius: '4px', border: '1px solid #ddd' }}
               placeholder="Saisissez une description pour ce fichier..."
+              colors={colors}
             />
-          </div>
+          </EditForm>
         </Modal>
       )}
     </ExpandableSection>
   );
 };
+
+// Styled Components avec thématisation
+const FileUploadArea = styled.div`
+  border: 2px dashed ${props => props.dragActive ? props.colors.primary : props.colors.border};
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: ${props => props.dragActive ? props.colors.primary + '20' : props.colors.surface};
+  
+  &:hover {
+    border-color: ${props => props.colors.primary};
+    background-color: ${props => props.colors.primary}20;
+  }
+`;
+
+const UploadIcon = styled.div`
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
+`;
+
+const UploadText = styled.div`
+  color: ${props => props.colors.textPrimary};
+  font-weight: 500;
+  transition: color 0.3s ease;
+`;
+
+const UploadSubtext = styled.div`
+  font-size: 12px;
+  margin-top: 5px;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
+`;
+
+const FileInput = styled.input`
+  display: none;
+`;
+
+const UploadForm = styled.div`
+  margin-top: 20px;
+`;
+
+const DescriptionInput = styled.input`
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 10px;
+  border-radius: 4px;
+  border: 1px solid ${props => props.colors.border};
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
+  }
+`;
+
+const ProgressContainer = styled.div`
+  margin-top: 10px;
+  width: 100%;
+`;
+
+const ProgressBar = styled.progress`
+  width: 100%;
+  max-width: 300px;
+  
+  &::-webkit-progress-bar {
+    background-color: ${props => props.colors.surfaceHover};
+    border-radius: 4px;
+  }
+  
+  &::-webkit-progress-value {
+    background-color: ${props => props.colors.primary};
+    border-radius: 4px;
+  }
+`;
+
+const ProgressText = styled.div`
+  color: ${props => props.colors.textPrimary};
+  font-size: 14px;
+  margin-top: 4px;
+  transition: color 0.3s ease;
+`;
+
+const ErrorMessage = styled.div`
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
+`;
+
+const FileList = styled.div`
+  margin-top: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+`;
+
+const LoadingMessage = styled.div`
+  padding: 20px;
+  text-align: center;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
+`;
+
+const FileItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.surfaceHover};
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const FileIcon = styled.div`
+  margin-right: 15px;
+  font-size: 24px;
+`;
+
+const FileInfo = styled.div`
+  flex-grow: 1;
+  cursor: pointer;
+`;
+
+const FileName = styled.div`
+  font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const FileDetails = styled.div`
+  font-size: 12px;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
+`;
+
+const FileActions = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const ActionButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: ${props => props.danger ? props.colors.error : props.colors.primary};
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  &:hover {
+    background-color: ${props => props.danger ? props.colors.error + '20' : props.colors.primary + '20'};
+    transform: scale(1.1);
+  }
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 40px 20px;
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 32px;
+  opacity: 0.5;
+  margin-bottom: 10px;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
+`;
+
+const EmptyText = styled.div`
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
+`;
+
+const PreviewContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
+`;
+
+const IframeContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+  flex: 1;
+  
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+`;
+
+const OdtPreview = styled.div`
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
+`;
+
+const OdtIcon = styled.div`
+  font-size: 48px;
+  color: ${props => props.colors.cardIcon.affaires.color};
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+`;
+
+const OdtTitle = styled.h3`
+  color: ${props => props.colors.textPrimary};
+  margin-bottom: 16px;
+  transition: color 0.3s ease;
+`;
+
+const OdtDescription = styled.p`
+  color: ${props => props.colors.textSecondary};
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+`;
+
+const OdtButton = styled.button`
+  padding: 10px 15px;
+  background: ${props => props.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
+const NoPreview = styled.div`
+  padding: 20px;
+  text-align: center;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
+`;
+
+const EditForm = styled.div`
+  padding: 16px 0;
+`;
+
+const EditLabel = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  color: ${props => props.colors.textPrimary};
+  font-weight: 500;
+  transition: color 0.3s ease;
+`;
+
+const EditTextarea = styled.textarea`
+  width: 100%;
+  padding: 8px;
+  min-height: 100px;
+  border-radius: 4px;
+  border: 1px solid ${props => props.colors.border};
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  resize: vertical;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 8px 16px;
+  background: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 4px;
+  margin-right: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.colors.surfaceHover};
+    border-color: ${props => props.colors.primary};
+  }
+`;
+
+const SaveButton = styled.button`
+  padding: 8px 16px;
+  background: ${props => props.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
 
 export default DocumentsSection;

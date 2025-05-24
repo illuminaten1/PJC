@@ -6,6 +6,7 @@ import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import AvocatForm from '../components/forms/AvocatForm';
 import AvocatDetail from '../components/specific/AvocatDetail';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Fonction utilitaire pour surligner le terme dans le texte
 const highlightMatch = (text, term) => {
@@ -55,6 +56,9 @@ const Avocats = () => {
   
   // État pour le tri
   const [sortConfig, setSortConfig] = useState({ key: 'nom', direction: 'asc' });
+
+  // Import du thème
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchAvocats();
@@ -142,7 +146,7 @@ const Avocats = () => {
     
     setFilteredAvocats(result);
   }, [searchTerm, filters, avocats]);
-
+  
   // Effet pour le tri
   useEffect(() => {
     let sortedAvocats = [...filteredAvocats];
@@ -263,56 +267,58 @@ const Avocats = () => {
 
   if (loading && avocats.length === 0) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Annuaire des avocats" />
-        <Loading>Chargement des avocats...</Loading>
+        <Loading colors={colors}>Chargement des avocats...</Loading>
       </Container>
     );
   }
 
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title="Annuaire des avocats" 
         actionButton={
-          <AddButton onClick={() => handleOpenModal()}>
+          <AddButton onClick={() => handleOpenModal()} colors={colors}>
             <FaPlus />
             <span>Ajouter un avocat</span>
           </AddButton>
         }
       />
 
-      <ControlsPanel>
+      <ControlsPanel colors={colors}>
         <SearchFilterContainer>
-          <SearchBar>
-            <SearchIcon><FaSearch /></SearchIcon>
+          <SearchBar colors={colors}>
+            <SearchIcon colors={colors}><FaSearch /></SearchIcon>
             <SearchInput
               type="text"
               placeholder="Rechercher par nom, cabinet ou ville..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              colors={colors}
             />
           </SearchBar>
           
-          <FilterToggle onClick={() => setShowFilters(!showFilters)}>
+          <FilterToggle onClick={() => setShowFilters(!showFilters)} colors={colors}>
             <FaFilter />
             <span>{showFilters ? 'Masquer les filtres' : 'Afficher les filtres'}</span>
           </FilterToggle>
         </SearchFilterContainer>
         
-        <ResultCount>
+        <ResultCount colors={colors}>
           {filteredAvocats.length} avocat{filteredAvocats.length !== 1 ? 's' : ''} trouvé{filteredAvocats.length !== 1 ? 's' : ''}
         </ResultCount>
       </ControlsPanel>
       
       {showFilters && (
-        <FiltersPanel>
+        <FiltersPanel colors={colors}>
           <FilterGroup>
-            <FilterLabel>Région</FilterLabel>
+            <FilterLabel colors={colors}>Région</FilterLabel>
             <FilterSelect 
               name="region" 
               value={filters.region} 
               onChange={handleFilterChange}
+              colors={colors}
             >
               <option value="">Toutes les régions</option>
               {regions.map((region, index) => (
@@ -323,11 +329,12 @@ const Avocats = () => {
           
           {/* Filtre pour cabinet */}
           <FilterGroup>
-            <FilterLabel>Cabinet</FilterLabel>
+            <FilterLabel colors={colors}>Cabinet</FilterLabel>
             <FilterSelect 
               name="cabinet" 
               value={filters.cabinet} 
               onChange={handleFilterChange}
+              colors={colors}
             >
               <option value="">Tous les cabinets</option>
               {cabinets.map((cabinet, index) => (
@@ -337,11 +344,12 @@ const Avocats = () => {
           </FilterGroup>
           
           <FilterGroup>
-            <FilterLabel>Ville d'intervention</FilterLabel>
+            <FilterLabel colors={colors}>Ville d'intervention</FilterLabel>
             <FilterSelect 
               name="ville" 
               value={filters.ville} 
               onChange={handleFilterChange}
+              colors={colors}
             >
               <option value="">Toutes les villes</option>
               {villesIntervention.map((ville, index) => (
@@ -352,8 +360,8 @@ const Avocats = () => {
           
           {/* Mise à jour pour mieux aligner le bouton RPC */}
           <FilterGroup>
-            <FilterLabel>Spécialisation</FilterLabel>
-            <FilterCheckboxContainer>
+            <FilterLabel colors={colors}>Spécialisation</FilterLabel>
+            <FilterCheckboxContainer colors={colors}>
               <input
                 type="checkbox"
                 name="specialisationRPC"
@@ -361,91 +369,92 @@ const Avocats = () => {
                 checked={filters.specialisationRPC}
                 onChange={handleFilterChange}
               />
-              <FilterCheckboxLabel htmlFor="filter-rpc">
+              <FilterCheckboxLabel htmlFor="filter-rpc" colors={colors}>
                 Spécialisation RPC uniquement
               </FilterCheckboxLabel>
             </FilterCheckboxContainer>
           </FilterGroup>
           
-          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres" colors={colors}>
             Réinitialiser
           </ResetButton>
         </FiltersPanel>
       )}
 
       {error ? (
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       ) : (
-        <TableContainer>
+        <TableContainer colors={colors}>
           {filteredAvocats.length > 0 ? (
-            <Table>
-              <TableHead>
+            <Table colors={colors}>
+              <TableHead colors={colors}>
                 <tr>
-                  <Th onClick={() => handleSort('nom')}>
+                  <Th onClick={() => handleSort('nom')} colors={colors}>
                     <ThContent>
                       Nom
-                      <SortIcon>{getSortIcon('nom')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('nom')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('prenom')}>
+                  <Th onClick={() => handleSort('prenom')} colors={colors}>
                     <ThContent>
                       Prénom
-                      <SortIcon>{getSortIcon('prenom')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('prenom')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('cabinet')}>
+                  <Th onClick={() => handleSort('cabinet')} colors={colors}>
                     <ThContent>
                       Cabinet
-                      <SortIcon>{getSortIcon('cabinet')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('cabinet')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('region')}>
+                  <Th onClick={() => handleSort('region')} colors={colors}>
                     <ThContent>
                       Région
-                      <SortIcon>{getSortIcon('region')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('region')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('villesIntervention')}>
+                  <Th onClick={() => handleSort('villesIntervention')} colors={colors}>
                     <ThContent>
                       Villes d'intervention
-                      <SortIcon>{getSortIcon('villesIntervention')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('villesIntervention')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <Th onClick={() => handleSort('specialisationRPC')}>
+                  <Th onClick={() => handleSort('specialisationRPC')} colors={colors}>
                     <ThContent>
                       Spé.
-                      <SortIcon>{getSortIcon('specialisationRPC')}</SortIcon>
+                      <SortIcon colors={colors}>{getSortIcon('specialisationRPC')}</SortIcon>
                     </ThContent>
                   </Th>
-                  <ThActions>Actions</ThActions>
+                  <ThActions colors={colors}>Actions</ThActions>
                 </tr>
               </TableHead>
-              <TableBody>
+              <TableBody colors={colors}>
                 {filteredAvocats.map((avocat) => (
                   <tr 
                     key={avocat._id}
                     onClick={() => handleOpenDetailModal(avocat)}
                     className="clickable-row"
                   >
-                    <Td><HighlightedText text={avocat.nom} searchTerm={searchTerm} /></Td>
-                    <Td><HighlightedText text={avocat.prenom} searchTerm={searchTerm} /></Td>
-                    <Td><HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} /></Td>
-                    <Td>
+                    <Td colors={colors}><HighlightedText text={avocat.nom} searchTerm={searchTerm} /></Td>
+                    <Td colors={colors}><HighlightedText text={avocat.prenom} searchTerm={searchTerm} /></Td>
+                    <Td colors={colors}><HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} /></Td>
+                    <Td colors={colors}>
                       {avocat.region ? (
-                        <RegionBadge>
+                        <RegionBadge colors={colors}>
                           {avocat.region}
                         </RegionBadge>
                       ) : (
                         '-'
                       )}
                     </Td>
-                    <Td>
+                    <Td colors={colors}>
                       {avocat.villesIntervention && avocat.villesIntervention.length > 0 ? (
                         <VillesContainer>
                           {avocat.villesIntervention.slice(0, 2).map((ville, index) => (
                             <VilleTag 
                               key={index}
                               className={searchTerm.trim() !== "" && ville.toLowerCase().includes(searchTerm.toLowerCase()) ? "highlighted" : ""}
+                              colors={colors}
                             >
                               <HighlightedText text={ville} searchTerm={searchTerm} />
                             </VilleTag>
@@ -455,6 +464,7 @@ const Avocats = () => {
                               className={`more ${searchTerm.trim() !== "" && 
                                 avocat.villesIntervention.slice(2).some(v => v.toLowerCase().includes(searchTerm.toLowerCase())) 
                                 ? "highlighted" : ""}`}
+                              colors={colors}
                             >
                               +{avocat.villesIntervention.length - 2}
                               {searchTerm.trim() !== "" && 
@@ -464,22 +474,23 @@ const Avocats = () => {
                           )}
                         </VillesContainer>
                       ) : '-'}
-                    </Td>                   <Td>
+                    </Td>
+                    <Td colors={colors}>
                       {avocat.specialisationRPC && (
-                        <RPCTag>RPC</RPCTag>
+                        <RPCTag colors={colors}>RPC</RPCTag>
                       )}
                     </Td>
-                    <TdActions onClick={(e) => e.stopPropagation()}>
+                    <TdActions onClick={(e) => e.stopPropagation()} colors={colors}>
                       <ActionButton title="Voir le détail" onClick={(e) => {
                         e.stopPropagation();
                         handleOpenDetailModal(avocat);
-                      }}>
+                      }} colors={colors}>
                         <FaEye />
                       </ActionButton>
                       <ActionButton onClick={(e) => {
                         e.stopPropagation();
                         handleOpenModal(avocat);
-                      }} title="Modifier">
+                      }} title="Modifier" colors={colors}>
                         <FaEdit />
                       </ActionButton>
                       <ActionButton 
@@ -489,6 +500,7 @@ const Avocats = () => {
                         }} 
                         title="Supprimer"
                         className="delete"
+                        colors={colors}
                       >
                         <FaTrash />
                       </ActionButton>
@@ -498,7 +510,7 @@ const Avocats = () => {
               </TableBody>
             </Table>
           ) : (
-            <EmptyMessage>Aucun avocat trouvé</EmptyMessage>
+            <EmptyMessage colors={colors}>Aucun avocat trouvé</EmptyMessage>
           )}
         </TableContainer>
       )}
@@ -543,10 +555,10 @@ const Avocats = () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setDeleteModalOpen(false)}>
+            <CancelButton onClick={() => setDeleteModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <DeleteButton onClick={handleDelete}>
+            <DeleteButton onClick={handleDelete} colors={colors}>
               Supprimer
             </DeleteButton>
           </>
@@ -554,16 +566,19 @@ const Avocats = () => {
       >
         <DeleteConfirmContent>
           <p>Êtes-vous sûr de vouloir supprimer définitivement cet avocat ?</p>
-          {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+          {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
     </Container>
   );
 };
 
-// Styles
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const ControlsPanel = styled.div`
@@ -573,6 +588,12 @@ const ControlsPanel = styled.div`
   margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 10px;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -595,6 +616,14 @@ const SearchFilterContainer = styled.div`
 const SearchBar = styled.div`
   position: relative;
   flex-grow: 1;
+  
+  .highlight {
+    background-color: ${props => props.colors.warning};
+    color: ${props => props.colors.textPrimary};
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
 `;
 
 const SearchIcon = styled.div`
@@ -602,27 +631,38 @@ const SearchIcon = styled.div`
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 10px 10px 10px 35px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   height: 100%;
   box-sizing: border-box;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
 const ResultCount = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const FilterToggle = styled.button`
@@ -630,14 +670,22 @@ const FilterToggle = styled.button`
   align-items: center;
   gap: 8px;
   padding: 10px 15px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.primary}10;
+    border-color: ${props => props.colors.primary};
+    color: ${props => props.colors.primary};
+  }
+  
+  svg {
+    color: ${props => props.colors.primary};
   }
 `;
 
@@ -646,10 +694,13 @@ const FiltersPanel = styled.div`
   flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  padding: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
   align-items: flex-end;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -671,41 +722,66 @@ const FilterLabel = styled.label`
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const FilterSelect = styled.select`
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
-  background-color: white;
-  height: 40px; /* Hauteur fixe pour aligner avec la case à cocher */
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  height: 40px;
+  transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &:hover {
+    border-color: ${props => props.colors.primary}80;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
-// Styles pour aligner la case à cocher RPC
 const FilterCheckboxContainer = styled.div`
   display: flex;
   align-items: center;
-  height: 40px; /* Même hauteur que les select */
-  background-color: white;
-  border: 1px solid #ddd;
+  height: 40px;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 0 10px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${props => props.colors.primary}80;
+  }
+  
+  input[type="checkbox"] {
+    accent-color: ${props => props.colors.primary};
+  }
 `;
 
 const FilterCheckboxLabel = styled.label`
   margin-left: 8px;
   font-size: 14px;
+  color: ${props => props.colors.textPrimary};
+  cursor: pointer;
+  transition: color 0.3s ease;
 `;
 
 const ResetButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
@@ -715,42 +791,50 @@ const ResetButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
-  height: 40px; /* Même hauteur que les autres contrôles */
+  transition: all 0.3s ease;
+  height: 40px;
+  font-weight: 500;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
 const TableContainer = styled.div`
   overflow-x: auto;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
+  background-color: ${props => props.colors.surface};
 `;
 
 const TableHead = styled.thead`
-  background-color: #f5f5f5;
-  border-bottom: 2px solid #e0e0e0;
+  background-color: ${props => props.colors.surfaceHover};
+  border-bottom: 2px solid ${props => props.colors.borderLight};
 `;
 
 const Th = styled.th`
   padding: 12px 16px;
   text-align: left;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   cursor: pointer;
   user-select: none;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #eeeeee;
+    background-color: ${props => props.colors.primary}10;
+    color: ${props => props.colors.primary};
   }
 `;
 
@@ -758,8 +842,9 @@ const ThActions = styled.th`
   padding: 12px 16px;
   text-align: center;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   width: 120px;
+  transition: color 0.3s ease;
 `;
 
 const ThContent = styled.div`
@@ -772,15 +857,17 @@ const SortIcon = styled.span`
   display: inline-flex;
   align-items: center;
   margin-left: 4px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const TableBody = styled.tbody`
   tr {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid ${props => props.colors.borderLight};
+    transition: all 0.3s ease;
     
     &:hover {
-      background-color: #f9f9f9;
+      background-color: ${props => props.colors.surfaceHover};
     }
     
     &.clickable-row {
@@ -792,12 +879,15 @@ const TableBody = styled.tbody`
 const Td = styled.td`
   padding: 12px 16px;
   font-size: 14px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   .highlight {
-    background-color: #ffc107;
+    background-color: ${props => props.colors.warning};
+    color: ${props => props.colors.textPrimary};
     padding: 0 2px;
     border-radius: 2px;
+    font-weight: 500;
   }
 `;
 
@@ -811,132 +901,157 @@ const TdActions = styled.td`
 
 const RegionBadge = styled.span`
   display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 2px 6px;
+  background-color: ${props => props.colors.cardIcon.affaires.bg};
+  color: ${props => props.colors.cardIcon.affaires.color};
+  padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
 `;
 
 const RPCTag = styled.span`
   display: inline-block;
-  background-color: #ff5722;
+  background-color: ${props => props.colors.error};
   color: white;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
+  transition: all 0.3s ease;
 `;
 
 const ActionButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  padding: 4px;
+  padding: 6px;
   border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(63, 81, 181, 0.1);
+    background-color: ${props => props.colors.primary}10;
+    transform: scale(1.1);
   }
   
   &.delete {
-    color: #f44336;
+    color: ${props => props.colors.error};
     
     &:hover {
-      background-color: rgba(244, 67, 54, 0.1);
+      background-color: ${props => props.colors.errorBg};
     }
   }
 `;
 
 const AddButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
+    color: ${props => props.colors ? props.colors.textPrimary : '#333'};
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  padding: 8px 12px;
+  border-radius: 4px;
   margin-top: 12px;
   font-size: 14px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    border-color: ${props => props.colors.primary};
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const EmptyMessage = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surface};
+  font-style: italic;
+  transition: all 0.3s ease;
 `;
 
 const VillesContainer = styled.div`
@@ -946,38 +1061,42 @@ const VillesContainer = styled.div`
 `;
 
 const VilleTag = styled.span`
-  background-color: #e3f2fd;
+  background-color: ${props => props.colors.cardIcon.beneficiaires.bg};
   border-radius: 12px;
-  padding: 2px 8px;
+  padding: 3px 8px;
   font-size: 12px;
-  color: #1976d2;
+  color: ${props => props.colors.cardIcon.beneficiaires.color};
   white-space: nowrap;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
   
   &.more {
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
     
     &.highlighted {
-      background-color: #fff8e1;
-      border: 1px solid #ffc107;
-      color: #1976d2;
+      background-color: ${props => props.colors.warningBg};
+      border: 1px solid ${props => props.colors.warning};
+      color: ${props => props.colors.textPrimary};
     }
     
     .match-indicator {
-      color: #ffc107;
+      color: ${props => props.colors.warning};
       font-weight: bold;
     }
   }
   
   &.highlighted {
-    border: 1px solid #ffc107;
-    background-color: #fff8e1;
+    border: 1px solid ${props => props.colors.warning};
+    background-color: ${props => props.colors.warningBg};
   }
   
   .highlight {
-    background-color: #ffc107;
+    background-color: ${props => props.colors.warning};
+    color: ${props => props.colors.textPrimary};
     padding: 0 2px;
     border-radius: 2px;
+    font-weight: 500;
   }
 `;
 

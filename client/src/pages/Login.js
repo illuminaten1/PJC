@@ -298,7 +298,7 @@ const Login = () => {
         onClick={toggleDarkMode}
         title={darkMode ? 'Mode clair' : 'Mode sombre'}
       >
-        {darkMode ? '☀️' : '🌙'}
+        {darkMode ? '☀' : '●'}
       </ThemeToggle>
       
       <LoginCard darkMode={darkMode}>

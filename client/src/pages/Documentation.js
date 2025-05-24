@@ -254,7 +254,7 @@ const Documentation = () => {
         </Sidebar>
 
         <Content colors={colors}>
-          <Section id="introduction" className="doc-section">
+          <Section id="introduction" className="doc-section" colors={colors}>
             <SectionTitle colors={colors}>Introduction</SectionTitle>
             <HighlightBox colors={colors}>
               <p><strong>Bienvenue dans l'application de gestion de Protection Juridique Complémentaire</strong></p>
@@ -264,7 +264,7 @@ const Documentation = () => {
             <p>L'application offre une interface complète pour gérer l'ensemble du processus, depuis la création des dossiers jusqu'au suivi des paiements, en passant par la génération automatique de documents.</p>
           </Section>
 
-          <Section id="structure" className="doc-section">
+          <Section id="structure" className="doc-section" colors={colors}>
             <SectionTitle colors={colors}>Structure des données</SectionTitle>
             
             <StructureCard colors={colors}>
@@ -290,7 +290,7 @@ const Documentation = () => {
             </FeatureGrid>
           </Section>
 
-          <Section id="fonctionnalites" className="doc-section">
+          <Section id="fonctionnalites" className="doc-section" colors={colors}>
             <SectionTitle colors={colors}>Fonctionnalités principales</SectionTitle>
             
             <SubsectionTitle colors={colors}>Gestion hiérarchique</SubsectionTitle>
@@ -311,7 +311,7 @@ const Documentation = () => {
             <p>Vue d'ensemble avec indicateurs clés de performance et analyses financières détaillées.</p>
           </Section>
 
-          <Section id="gestion-parametres" className="doc-section">
+          <Section id="gestion-parametres" className="doc-section" colors={colors}>
             <SectionTitle colors={colors}>Gestion des paramètres</SectionTitle>
             
             <WarningBox colors={colors}>
@@ -339,7 +339,7 @@ const Documentation = () => {
             </ol>
           </Section>
 
-          <Section id="templates" className="doc-section">
+          <Section id="templates" className="doc-section" colors={colors}>
             <SectionTitle colors={colors}>Templates de documents</SectionTitle>
             
             <SubsectionTitle id="personnalisation" colors={colors}>Personnalisation des templates</SubsectionTitle>
@@ -440,7 +440,6 @@ const Documentation = () => {
                 </VariableList>
               </VariableGroup>
               
-              {/* Répéter les autres groupes de variables communes */}
               <VariableGroup colors={colors}>
                 <VariableGroupTitle colors={colors}>👤 Bénéficiaire</VariableGroupTitle>
                 <VariableList>
@@ -492,7 +491,7 @@ const Documentation = () => {
   );
 };
 
-// Styled Components
+// Styled Components avec support complet du thème sombre
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
@@ -633,7 +632,8 @@ const Section = styled.section`
   p {
     margin-bottom: 16px;
     line-height: 1.7;
-    color: ${props => props.colors?.textPrimary};
+    color: ${props => props.colors.textPrimary};
+    transition: color 0.3s ease;
   }
   
   ul, ol {
@@ -643,7 +643,8 @@ const Section = styled.section`
     li {
       margin-bottom: 8px;
       line-height: 1.6;
-      color: ${props => props.colors?.textPrimary};
+      color: ${props => props.colors.textPrimary};
+      transition: color 0.3s ease;
     }
   }
 `;
@@ -726,6 +727,7 @@ const WarningBox = styled.div`
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     font-size: 13px;
+    color: ${props => props.colors.textPrimary};
   }
 `;
 

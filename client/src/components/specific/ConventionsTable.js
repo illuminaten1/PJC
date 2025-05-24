@@ -4,6 +4,7 @@ import { FaEdit, FaTrash, FaFileWord, FaFilePdf } from 'react-icons/fa';
 import { documentsAPI } from '../../utils/api';
 import Modal from '../common/Modal';
 import ConventionForm from '../forms/ConventionForm';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats = [] }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -12,6 +13,8 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [downloadError, setDownloadError] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  
+  const { colors } = useTheme();
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -108,13 +111,13 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
   };
   
   if (!conventions || conventions.length === 0) {
-    return <EmptyMessage>Aucune convention d'honoraires</EmptyMessage>;
+    return <EmptyMessage colors={colors}>Aucune convention d'honoraires</EmptyMessage>;
   }
   
   return (
-    <TableContainer>
-      {downloadError && <ErrorMessage>{downloadError}</ErrorMessage>}
-      <Table>
+    <TableContainer colors={colors}>
+      {downloadError && <ErrorMessage colors={colors}>{downloadError}</ErrorMessage>}
+      <Table colors={colors}>
         <thead>
           <tr>
             <th>Avocat</th>
@@ -133,7 +136,8 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
               <td>{convention.montant ? convention.montant.toLocaleString('fr-FR') + ' €' : '-'}</td>
               <td>{convention.pourcentageResultats !== undefined && 
                     convention.pourcentageResultats !== null ? 
-                    convention.pourcentageResultats + ' %' : '-'}</td>              <td>{formatDate(convention.dateEnvoiAvocat)}</td>
+                    convention.pourcentageResultats + ' %' : '-'}</td>
+              <td>{formatDate(convention.dateEnvoiAvocat)}</td>
               <td>{formatDate(convention.dateEnvoiBeneficiaire)}</td>
               <td>{formatDate(convention.dateValidationFMG)}</td>
               <td>
@@ -141,6 +145,7 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
                   <ActionButton 
                     onClick={() => handleEditConvention(convention, index)} 
                     title="Modifier la convention"
+                    colors={colors}
                   >
                     <FaEdit />
                   </ActionButton>
@@ -150,6 +155,7 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
                     onClick={() => handleDownloadConvention(index, 'pdf')} 
                     title="Télécharger la convention en PDF"
                     className="pdf"
+                    colors={colors}
                   >
                     <FaFilePdf />
                   </ActionButton>
@@ -159,6 +165,7 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
                     onClick={() => handleDownloadConvention(index, 'docx')} 
                     title="Télécharger la convention en DOCX"
                     className="docx"
+                    colors={colors}
                   >
                     <FaFileWord />
                   </ActionButton>
@@ -167,6 +174,7 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
                     onClick={() => handleDeleteConvention(convention, index)} 
                     title="Supprimer la convention"
                     className="delete"
+                    colors={colors}
                   >
                     <FaTrash />
                   </ActionButton>
@@ -202,50 +210,63 @@ const ConventionsTable = ({ conventions = [], beneficiaireId, onUpdate, avocats 
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setDeleteModalOpen(false)}>
+            <CancelButton colors={colors} onClick={() => setDeleteModalOpen(false)}>
               Annuler
             </CancelButton>
-            <DeleteButton onClick={confirmDeleteConvention}>
+            <DeleteButton colors={colors} onClick={confirmDeleteConvention}>
               Supprimer
             </DeleteButton>
           </>
         }
       >
-        <DeleteConfirmContent>
+        <DeleteConfirmContent colors={colors}>
           <p>Êtes-vous sûr de vouloir supprimer cette convention d'honoraires ?</p>
           <p><strong>Attention :</strong> Cette action est irréversible.</p>
           
-          {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+          {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
     </TableContainer>
   );
 };
 
+// Styled Components avec thématisation
 const TableContainer = styled.div`
   margin-top: 16px;
   overflow-x: auto;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  background-color: ${props => props.colors.surface};
+  transition: all 0.3s ease;
   
   th, td {
     padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid ${props => props.colors.borderLight};
+    color: ${props => props.colors.textPrimary};
+    transition: all 0.3s ease;
   }
   
   th {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
     font-weight: 500;
-    color: #333;
+    color: ${props => props.colors.textPrimary};
+    border-bottom: 1px solid ${props => props.colors.border};
   }
   
-  tr:hover {
-    background-color: #f9f9f9;
+  tbody tr {
+    transition: background-color 0.3s ease;
+    
+    &:hover {
+      background-color: ${props => props.colors.navActive};
+    }
   }
 `;
 
@@ -258,38 +279,40 @@ const ActionButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
   border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(63, 81, 181, 0.1);
+    background-color: ${props => props.colors.primary}20;
+    transform: scale(1.1);
   }
   
   &.delete {
-    color: #f44336;
+    color: ${props => props.colors.error};
     
     &:hover {
-      background-color: rgba(244, 67, 54, 0.1);
+      background-color: ${props => props.colors.error}20;
     }
   }
   
   &.pdf {
-    color: #d32f2f;
+    color: ${props => props.colors.error};
     
     &:hover {
-      background-color: rgba(211, 47, 47, 0.1);
+      background-color: ${props => props.colors.error}20;
     }
   }
   
   &.docx {
-    color: #2196f3;
+    color: ${props => props.colors.cardIcon.affaires.color};
     
     &:hover {
-      background-color: rgba(33, 150, 243, 0.1);
+      background-color: ${props => props.colors.cardIcon.affaires.color}20;
     }
   }
 `;
@@ -297,51 +320,67 @@ const ActionButton = styled.button`
 const EmptyMessage = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
   margin-top: 16px;
+  transition: all 0.3s ease;
 `;
 
 const ErrorMessage = styled.div`
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: ${props => props.colors.errorBg};
+  color: ${props => props.colors.error};
   padding: 12px 16px;
   border-radius: 4px;
   margin-bottom: 16px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.surfaceHover};
+    border-color: ${props => props.colors.primary};
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const DeleteConfirmContent = styled.div`
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+  
   p {
     margin-bottom: 16px;
+    
+    strong {
+      color: ${props => props.colors.warning};
+    }
   }
 `;
 

@@ -1,8 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaEdit, FaCopy, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBuilding, FaIdCard } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
+  const { colors } = useTheme();
+  
   // Fonction pour copier les coordonnées dans le presse-papier
   const copyCoordinates = () => {
     // Format: Maître Prénom NOM, Adresse postale, Téléphone(s) public(s), Adresse mail
@@ -56,20 +59,20 @@ const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
   };
   
   return (
-    <Container>
-      <HeaderSection>
-        <Title>
+    <Container colors={colors}>
+      <HeaderSection colors={colors}>
+        <Title colors={colors}>
           <span>Maître {avocat.prenom} {avocat.nom}</span>
-          {avocat.specialisationRPC && <RPCTag>RPC</RPCTag>}
+          {avocat.specialisationRPC && <RPCTag colors={colors}>RPC</RPCTag>}
         </Title>
         <ActionButtons>
-          <Button onClick={copyCoordinates} title="Copier les coordonnées">
+          <Button onClick={copyCoordinates} title="Copier les coordonnées" colors={colors}>
             <FaCopy />
             <span>Copier les coordonnées</span>
           </Button>
         {/* Rendre le bouton modifier conditionnel (réutilisé dans DetailBeneficiaire.js)*/}
         {showEditButton && (
-            <Button onClick={onEditClick} title="Modifier">
+            <Button onClick={onEditClick} title="Modifier" colors={colors}>
               <FaEdit />
               <span>Modifier</span>
             </Button>
@@ -80,96 +83,114 @@ const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
       <InfoGrid>
         {avocat.cabinet && (
           <InfoItem>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaBuilding />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Cabinet</InfoLabel>
-              <InfoValue>{avocat.cabinet}</InfoValue>
+              <InfoLabel colors={colors}>Cabinet</InfoLabel>
+              <InfoValue colors={colors}>{avocat.cabinet}</InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.region && (
           <InfoItem>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaMapMarkerAlt />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Région</InfoLabel>
-              <InfoValue>{avocat.region}</InfoValue>
+              <InfoLabel colors={colors}>Région</InfoLabel>
+              <InfoValue colors={colors}>{avocat.region}</InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {formatAdresseComplete() && (
           <InfoItem span={2}>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaMapMarkerAlt />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Adresse</InfoLabel>
-              <InfoValue>{formatAdresseComplete()}</InfoValue>
+              <InfoLabel colors={colors}>Adresse</InfoLabel>
+              <InfoValue colors={colors}>{formatAdresseComplete()}</InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.telephonePublic1 && (
           <InfoItem>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaPhone />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Téléphone public 1</InfoLabel>
-              <InfoValue><a href={`tel:${avocat.telephonePublic1}`}>{avocat.telephonePublic1}</a></InfoValue>
+              <InfoLabel colors={colors}>Téléphone public 1</InfoLabel>
+              <InfoValue colors={colors}>
+                <StyledLink href={`tel:${avocat.telephonePublic1}`} colors={colors}>
+                  {avocat.telephonePublic1}
+                </StyledLink>
+              </InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.telephonePublic2 && (
           <InfoItem>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaPhone />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Téléphone public 2</InfoLabel>
-              <InfoValue><a href={`tel:${avocat.telephonePublic2}`}>{avocat.telephonePublic2}</a></InfoValue>
+              <InfoLabel colors={colors}>Téléphone public 2</InfoLabel>
+              <InfoValue colors={colors}>
+                <StyledLink href={`tel:${avocat.telephonePublic2}`} colors={colors}>
+                  {avocat.telephonePublic2}
+                </StyledLink>
+              </InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.telephonePrive && (
           <InfoItem>
-            <IconWrapper>
-              <FaPhone style={{ color: '#f44336' }} />
+            <IconWrapper colors={colors}>
+              <FaPhone style={{ color: colors.error }} />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Téléphone privé <PrivateNote>(non communiqué aux clients)</PrivateNote></InfoLabel>
-              <InfoValue><a href={`tel:${avocat.telephonePrive}`}>{avocat.telephonePrive}</a></InfoValue>
+              <InfoLabel colors={colors}>
+                Téléphone privé <PrivateNote colors={colors}>(non communiqué aux clients)</PrivateNote>
+              </InfoLabel>
+              <InfoValue colors={colors}>
+                <StyledLink href={`tel:${avocat.telephonePrive}`} colors={colors}>
+                  {avocat.telephonePrive}
+                </StyledLink>
+              </InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.email && (
           <InfoItem span={2}>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaEnvelope />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>Email</InfoLabel>
-              <InfoValue><a href={`mailto:${avocat.email}`}>{avocat.email}</a></InfoValue>
+              <InfoLabel colors={colors}>Email</InfoLabel>
+              <InfoValue colors={colors}>
+                <StyledLink href={`mailto:${avocat.email}`} colors={colors}>
+                  {avocat.email}
+                </StyledLink>
+              </InfoValue>
             </InfoContent>
           </InfoItem>
         )}
         
         {avocat.siretRidet && (
           <InfoItem span={2}>
-            <IconWrapper>
+            <IconWrapper colors={colors}>
               <FaIdCard />
             </IconWrapper>
             <InfoContent>
-              <InfoLabel>SIRET/RIDET</InfoLabel>
-              <InfoValue>{avocat.siretRidet}</InfoValue>
+              <InfoLabel colors={colors}>SIRET/RIDET</InfoLabel>
+              <InfoValue colors={colors}>{avocat.siretRidet}</InfoValue>
             </InfoContent>
           </InfoItem>
         )}
@@ -177,10 +198,10 @@ const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
       
       {avocat.villesIntervention && avocat.villesIntervention.length > 0 && (
         <Section>
-          <SectionTitle>Villes d'intervention</SectionTitle>
+          <SectionTitle colors={colors}>Villes d'intervention</SectionTitle>
           <VillesContainer>
             {avocat.villesIntervention.map((ville, index) => (
-              <VilleTag key={index}>{ville}</VilleTag>
+              <VilleTag key={index} colors={colors}>{ville}</VilleTag>
             ))}
           </VillesContainer>
         </Section>
@@ -188,17 +209,20 @@ const AvocatDetail = ({ avocat, onEditClick, showEditButton = true }) => {
       
       {avocat.commentaires && (
         <Section>
-          <SectionTitle>Commentaires</SectionTitle>
-          <CommentairesContent>{avocat.commentaires}</CommentairesContent>
+          <SectionTitle colors={colors}>Commentaires</SectionTitle>
+          <CommentairesContent colors={colors}>{avocat.commentaires}</CommentairesContent>
         </Section>
       )}
     </Container>
   );
 };
 
-// Styles
+// Styled Components avec thématisation
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
 `;
 
 const HeaderSection = styled.div`
@@ -206,8 +230,9 @@ const HeaderSection = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   padding-bottom: 15px;
+  transition: border-color 0.3s ease;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -222,16 +247,19 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 12px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const RPCTag = styled.span`
   display: inline-block;
-  background-color: #ff5722;
+  background-color: ${props => props.colors.warning};
   color: white;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: bold;
+  transition: background-color 0.3s ease;
 `;
 
 const ActionButtons = styled.div`
@@ -248,16 +276,19 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   @media (max-width: 480px) {
@@ -281,14 +312,16 @@ const InfoGrid = styled.div`
 const InfoItem = styled.div`
   display: flex;
   grid-column: span ${props => props.span || 1};
+  padding: 12px 0;
 `;
 
 const IconWrapper = styled.div`
   display: flex;
   align-items: flex-start;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   margin-right: 10px;
   padding-top: 2px;
+  transition: color 0.3s ease;
 `;
 
 const InfoContent = styled.div`
@@ -297,29 +330,34 @@ const InfoContent = styled.div`
 
 const InfoLabel = styled.div`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 4px;
   font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const InfoValue = styled.div`
   font-size: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const StyledLink = styled.a`
+  color: ${props => props.colors.primary};
+  text-decoration: none;
+  transition: all 0.3s ease;
   
-  a {
-    color: #3f51b5;
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
+    color: ${props => props.colors.primaryLight};
   }
 `;
 
 const PrivateNote = styled.span`
   font-size: 12px;
-  color: #f44336;
+  color: ${props => props.colors.error};
   font-style: italic;
+  transition: color 0.3s ease;
 `;
 
 const Section = styled.div`
@@ -329,8 +367,9 @@ const Section = styled.div`
 const SectionTitle = styled.h3`
   font-size: 18px;
   margin-bottom: 12px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const VillesContainer = styled.div`
@@ -340,21 +379,30 @@ const VillesContainer = styled.div`
 `;
 
 const VilleTag = styled.div`
-  background-color: #e3f2fd;
+  background-color: ${props => props.colors.cardIcon.affaires.bg};
   border-radius: 16px;
   padding: 5px 12px;
   font-size: 14px;
-  color: #1976d2;
+  color: ${props => props.colors.cardIcon.affaires.color};
+  border: 1px solid ${props => props.colors.cardIcon.affaires.color}40;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
+  }
 `;
 
 const CommentairesContent = styled.div`
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
   padding: 15px;
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   white-space: pre-line;
+  transition: all 0.3s ease;
 `;
 
 export default AvocatDetail;

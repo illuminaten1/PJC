@@ -71,7 +71,7 @@ const beneficiaireSchema = new Schema({
   qualite: { 
     type: String, 
     required: true,
-    enum: ['Militaire', 'Conjoint', 'Enfant', 'Parent']
+    enum: ['Militaire', 'Conjoint', 'Enfant', 'Parent', 'Autre']
   },
   militaire: { 
     type: Schema.Types.ObjectId, 

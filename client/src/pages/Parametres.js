@@ -4,11 +4,13 @@ import { FaPlus, FaTrash, FaExchangeAlt, FaHistory, FaArrowLeft, FaDownload, FaU
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { parametresAPI, templatesAPI } from '../utils/api';
 import { AuthContext } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext'; // Import du hook de thème
 import PageHeader from '../components/common/PageHeader';
 import ExpandableSection from '../components/common/ExpandableSection';
 import Modal from '../components/common/Modal';
 
 const Parametres = () => {
+  const { colors } = useTheme(); // Hook de thème
   const [parametres, setParametres] = useState({
     circonstances: [],
     redacteurs: [],
@@ -704,28 +706,28 @@ const handleTransferPortfolio = async () => {
 
   if (loading) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Paramètres" />
-        <Loading>Chargement des paramètres...</Loading>
+        <Loading colors={colors}>Chargement des paramètres...</Loading>
       </Container>
     );
   }
   
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title="Paramètres" 
         subtitle="Configuration de l'application"
       />
       
-      {error && <ErrorMessage>{error}</ErrorMessage>}
-      {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
-      <Section>
+      {error && <ErrorMessage colors={colors}>{error}</ErrorMessage>}
+      {successMessage && <SuccessMessage colors={colors}>{successMessage}</SuccessMessage>}
+      <Section colors={colors}>
         <ExpandableSection
           title="Documentation"
           defaultExpanded={false}
         >
-          <DocumentationContent>
+          <DocumentationContent colors={colors}>
             <h3>Guide d'utilisation</h3>
             <p>Cette application permet la gestion des dossiers de protection juridique complémentaire pour les militaires ou leurs ayants-droits.</p>
             
@@ -829,27 +831,27 @@ const handleTransferPortfolio = async () => {
       
 {/* Afficher le mode historique si activé */}
 {historiqueModeOpen ? (
-  <Section>
-    <HistoriqueHeader>
+  <Section colors={colors}>
+    <HistoriqueHeader colors={colors}>
       <h2>Historique des transferts de portefeuille (30 derniers jours)</h2>
-      <BackButton onClick={() => setHistoriqueModeOpen(false)}>
+      <BackButton onClick={() => setHistoriqueModeOpen(false)} colors={colors}>
         <FaArrowLeft style={{ marginRight: '8px' }} />
         Retour aux paramètres
       </BackButton>
     </HistoriqueHeader>
     
     {historiqueLoading ? (
-      <Loading>Chargement de l'historique...</Loading>
+      <Loading colors={colors}>Chargement de l'historique...</Loading>
     ) : historiqueTransferts.length === 0 ? (
-      <EmptyHistorique>
+      <EmptyHistorique colors={colors}>
         Aucun transfert de portefeuille n'a été effectué durant les 30 derniers jours.
       </EmptyHistorique>
     ) : (
       <HistoriqueList>
         {historiqueTransferts.map((transfert, index) => (
-          <HistoriqueItem key={index} status={transfert.statut}>
-            <HistoriqueDate>{formatDate(transfert.dateTransfert)}</HistoriqueDate>
-            <HistoriqueContent>
+          <HistoriqueItem key={index} status={transfert.statut} colors={colors}>
+            <HistoriqueDate colors={colors}>{formatDate(transfert.dateTransfert)}</HistoriqueDate>
+            <HistoriqueContent colors={colors}>
               <div>
                 <strong>De:</strong> {transfert.sourceRedacteur}
               </div>
@@ -863,7 +865,7 @@ const handleTransferPortfolio = async () => {
                 <strong>Statut:</strong> {transfert.statut}
               </div>
               {transfert.message && (
-                <HistoriqueMessage>
+                <HistoriqueMessage colors={colors}>
                   {transfert.message}
                 </HistoriqueMessage>
               )}
@@ -878,17 +880,17 @@ const handleTransferPortfolio = async () => {
     {isAdmin() && (
       <>
         {/* Section des templates de documents */}
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Templates de documents (voir la documentation avant de modifier)"
             defaultExpanded={false}
           >
             <TemplatesList>
               {/* Template de convention */}
-              <TemplateItem>
+              <TemplateItem colors={colors}>
                 <TemplateInfo>
-                  <TemplateName>{templates.convention.name}</TemplateName>
-                  <TemplateStatus status={templates.convention.status}>
+                  <TemplateName colors={colors}>{templates.convention.name}</TemplateName>
+                  <TemplateStatus status={templates.convention.status} colors={colors}>
                     {templates.convention.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
                   </TemplateStatus>
                 </TemplateInfo>
@@ -898,6 +900,7 @@ const handleTransferPortfolio = async () => {
                     onClick={() => handleDownloadTemplate('convention')}
                     disabled={templateLoading}
                     className="download"
+                    colors={colors}
                   >
                     <FaDownload />
                     <span>Télécharger</span>
@@ -908,6 +911,7 @@ const handleTransferPortfolio = async () => {
                     onClick={() => triggerFileInput(conventionInputRef)}
                     disabled={templateLoading}
                     className="upload"
+                    colors={colors}
                   >
                     <FaUpload />
                     <span>Uploader</span>
@@ -927,6 +931,7 @@ const handleTransferPortfolio = async () => {
                       onClick={() => openRestoreConfirmation('convention')}
                       disabled={templateLoading}
                       className="restore"
+                      colors={colors}
                     >
                       <FaUndo />
                       <span>Restaurer</span>
@@ -936,10 +941,10 @@ const handleTransferPortfolio = async () => {
               </TemplateItem>
               
               {/* Template de règlement */}
-              <TemplateItem>
+              <TemplateItem colors={colors}>
                 <TemplateInfo>
-                  <TemplateName>{templates.reglement.name}</TemplateName>
-                  <TemplateStatus status={templates.reglement.status}>
+                  <TemplateName colors={colors}>{templates.reglement.name}</TemplateName>
+                  <TemplateStatus status={templates.reglement.status} colors={colors}>
                     {templates.reglement.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
                   </TemplateStatus>
                 </TemplateInfo>
@@ -949,6 +954,7 @@ const handleTransferPortfolio = async () => {
                     onClick={() => handleDownloadTemplate('reglement')}
                     disabled={templateLoading}
                     className="download"
+                    colors={colors}
                   >
                     <FaDownload />
                     <span>Télécharger</span>
@@ -959,6 +965,7 @@ const handleTransferPortfolio = async () => {
                     onClick={() => triggerFileInput(reglementInputRef)}
                     disabled={templateLoading}
                     className="upload"
+                    colors={colors}
                   >
                     <FaUpload />
                     <span>Uploader</span>
@@ -978,6 +985,7 @@ const handleTransferPortfolio = async () => {
                       onClick={() => openRestoreConfirmation('reglement')}
                       disabled={templateLoading}
                       className="restore"
+                      colors={colors}
                     >
                       <FaUndo />
                       <span>Restaurer</span>
@@ -990,30 +998,30 @@ const handleTransferPortfolio = async () => {
         </Section>
 
         {/* Section pour la gestion des utilisateurs (admin uniquement) */}
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Gestion des utilisateurs"
             defaultExpanded={false}
           >
             {utilisateursLoading ? (
-              <Loading>Chargement des utilisateurs...</Loading>
+              <Loading colors={colors}>Chargement des utilisateurs...</Loading>
             ) : (
               <>
-                <UserActionButton onClick={() => openUtilisateurModal()}>
+                <UserActionButton onClick={() => openUtilisateurModal()} colors={colors}>
                   <FaUserPlus />
                   <span>Ajouter un utilisateur</span>
                 </UserActionButton>
                 
                 <UsersList>
                   {utilisateurs.map((utilisateur) => (
-                    <UserItem key={utilisateur._id} active={utilisateur.actif}>
-                      <UserInfo>
-                        <UserName>{utilisateur.nom}</UserName>
-                        <UserUsername>@{utilisateur.username}</UserUsername>
-                        <UserRole>
+                    <UserItem key={utilisateur._id} active={utilisateur.actif} colors={colors}>
+                      <UserInfo colors={colors}>
+                        <UserName colors={colors}>{utilisateur.nom}</UserName>
+                        <UserUsername colors={colors}>@{utilisateur.username}</UserUsername>
+                        <UserRole colors={colors}>
                           {utilisateur.role === 'administrateur' ? 'Administrateur' : 'Rédacteur'}
                         </UserRole>
-                        <UserStatus active={utilisateur.actif}>
+                        <UserStatus active={utilisateur.actif} colors={colors}>
                           {utilisateur.actif ? 'Actif' : 'Inactif'}
                         </UserStatus>
                       </UserInfo>
@@ -1022,6 +1030,7 @@ const handleTransferPortfolio = async () => {
                           title="Modifier l'utilisateur" 
                           onClick={() => openUtilisateurModal(utilisateur)}
                           small
+                          colors={colors}
                         >
                           <FaUserEdit />
                         </UserActionButton>
@@ -1030,6 +1039,7 @@ const handleTransferPortfolio = async () => {
                           title="Changer le mot de passe" 
                           onClick={() => openPasswordModal(utilisateur)}
                           small
+                          colors={colors}
                         >
                           <FaKey />
                         </UserActionButton>
@@ -1039,6 +1049,7 @@ const handleTransferPortfolio = async () => {
                           onClick={() => toggleUtilisateurActif(utilisateur)}
                           small
                           status={utilisateur.actif ? 'warning' : 'success'}
+                          colors={colors}
                         >
                           {utilisateur.actif ? <FaTrash /> : <FaUndo />}
                         </UserActionButton>
@@ -1050,6 +1061,7 @@ const handleTransferPortfolio = async () => {
                             onClick={() => confirmerSuppressionUtilisateur(utilisateur)}
                             small
                             status="danger"
+                            colors={colors}
                           >
                             <FaTrash />
                           </UserActionButton>
@@ -1060,7 +1072,7 @@ const handleTransferPortfolio = async () => {
                 </UsersList>
                 
                 {utilisateurs.length === 0 && (
-                  <EmptyUsers>
+                  <EmptyUsers colors={colors}>
                     Aucun utilisateur trouvé. Cliquez sur "Ajouter un utilisateur" pour créer le premier compte.
                   </EmptyUsers>
                 )}
@@ -1070,16 +1082,16 @@ const handleTransferPortfolio = async () => {
         </Section>
       
 
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Circonstances (voir la documentation avant de modifier)"
             defaultExpanded={false}
           >
             <ParametersList>
               {parametres.circonstances && parametres.circonstances.map((circonstance, index) => (
-                <ParameterItem key={index}>
-                  <ParameterText>{circonstance}</ParameterText>
-                  <DeleteButton onClick={() => openDeleteConfirmation('circonstances', index, circonstance)}>
+                <ParameterItem key={index} colors={colors}>
+                  <ParameterText colors={colors}>{circonstance}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('circonstances', index, circonstance)} colors={colors}>
                     <FaTrash />
                   </DeleteButton>
                 </ParameterItem>
@@ -1093,8 +1105,9 @@ const handleTransferPortfolio = async () => {
                 onChange={(e) => setCirconstanceInput(e.target.value)}
                 onKeyDown={handleCirconstanceKeyDown}
                 placeholder="Nouvelle circonstance..."
+                colors={colors}
               />
-              <AddButton onClick={handleAddCirconstance}>
+              <AddButton onClick={handleAddCirconstance} colors={colors}>
                 <FaPlus />
                 <span>Ajouter</span>
               </AddButton>
@@ -1102,22 +1115,23 @@ const handleTransferPortfolio = async () => {
           </ExpandableSection>
         </Section>
         
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Régions (voir la documentation avant de modifier)"
             defaultExpanded={false}
           >
-            <SectionHeader>
-              <SectionTitle>Liste des régions</SectionTitle>
+            <SectionHeader colors={colors}>
+              <SectionTitle colors={colors}>Liste des régions</SectionTitle>
               <ReorderToggle 
                 active={reorderingRegions}
                 onClick={() => setReorderingRegions(!reorderingRegions)}
+                colors={colors}
               >
                 {reorderingRegions ? 'Annuler' : 'Réorganiser'}
               </ReorderToggle>
               
               {hasReorderedRegions && (
-                <SaveOrderButton onClick={() => saveReorderedValues('regions')}>
+                <SaveOrderButton onClick={() => saveReorderedValues('regions')} colors={colors}>
                   <FaSave style={{ marginRight: '8px' }} />
                   Sauvegarder l'ordre
                 </SaveOrderButton>
@@ -1138,11 +1152,12 @@ const handleTransferPortfolio = async () => {
                             <DraggableItem
                               ref={provided.innerRef}
                               {...provided.draggableProps}
+                              colors={colors}
                             >
-                              <DragHandle {...provided.dragHandleProps}>
+                              <DragHandle {...provided.dragHandleProps} colors={colors}>
                                 <FaGripVertical />
                               </DragHandle>
-                              <ItemText>{region}</ItemText>
+                              <ItemText colors={colors}>{region}</ItemText>
                             </DraggableItem>
                           )}
                         </Draggable>
@@ -1156,9 +1171,9 @@ const handleTransferPortfolio = async () => {
               <>
                 <ParametersList>
                   {parametres.regions && parametres.regions.map((region, index) => (
-                    <ParameterItem key={index}>
-                      <ParameterText>{region}</ParameterText>
-                      <DeleteButton onClick={() => openDeleteConfirmation('regions', index, region)}>
+                    <ParameterItem key={index} colors={colors}>
+                      <ParameterText colors={colors}>{region}</ParameterText>
+                      <DeleteButton onClick={() => openDeleteConfirmation('regions', index, region)} colors={colors}>
                         <FaTrash />
                       </DeleteButton>
                     </ParameterItem>
@@ -1172,8 +1187,9 @@ const handleTransferPortfolio = async () => {
                     onChange={(e) => setRegionInput(e.target.value)}
                     onKeyDown={handleRegionKeyDown}
                     placeholder="Nouvelle région..."
+                    colors={colors}
                   />
-                  <AddButton onClick={handleAddRegion}>
+                  <AddButton onClick={handleAddRegion} colors={colors}>
                     <FaPlus />
                     <span>Ajouter</span>
                   </AddButton>
@@ -1183,22 +1199,23 @@ const handleTransferPortfolio = async () => {
           </ExpandableSection>
         </Section>
 
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Départements (voir la documentation avant de modifier)"
             defaultExpanded={false}
           >
-            <SectionHeader>
-              <SectionTitle>Liste des départements</SectionTitle>
+            <SectionHeader colors={colors}>
+              <SectionTitle colors={colors}>Liste des départements</SectionTitle>
               <ReorderToggle 
                 active={reorderingDepartements}
                 onClick={() => setReorderingDepartements(!reorderingDepartements)}
+                colors={colors}
               >
                 {reorderingDepartements ? 'Annuler' : 'Réorganiser'}
               </ReorderToggle>
               
               {hasReorderedDepartements && (
-                <SaveOrderButton onClick={() => saveReorderedValues('departements')}>
+                <SaveOrderButton onClick={() => saveReorderedValues('departements')} colors={colors}>
                   <FaSave style={{ marginRight: '8px' }} />
                   Sauvegarder l'ordre
                 </SaveOrderButton>
@@ -1219,11 +1236,12 @@ const handleTransferPortfolio = async () => {
                             <DraggableItem
                               ref={provided.innerRef}
                               {...provided.draggableProps}
+                              colors={colors}
                             >
-                              <DragHandle {...provided.dragHandleProps}>
+                              <DragHandle {...provided.dragHandleProps} colors={colors}>
                                 <FaGripVertical />
                               </DragHandle>
-                              <ItemText>{departement}</ItemText>
+                              <ItemText colors={colors}>{departement}</ItemText>
                             </DraggableItem>
                           )}
                         </Draggable>
@@ -1237,9 +1255,9 @@ const handleTransferPortfolio = async () => {
               <>
                 <ParametersList>
                   {parametres.departements && parametres.departements.map((departement, index) => (
-                    <ParameterItem key={index}>
-                      <ParameterText>{departement}</ParameterText>
-                      <DeleteButton onClick={() => openDeleteConfirmation('departements', index, departement)}>
+                    <ParameterItem key={index} colors={colors}>
+                      <ParameterText colors={colors}>{departement}</ParameterText>
+                      <DeleteButton onClick={() => openDeleteConfirmation('departements', index, departement)} colors={colors}>
                         <FaTrash />
                       </DeleteButton>
                     </ParameterItem>
@@ -1253,8 +1271,9 @@ const handleTransferPortfolio = async () => {
                     onChange={(e) => setDepartementInput(e.target.value)}
                     onKeyDown={handleDepartementKeyDown}
                     placeholder="Nouveau département..."
+                    colors={colors}
                   />
-                  <AddButton onClick={handleAddDepartement}>
+                  <AddButton onClick={handleAddDepartement} colors={colors}>
                     <FaPlus />
                     <span>Ajouter</span>
                   </AddButton>
@@ -1264,16 +1283,16 @@ const handleTransferPortfolio = async () => {
           </ExpandableSection>
         </Section>
         
-        <Section>
+        <Section colors={colors}>
           <ExpandableSection
             title="Rédacteurs (voir la documentation avant de modifier)"
             defaultExpanded={false}
           >
             <ParametersList>
               {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (
-                <ParameterItem key={index}>
-                  <ParameterText>{redacteur}</ParameterText>
-                  <DeleteButton onClick={() => openDeleteConfirmation('redacteurs', index, redacteur)}>
+                <ParameterItem key={index} colors={colors}>
+                  <ParameterText colors={colors}>{redacteur}</ParameterText>
+                  <DeleteButton onClick={() => openDeleteConfirmation('redacteurs', index, redacteur)} colors={colors}>
                     <FaTrash />
                   </DeleteButton>
                 </ParameterItem>
@@ -1287,8 +1306,9 @@ const handleTransferPortfolio = async () => {
                 onChange={(e) => setRedacteurInput(e.target.value)}
                 onKeyDown={handleRedacteurKeyDown}
                 placeholder="Nouveau rédacteur..."
+                colors={colors}
               />
-              <AddButton onClick={handleAddRedacteur}>
+              <AddButton onClick={handleAddRedacteur} colors={colors}>
                 <FaPlus />
                 <span>Ajouter</span>
               </AddButton>
@@ -1296,12 +1316,12 @@ const handleTransferPortfolio = async () => {
             
             {/* Boutons pour le transfert et l'historique */}
             <ActionButtonsContainer>
-              <TransferButton onClick={openTransferModal}>
+              <TransferButton onClick={openTransferModal} colors={colors}>
                 <FaExchangeAlt />
                 <span>Transférer un portefeuille</span>
               </TransferButton>
               
-              <HistoryButton onClick={openHistoriqueMode}>
+              <HistoryButton onClick={openHistoriqueMode} colors={colors}>
                 <FaHistory />
                 <span>Voir l'historique des transferts</span>
               </HistoryButton>
@@ -1325,16 +1345,16 @@ const handleTransferPortfolio = async () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setConfirmModalOpen(false)}>
+            <CancelButton onClick={() => setConfirmModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <DeleteConfirmButton onClick={handleConfirmDelete}>
+            <DeleteConfirmButton onClick={handleConfirmDelete} colors={colors}>
               Supprimer
             </DeleteConfirmButton>
           </>
         }
       >
-        <ConfirmContent>
+        <ConfirmContent colors={colors}>
           <p>
             Êtes-vous sûr de vouloir supprimer 
             {itemToDelete.type === 'circonstances' ? ' la circonstance ' : 
@@ -1342,7 +1362,7 @@ const handleTransferPortfolio = async () => {
              " l'utilisateur "}
             <strong>"{itemToDelete.value}"</strong> ?
           </p>
-          <WarningText>
+          <WarningText colors={colors}>
             {itemToDelete.type === 'circonstances' 
               ? "Cette circonstance ne sera plus disponible pour les nouvelles affaires, mais les affaires existantes ne seront pas modifiées."
               : itemToDelete.type === 'redacteurs'
@@ -1350,7 +1370,7 @@ const handleTransferPortfolio = async () => {
               : "Cette action est irréversible. Toutes les données associées à cet utilisateur seront supprimées."
             }
           </WarningText>
-          <WarningText>
+          <WarningText colors={colors}>
             Veuillez consulter la documentation avant de procéder à cette suppression.
           </WarningText>
         </ConfirmContent>
@@ -1367,19 +1387,21 @@ const handleTransferPortfolio = async () => {
             <CancelButton 
               onClick={() => setTransferModalOpen(false)}
               disabled={transferInProgress}
+              colors={colors}
             >
               Annuler
             </CancelButton>
             <ConfirmButton 
               onClick={handleTransferPortfolio}
               disabled={!sourceRedacteur || !targetRedacteur || sourceRedacteur === targetRedacteur || transferInProgress}
+              colors={colors}
             >
               {transferInProgress ? 'Transfert en cours...' : 'Transférer'}
             </ConfirmButton>
           </>
         }
       >
-        <TransferContent>
+        <TransferContent colors={colors}>
           <p>
             Cette opération va transférer tous les dossiers d'un rédacteur vers un autre.
             Les affaires assignées au rédacteur source seront réassignées au rédacteur cible.
@@ -1391,6 +1413,7 @@ const handleTransferPortfolio = async () => {
               value={sourceRedacteur}
               onChange={(e) => setSourceRedacteur(e.target.value)}
               disabled={transferInProgress}
+              colors={colors}
             >
               <option value="">Sélectionner un rédacteur</option>
               {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (
@@ -1405,6 +1428,7 @@ const handleTransferPortfolio = async () => {
               value={targetRedacteur}
               onChange={(e) => setTargetRedacteur(e.target.value)}
               disabled={transferInProgress}
+              colors={colors}
             >
               <option value="">Sélectionner un rédacteur</option>
               {parametres.redacteurs && parametres.redacteurs.map((redacteur, index) => (
@@ -1413,12 +1437,12 @@ const handleTransferPortfolio = async () => {
             </Select>
           </SelectGroup>
           
-          <WarningText>
+          <WarningText colors={colors}>
             Cette opération est irréversible. Assurez-vous d'avoir sélectionné les bons rédacteurs.
           </WarningText>
           
           {sourceRedacteur === targetRedacteur && sourceRedacteur !== '' && (
-            <ErrorText>
+            <ErrorText colors={colors}>
               Les rédacteurs source et cible doivent être différents.
             </ErrorText>
           )}
@@ -1433,21 +1457,21 @@ const handleTransferPortfolio = async () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setTemplateRestoreModalOpen(false)}>
+            <CancelButton onClick={() => setTemplateRestoreModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <RestoreButton onClick={handleRestoreTemplate}>
+            <RestoreButton onClick={handleRestoreTemplate} colors={colors}>
               Restaurer
             </RestoreButton>
           </>
         }
       >
-        <ConfirmContent>
+        <ConfirmContent colors={colors}>
           <p>
             Êtes-vous sûr de vouloir restaurer le template par défaut pour 
             <strong> {templateToRestore ? templates[templateToRestore].name : ''}</strong> ?
           </p>
-          <WarningText>
+          <WarningText colors={colors}>
             Cette action remplacera définitivement votre template personnalisé par le template par défaut.
           </WarningText>
         </ConfirmContent>
@@ -1462,11 +1486,12 @@ const handleTransferPortfolio = async () => {
         size="medium"
         actions={
           <>
-            <CancelButton onClick={() => setUtilisateurModalOpen(false)}>
+            <CancelButton onClick={() => setUtilisateurModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
             <ConfirmButton 
               onClick={handleUtilisateurSubmit}
+              colors={colors}
             >
               {currentUtilisateur.id ? 'Enregistrer' : 'Créer'}
             </ConfirmButton>
@@ -1475,18 +1500,19 @@ const handleTransferPortfolio = async () => {
       >
         <UserForm>
           <FormGroup>
-            <FormLabel>Nom d'utilisateur</FormLabel>
+            <FormLabel colors={colors}>Nom d'utilisateur</FormLabel>
             <FormInput 
               type="text" 
               value={currentUtilisateur.username} 
               onChange={(e) => setCurrentUtilisateur({...currentUtilisateur, username: e.target.value})}
               placeholder="ex: jdupont"
               required
+              colors={colors}
             />
           </FormGroup>
           
           <FormGroup>
-            <FormLabel>
+            <FormLabel colors={colors}>
               {currentUtilisateur.id ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
             </FormLabel>
             <FormInput 
@@ -1495,30 +1521,33 @@ const handleTransferPortfolio = async () => {
               onChange={(e) => setCurrentUtilisateur({...currentUtilisateur, password: e.target.value})}
               placeholder={currentUtilisateur.id ? '••••••••' : 'Mot de passe'}
               required={!currentUtilisateur.id}
+              colors={colors}
             />
           </FormGroup>
           
           <FormGroup>
-            <FormLabel>Nom complet</FormLabel>
+            <FormLabel colors={colors}>Nom complet</FormLabel>
             <FormInput 
               type="text" 
               value={currentUtilisateur.nom} 
               onChange={(e) => setCurrentUtilisateur({...currentUtilisateur, nom: e.target.value})}
               placeholder="ex: Jean Dupont"
               required
+              colors={colors}
             />
           </FormGroup>
           
           <FormGroup>
-            <FormLabel>Rôle</FormLabel>
+            <FormLabel colors={colors}>Rôle</FormLabel>
             <FormSelect
               value={currentUtilisateur.role}
               onChange={(e) => setCurrentUtilisateur({...currentUtilisateur, role: e.target.value})}
+              colors={colors}
             >
               <option value="redacteur">Rédacteur</option>
               <option value="administrateur">Administrateur</option>
             </FormSelect>
-            <FormHelpText>
+            <FormHelpText colors={colors}>
               Les administrateurs peuvent gérer les utilisateurs et accéder à toutes les fonctionnalités.
               Les rédacteurs ne peuvent pas gérer les utilisateurs.
             </FormHelpText>
@@ -1534,11 +1563,12 @@ const handleTransferPortfolio = async () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setPasswordModalOpen(false)}>
+            <CancelButton onClick={() => setPasswordModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
             <ConfirmButton 
               onClick={handlePasswordChange}
+              colors={colors}
             >
               Changer le mot de passe
             </ConfirmButton>
@@ -1547,13 +1577,14 @@ const handleTransferPortfolio = async () => {
       >
         <UserForm>
           <FormGroup>
-            <FormLabel>Nouveau mot de passe</FormLabel>
+            <FormLabel colors={colors}>Nouveau mot de passe</FormLabel>
             <FormInput 
               type="password" 
               value={passwordChangeData.password} 
               onChange={(e) => setPasswordChangeData({...passwordChangeData, password: e.target.value})}
               placeholder="Nouveau mot de passe"
               required
+              colors={colors}
             />
           </FormGroup>
         </UserForm>
@@ -1562,13 +1593,22 @@ const handleTransferPortfolio = async () => {
   );
 };
 
-// Styles existants (conservés)
+// Styles existants avec thématisation
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const Section = styled.section`
   margin-bottom: 24px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  box-shadow: ${props => props.colors.shadow};
+  padding: 20px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const ParametersList = styled.ul`
@@ -1582,33 +1622,39 @@ const ParameterItem = styled.li`
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   margin-bottom: 8px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #eeeeee;
+    background-color: ${props => props.colors.navActive};
+    border-color: ${props => props.colors.border};
   }
 `;
 
 const ParameterText = styled.span`
   font-size: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const DeleteButton = styled.button`
   background: none;
   border: none;
-  color: #f44336;
+  color: ${props => props.colors.error};
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
   border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(244, 67, 54, 0.1);
+    background-color: ${props => props.colors.errorBg};
+    transform: scale(1.1);
   }
 `;
 
@@ -1620,18 +1666,26 @@ const AddParameterForm = styled.div`
 const AddParameterInput = styled.input`
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
 const AddButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -1640,38 +1694,49 @@ const AddButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const ErrorMessage = styled.div`
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: ${props => props.colors.errorBg};
+  color: ${props => props.colors.error};
   padding: 12px 16px;
   border-radius: 4px;
   margin-bottom: 16px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const SuccessMessage = styled.div`
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: ${props => props.colors.successBg};
+  color: ${props => props.colors.success};
   padding: 12px 16px;
   border-radius: 4px;
   margin-bottom: 16px;
+  border: 1px solid ${props => props.colors.success}40;
+  transition: all 0.3s ease;
 `;
 
 const DocumentationContent = styled.div`
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+  
   h3 {
     font-size: 18px;
     font-weight: 500;
     margin-top: 0;
     margin-bottom: 16px;
+    color: ${props => props.colors.textPrimary};
   }
   
   h4 {
@@ -1679,11 +1744,13 @@ const DocumentationContent = styled.div`
     font-weight: 500;
     margin-top: 16px;
     margin-bottom: 8px;
+    color: ${props => props.colors.textPrimary};
   }
   
   p {
     margin-bottom: 16px;
     line-height: 1.6;
+    color: ${props => props.colors.textPrimary};
   }
   
   ul {
@@ -1692,44 +1759,61 @@ const DocumentationContent = styled.div`
     
     li {
       margin-bottom: 8px;
+      color: ${props => props.colors.textPrimary};
     }
+  }
+  
+  strong {
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const ConfirmContent = styled.div`
   margin-bottom: 16px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   p {
     margin-bottom: 16px;
+    color: ${props => props.colors.textPrimary};
+  }
+  
+  strong {
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const WarningText = styled.p`
-  color: #e65100;
+  color: ${props => props.colors.warning};
   font-size: 14px;
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.navActive};
+    border-color: ${props => props.colors.border};
   }
   
   &:disabled {
@@ -1739,16 +1823,19 @@ const CancelButton = styled.button`
 `;
 
 const DeleteConfirmButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -1761,7 +1848,7 @@ const ActionButtonsContainer = styled.div`
 `;
 
 const TransferButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -1770,18 +1857,21 @@ const TransferButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const HistoryButton = styled.button`
-  background-color: #607d8b;
+  background-color: ${props => props.colors.textSecondary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -1790,22 +1880,28 @@ const HistoryButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #455a64;
+    background-color: ${props => props.colors.textSecondary}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const TransferContent = styled.div`
   margin-bottom: 16px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   p {
     margin-bottom: 20px;
     line-height: 1.6;
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
@@ -1816,38 +1912,53 @@ const SelectGroup = styled.div`
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
+    color: ${props => props.colors.textPrimary};
+    transition: color 0.3s ease;
   }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
   }
   
   &:disabled {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
     cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const ConfirmButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &:disabled {
@@ -1857,9 +1968,10 @@ const ConfirmButton = styled.button`
 `;
 
 const ErrorText = styled.p`
-  color: #c62828;
+  color: ${props => props.colors.error};
   font-size: 14px;
   margin-top: 4px;
+  transition: color 0.3s ease;
 `;
 
 const HistoriqueHeader = styled.div`
@@ -1867,16 +1979,19 @@ const HistoriqueHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   h2 {
     font-size: 20px;
     font-weight: 500;
     margin: 0;
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const BackButton = styled.button`
-  background-color: #4caf50; /* Vert */
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -1886,12 +2001,13 @@ const BackButton = styled.button`
   display: flex;
   align-items: center;
   font-size: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #388e3c; /* Vert plus foncé */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: ${props => props.colors.success}dd;
+    box-shadow: ${props => props.colors.shadowHover};
+    transform: translateY(-1px);
   }
   
   &:active {
@@ -1909,46 +2025,56 @@ const HistoriqueItem = styled.li`
   margin-bottom: 16px;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid ${props => props.status === 'succès' ? '#4caf50' : '#f44336'};
+  box-shadow: ${props => props.colors.shadow};
+  border-left: 5px solid ${props => props.status === 'succès' ? props.colors.success : props.colors.error};
+  background-color: ${props => props.colors.surface};
+  transition: all 0.3s ease;
 `;
 
 const HistoriqueDate = styled.div`
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   padding: 10px 16px;
   font-weight: 500;
   font-size: 14px;
-  color: #555;
+  color: ${props => props.colors.textSecondary};
+  transition: all 0.3s ease;
 `;
 
 const HistoriqueContent = styled.div`
   padding: 16px;
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   div {
     margin-bottom: 8px;
+    color: ${props => props.colors.textPrimary};
   }
   
   strong {
     margin-right: 8px;
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const HistoriqueMessage = styled.div`
   margin-top: 8px;
   padding: 8px;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   font-style: italic;
-  color: #555;
+  color: ${props => props.colors.textMuted};
+  transition: all 0.3s ease;
 `;
 
 const EmptyHistorique = styled.div`
   padding: 40px;
   text-align: center;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const TemplatesList = styled.div`
@@ -1957,17 +2083,24 @@ const TemplatesList = styled.div`
 
 const TemplateItem = styled.div`
   padding: 16px;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
+    border-color: ${props => props.colors.border};
   }
 `;
 
@@ -1980,7 +2113,8 @@ const TemplateInfo = styled.div`
 const TemplateName = styled.div`
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const TemplateStatus = styled.div`
@@ -1988,8 +2122,10 @@ const TemplateStatus = styled.div`
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 20px;
-  background-color: ${props => props.status === 'custom' ? '#e8f5e9' : '#e3f2fd'};
-  color: ${props => props.status === 'custom' ? '#2e7d32' : '#1565c0'};
+  background-color: ${props => props.status === 'custom' ? props.colors.successBg : props.colors.warningBg};
+  color: ${props => props.status === 'custom' ? props.colors.success : props.colors.warning};
+  border: 1px solid ${props => props.status === 'custom' ? props.colors.success + '40' : props.colors.warning + '40'};
+  transition: all 0.3s ease;
 `;
 
 const TemplateActions = styled.div`
@@ -2007,31 +2143,38 @@ const TemplateButton = styled.button`
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &.download {
-    background-color: #3f51b5; /* Bleu */
+    background-color: ${props => props.colors.primary};
     color: white;
     
     &:hover {
-      background-color: #303f9f;
+      background-color: ${props => props.colors.primaryDark};
+      transform: translateY(-1px);
+      box-shadow: ${props => props.colors.shadowHover};
     }
   }
   
   &.upload {
-    background-color: #ff9800; /* Orange */
+    background-color: ${props => props.colors.warning};
     color: white;
     
     &:hover {
-      background-color: #f57c00;
+      background-color: ${props => props.colors.warning}dd;
+      transform: translateY(-1px);
+      box-shadow: ${props => props.colors.shadowHover};
     }
   }
   
   &.restore {
-    background-color: #9e9e9e; /* Gris */
+    background-color: ${props => props.colors.textMuted};
     color: white;
     
     &:hover {
-      background-color: #757575;
+      background-color: ${props => props.colors.textMuted}dd;
+      transform: translateY(-1px);
+      box-shadow: ${props => props.colors.shadowHover};
     }
   }
   
@@ -2042,16 +2185,19 @@ const TemplateButton = styled.button`
 `;
 
 const RestoreButton = styled.button`
-  background-color: #ff9800; /* Orange */
+  background-color: ${props => props.colors.warning};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f57c00;
+    background-color: ${props => props.colors.warning}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -2068,15 +2214,24 @@ const UserItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid ${props => props.active ? '#4caf50' : '#f44336'};
+  box-shadow: ${props => props.colors.shadow};
+  border-left: 4px solid ${props => props.active ? props.colors.success : props.colors.error};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
+    border-color: ${props => props.colors.border};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -2084,23 +2239,28 @@ const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const UserName = styled.div`
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const UserUsername = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const UserRole = styled.div`
   font-size: 14px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   margin-top: 4px;
+  transition: color 0.3s ease;
 `;
 
 const UserStatus = styled.div`
@@ -2109,8 +2269,10 @@ const UserStatus = styled.div`
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 20px;
-  background-color: ${props => props.active ? '#e8f5e9' : '#ffebee'};
-  color: ${props => props.active ? '#2e7d32' : '#c62828'};
+  background-color: ${props => props.active ? props.colors.successBg : props.colors.errorBg};
+  color: ${props => props.active ? props.colors.success : props.colors.error};
+  border: 1px solid ${props => props.active ? props.colors.success + '40' : props.colors.error + '40'};
+  transition: all 0.3s ease;
 `;
 
 const UserActions = styled.div`
@@ -2129,29 +2291,34 @@ const UserActionButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   background-color: ${props => {
-    if (props.status === 'danger') return '#f44336';
-    if (props.status === 'warning') return '#ff9800';
-    if (props.status === 'success') return '#4caf50';
-    return '#3f51b5';
+    if (props.status === 'danger') return props.colors.error;
+    if (props.status === 'warning') return props.colors.warning;
+    if (props.status === 'success') return props.colors.success;
+    return props.colors.primary;
   }};
   color: white;
+  transition: all 0.3s ease;
   
   &:hover {
     background-color: ${props => {
-      if (props.status === 'danger') return '#d32f2f';
-      if (props.status === 'warning') return '#f57c00';
-      if (props.status === 'success') return '#388e3c';
-      return '#303f9f';
+      if (props.status === 'danger') return props.colors.error + 'dd';
+      if (props.status === 'warning') return props.colors.warning + 'dd';
+      if (props.status === 'success') return props.colors.success + 'dd';
+      return props.colors.primaryDark;
     }};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const EmptyUsers = styled.div`
   padding: 40px;
   text-align: center;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const UserForm = styled.form`
@@ -2168,37 +2335,56 @@ const FormGroup = styled.div`
 
 const FormLabel = styled.label`
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const FormInput = styled.input`
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
 const FormSelect = styled.select`
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
 const FormHelpText = styled.div`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   margin-top: 4px;
+  transition: color 0.3s ease;
 `;
 
 const SectionHeader = styled.div`
@@ -2206,31 +2392,37 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const SectionTitle = styled.h3`
   font-size: 18px;
   font-weight: 500;
   margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const ReorderToggle = styled.button`
-  background-color: ${props => props.active ? '#f44336' : '#3f51b5'};
+  background-color: ${props => props.active ? props.colors.error : props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.active ? '#d32f2f' : '#303f9f'};
+    background-color: ${props => props.active ? props.colors.error + 'dd' : props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const SaveOrderButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -2239,9 +2431,12 @@ const SaveOrderButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -2255,31 +2450,40 @@ const DraggableItem = styled.li`
   display: flex;
   align-items: center;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   margin-bottom: 8px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #eeeeee;
+    background-color: ${props => props.colors.navActive};
+    border-color: ${props => props.colors.border};
   }
 `;
 
 const DragHandle = styled.div`
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   cursor: grab;
   margin-right: 12px;
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
   
   &:active {
     cursor: grabbing;
+  }
+  
+  &:hover {
+    color: ${props => props.colors.primary};
   }
 `;
 
 const ItemText = styled.span`
   font-size: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   flex: 1;
+  transition: color 0.3s ease;
 `;
 
 export default Parametres;

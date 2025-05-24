@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaFileExcel, FaFilePdf, FaTimes, FaToggleOn, FaToggleOff, FaFileExport } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 /**
  * Composant de modal pour configurer l'export des statistiques
@@ -15,6 +16,8 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
 
   // État pour le chargement
   const [isExporting, setIsExporting] = useState(false);
+  
+  const { colors } = useTheme();
   
   // Gestionnaire pour lancer l'export
   const handleExport = () => {
@@ -47,64 +50,67 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
   
   return (
     <ModalOverlay>
-      <ModalContent>
+      <ModalContent colors={colors}>
         {/* Indicateur de chargement */}
         {isExporting && (
-          <LoadingWrapper>
+          <LoadingWrapper colors={colors}>
             <DotsContainer>
-              <Dot />
-              <Dot />
-              <Dot />
+              <Dot colors={colors} />
+              <Dot colors={colors} />
+              <Dot colors={colors} />
             </DotsContainer>
-            <LoadingText>Export en cours</LoadingText>
+            <LoadingText colors={colors}>Export en cours</LoadingText>
           </LoadingWrapper>
         )}
         
-        <ModalHeader>
-          <ModalTitle>
+        <ModalHeader colors={colors}>
+          <ModalTitle colors={colors}>
             <FaFileExport style={{ marginRight: '10px' }} />
             Exporter les statistiques
           </ModalTitle>
-          <CloseButton onClick={onClose} disabled={isExporting}>
+          <CloseButton onClick={onClose} disabled={isExporting} colors={colors}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
         
-        <ModalBody>
+        <ModalBody colors={colors}>
           <FormatSection>
-            <Label>Format d'export</Label>
+            <Label colors={colors}>Format d'export</Label>
             <FormatOptions>
               <FormatCard 
                 active={format === 'excel'} 
                 onClick={() => !isExporting && setFormat('excel')}
                 disabled={isExporting}
+                colors={colors}
               >
-                <FormatIcon>
+                <FormatIcon colors={colors}>
                   <FaFileExcel />
                 </FormatIcon>
-                <FormatTitle>Excel</FormatTitle>
-                <FormatDesc>Fichier tableur avec plusieurs feuilles</FormatDesc>
+                <FormatTitle colors={colors}>Excel</FormatTitle>
+                <FormatDesc colors={colors}>Fichier tableur avec plusieurs feuilles</FormatDesc>
               </FormatCard>
               
               <FormatCard 
                 active={format === 'pdf'} 
                 onClick={() => !isExporting && setFormat('pdf')}
                 disabled={isExporting}
+                colors={colors}
               >
-                <FormatIcon>
+                <FormatIcon colors={colors}>
                   <FaFilePdf />
                 </FormatIcon>
-                <FormatTitle>PDF</FormatTitle>
-                <FormatDesc>Document formaté pour impression</FormatDesc>
+                <FormatTitle colors={colors}>PDF</FormatTitle>
+                <FormatDesc colors={colors}>Document formaté pour impression</FormatDesc>
               </FormatCard>
             </FormatOptions>
           </FormatSection>
           
           <OptionsSection>
-            <ToggleField disabled={isExporting}>
+            <ToggleField disabled={isExporting} colors={colors}>
               <ToggleIcon 
                 checked={includeAnnualStats}
                 onClick={() => !isExporting && setIncludeAnnualStats(!includeAnnualStats)}
+                colors={colors}
               >
                 {includeAnnualStats ? <FaToggleOn /> : <FaToggleOff />}
               </ToggleIcon>
@@ -117,11 +123,12 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
             </ToggleField>
             
             {includeAnnualStats && (
-              <IndentedSection>
-                <SubToggleField disabled={isExporting}>
+              <IndentedSection colors={colors}>
+                <SubToggleField disabled={isExporting} colors={colors}>
                   <ToggleIcon 
                     checked={includeRedacteurTable}
                     onClick={() => !isExporting && setIncludeRedacteurTable(!includeRedacteurTable)}
+                    colors={colors}
                   >
                     {includeRedacteurTable ? <FaToggleOn /> : <FaToggleOff />}
                   </ToggleIcon>
@@ -130,10 +137,11 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
                   </label>
                 </SubToggleField>
                 
-                <SubToggleField disabled={isExporting}>
+                <SubToggleField disabled={isExporting} colors={colors}>
                   <ToggleIcon 
                     checked={includeCirconstanceTable}
                     onClick={() => !isExporting && setIncludeCirconstanceTable(!includeCirconstanceTable)}
+                    colors={colors}
                   >
                     {includeCirconstanceTable ? <FaToggleOn /> : <FaToggleOff />}
                   </ToggleIcon>
@@ -143,10 +151,11 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
                 </SubToggleField>
                 
                 {/* Nouvelle option pour la répartition par région */}
-                <SubToggleField disabled={isExporting}>
+                <SubToggleField disabled={isExporting} colors={colors}>
                   <ToggleIcon 
                     checked={includeRegionTable}
                     onClick={() => !isExporting && setIncludeRegionTable(!includeRegionTable)}
+                    colors={colors}
                   >
                     {includeRegionTable ? <FaToggleOn /> : <FaToggleOff />}
                   </ToggleIcon>
@@ -159,11 +168,11 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
           </OptionsSection>
         </ModalBody>
         
-        <ModalFooter>
-          <CancelButton onClick={onClose} disabled={isExporting}>
+        <ModalFooter colors={colors}>
+          <CancelButton onClick={onClose} disabled={isExporting} colors={colors}>
             Annuler
           </CancelButton>
-          <ExportButton onClick={handleExport} disabled={isExporting}>
+          <ExportButton onClick={handleExport} disabled={isExporting} colors={colors}>
             Exporter
           </ExportButton>
         </ModalFooter>
@@ -172,7 +181,7 @@ const ExportModal = ({ show, onClose, onExport, annee, isAllYears = false }) => 
   );
 };
 
-// Styles du composant
+// Styles du composant avec thématisation
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -188,15 +197,17 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   position: relative;
-  background-color: white;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: ${props => props.colors.shadowHover};
   width: 90%;
   max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
 `;
 
 // Styles pour l'indicateur de chargement
@@ -210,9 +221,11 @@ const LoadingWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: ${props => props.colors.surface}f0;
   border-radius: 8px;
   z-index: 10;
+  backdrop-filter: blur(2px);
+  transition: background-color 0.3s ease;
 `;
 
 const DotsContainer = styled.div`
@@ -224,8 +237,9 @@ const Dot = styled.div`
   width: 12px;
   height: 12px;
   margin: 0 5px;
-  background: #3f51b5;
+  background: ${props => props.colors.primary};
   border-radius: 50%;
+  transition: background-color 0.3s ease;
   
   &:nth-child(1) { animation: pulse 1s infinite; }
   &:nth-child(2) { animation: pulse 1s infinite 0.2s; }
@@ -239,8 +253,9 @@ const Dot = styled.div`
 
 const LoadingText = styled.div`
   font-size: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const ModalHeader = styled.div`
@@ -248,23 +263,27 @@ const ModalHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f5f7ff;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  background-color: ${props => props.colors.surfaceHover};
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  transition: all 0.3s ease;
 `;
 
 const ModalTitle = styled.h3`
   margin: 0;
   font-size: 18px;
   font-weight: 500;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   font-size: 18px;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.5 : 1};
@@ -273,24 +292,31 @@ const CloseButton = styled.button`
   justify-content: center;
   padding: 4px;
   border-radius: 50%;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.disabled ? 'transparent' : '#f5f5f5'};
-    color: ${props => props.disabled ? '#757575' : '#333'};
+    background-color: ${props => props.disabled ? 'transparent' : props.colors.navActive};
+    color: ${props => props.disabled ? props.colors.textMuted : props.colors.textPrimary};
   }
 `;
 
 const ModalBody = styled.div`
   padding: 24px;
   flex-grow: 1;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const ModalFooter = styled.div`
   display: flex;
   justify-content: flex-end;
   padding: 16px 24px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid ${props => props.colors.borderLight};
+  background-color: ${props => props.colors.surfaceHover};
   gap: 12px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  transition: all 0.3s ease;
 `;
 
 const FormatSection = styled.div`
@@ -305,8 +331,9 @@ const Label = styled.label`
   display: block;
   margin-bottom: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   font-size: 16px;
+  transition: color 0.3s ease;
 `;
 
 const FormatOptions = styled.div`
@@ -324,39 +351,42 @@ const FormatCard = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  border: 2px solid ${props => props.active ? '#3f51b5' : '#e0e0e0'};
+  border: 2px solid ${props => props.active ? props.colors.primary : props.colors.border};
   border-radius: 8px;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.7 : 1};
-  transition: all 0.2s ease;
-  background-color: ${props => props.active ? '#e8eaf6' : 'white'};
+  transition: all 0.3s ease;
+  background-color: ${props => props.active ? props.colors.primary + '20' : props.colors.surface};
   
   &:hover {
-    border-color: ${props => props.disabled ? (props.active ? '#3f51b5' : '#e0e0e0') : '#3f51b5'};
-    background-color: ${props => props.disabled ? (props.active ? '#e8eaf6' : 'white') : (props.active ? '#e8eaf6' : '#f5f7ff')};
+    border-color: ${props => props.disabled ? (props.active ? props.colors.primary : props.colors.border) : props.colors.primary};
+    background-color: ${props => props.disabled ? (props.active ? props.colors.primary + '20' : props.colors.surface) : props.colors.primary + '20'};
     transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
-    box-shadow: ${props => props.disabled ? 'none' : '0 4px 8px rgba(0, 0, 0, 0.05)'};
+    box-shadow: ${props => props.disabled ? 'none' : props.colors.shadowHover};
   }
 `;
 
 const FormatIcon = styled.div`
   font-size: 32px;
   margin-bottom: 12px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
 `;
 
 const FormatTitle = styled.h4`
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const FormatDesc = styled.p`
   margin: 0;
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   text-align: center;
+  transition: color 0.3s ease;
 `;
 
 const ToggleField = styled.div`
@@ -364,16 +394,18 @@ const ToggleField = styled.div`
   align-items: center;
   margin: 15px 0;
   padding: 12px 16px;
-  background-color: #f5f7ff;
+  background-color: ${props => props.colors.primary + '20'};
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.colors.primary + '40'};
   opacity: ${props => props.disabled ? 0.7 : 1};
+  transition: all 0.3s ease;
   
   label {
     margin-left: 12px;
     cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
     font-weight: 500;
-    color: #333;
+    color: ${props => props.colors.textPrimary};
+    transition: color 0.3s ease;
   }
 `;
 
@@ -382,50 +414,64 @@ const SubToggleField = styled.div`
   align-items: center;
   margin: 10px 0;
   padding: 10px 16px;
-  background-color: white;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 8px;
   opacity: ${props => props.disabled ? 0.7 : 1};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.surfaceHover};
+  }
   
   label {
     margin-left: 12px;
     cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-    color: #333;
+    color: ${props => props.colors.textPrimary};
+    transition: color 0.3s ease;
   }
 `;
 
 const ToggleIcon = styled.span`
   font-size: 24px;
-  color: ${props => props.checked ? '#3f51b5' : '#aaaaaa'};
+  color: ${props => props.checked ? props.colors.primary : props.colors.textMuted};
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: ${props => props.colors.primary};
+  }
 `;
 
 const IndentedSection = styled.div`
   margin-left: 12px;
   padding: 5px 5px 5px 12px;
-  border-left: 2px solid #e0e0e0;
+  border-left: 2px solid ${props => props.colors.borderLight};
+  transition: border-color 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   padding: 10px 16px;
   border-radius: 4px;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.7 : 1};
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.disabled ? '#f5f5f5' : '#e0e0e0'};
+    background-color: ${props => props.disabled ? props.colors.surface : props.colors.surfaceHover};
+    border-color: ${props => props.disabled ? props.colors.border : props.colors.primary};
   }
 `;
 
 const ExportButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   padding: 10px 20px;
@@ -434,10 +480,12 @@ const ExportButton = styled.button`
   opacity: ${props => props.disabled ? 0.7 : 1};
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.disabled ? '#3f51b5' : '#303f9f'};
+    background-color: ${props => props.disabled ? props.colors.primary : props.colors.primaryDark};
+    transform: ${props => props.disabled ? 'none' : 'translateY(-1px)'};
+    box-shadow: ${props => props.disabled ? 'none' : props.colors.shadowHover};
   }
 `;
 

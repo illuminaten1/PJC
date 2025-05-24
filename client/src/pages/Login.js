@@ -37,26 +37,27 @@ const ThemeToggle = styled.button`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: ${props => props.darkMode ? '#404040' : '#ffffff'};
-  border: 1px solid ${props => props.darkMode ? '#555555' : '#dee2e6'};
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  transition: all 0.3s ease;
-  color: ${props => props.darkMode ? '#ffd43b' : '#495057'};
+  font-size: 16px;
+  transition: all 0.2s ease;
+  color: ${props => props.darkMode ? '#adb5bd' : '#6c757d'};
+  opacity: 0.7;
 
   &:hover {
-    background: ${props => props.darkMode ? '#555555' : '#f8f9fa'};
-    transform: scale(1.05);
+    opacity: 1;
+    background: ${props => props.darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
 `;
 

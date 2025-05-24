@@ -6,6 +6,7 @@ import { affairesAPI, beneficiairesAPI, militairesAPI } from '../../utils/api';
 import Modal from '../common/Modal';
 import MilitaireForm from '../forms/MilitaireForm';
 import BeneficiaireForm from '../forms/BeneficiaireForm';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const AffaireTree = ({ affaireId, onUpdate }) => {
   const [arborescence, setArborescence] = useState(null);
@@ -17,6 +18,7 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   const [selectedMilitaire, setSelectedMilitaire] = useState(null);
   
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   useEffect(() => {
     fetchArborescence();
@@ -150,80 +152,81 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   };
   
   if (loading) {
-    return <Loading>Chargement de l'arborescence...</Loading>;
+    return <Loading colors={colors}>Chargement de l'arborescence...</Loading>;
   }
   
   if (error) {
-    return <Error>{error}</Error>;
+    return <Error colors={colors}>{error}</Error>;
   }
   
   if (!arborescence) {
-    return <Empty>Aucune donnée disponible</Empty>;
+    return <Empty colors={colors}>Aucune donnée disponible</Empty>;
   }
   
   return (
-    <Container>
-      <TreeHeader>
-        <Title>
+    <Container colors={colors}>
+      <TreeHeader colors={colors}>
+        <Title colors={colors}>
           <FaFolder />
           <span>{arborescence.nom}</span>
         </Title>
         <TreeControls>
-          <ToggleAllButton onClick={areAllExpanded() ? collapseAll : expandAll}>
+          <ToggleAllButton onClick={areAllExpanded() ? collapseAll : expandAll} colors={colors}>
             {areAllExpanded() ? 'Tout replier' : 'Tout déplier'}
           </ToggleAllButton>
-          <AddButton onClick={handleAddMilitaire}>
+          <AddButton onClick={handleAddMilitaire} colors={colors}>
             <FaPlus />
             <span>Ajouter un militaire</span>
           </AddButton>
         </TreeControls>
       </TreeHeader>
       
-      <TreeContent>
+      <TreeContent colors={colors}>
         {arborescence.militaires && arborescence.militaires.length > 0 ? (
           <MilitairesList>
             {arborescence.militaires.map(militaire => (
-              <MilitaireItem key={militaire._id}>
-                <MilitaireHeader>
-                  <ExpandButton onClick={() => toggleMilitaire(militaire._id)}>
+              <MilitaireItem key={militaire._id} colors={colors}>
+                <MilitaireHeader colors={colors}>
+                  <ExpandButton onClick={() => toggleMilitaire(militaire._id)} colors={colors}>
                     {expandedMilitaires[militaire._id] ? <FaChevronDown /> : <FaChevronRight />}
                   </ExpandButton>
                   
-                  <MilitaireInfo onClick={() => navigateToMilitaire(militaire._id)}>
+                  <MilitaireInfo onClick={() => navigateToMilitaire(militaire._id)} colors={colors}>
                     <FaUser />
-                    <MilitaireName>
+                    <MilitaireName colors={colors}>
                       {militaire.grade} {militaire.prenom} {militaire.nom}
                     </MilitaireName>
                     {militaire.decede ? (
-                      <StatusTag type="deces">Décédé</StatusTag>
+                      <StatusTag type="deces" colors={colors}>Décédé</StatusTag>
                     ) : (
-                      <StatusTag type="blesse">Blessé</StatusTag>
+                      <StatusTag type="blesse" colors={colors}>Blessé</StatusTag>
                     )}
                   </MilitaireInfo>
                   
-                  <AddBeneficiaireButton onClick={() => handleAddBeneficiaire(militaire)}>
+                  <AddBeneficiaireButton onClick={() => handleAddBeneficiaire(militaire)} colors={colors}>
                     <FaPlus />
                     <span>Ajouter un bénéficiaire</span>
                   </AddBeneficiaireButton>
                 </MilitaireHeader>
                 
                 {expandedMilitaires[militaire._id] && (
-                  <BeneficiairesList>
+                  <BeneficiairesList colors={colors}>
                     {militaire.beneficiaires && militaire.beneficiaires.length > 0 ? (
                       militaire.beneficiaires.map(beneficiaire => (
                         <BeneficiaireItem 
                           key={beneficiaire._id}
                           onClick={() => navigateToBeneficiaire(beneficiaire._id)}
+                          colors={colors}
                         >
                           <FaUsers />
                           <span>
                             {beneficiaire.prenom} {beneficiaire.nom}
-                            <QualiteTag>{beneficiaire.qualite}</QualiteTag>
+                            <QualiteTag colors={colors}>{beneficiaire.qualite}</QualiteTag>
                           </span>
                         </BeneficiaireItem>
                       ))
                     ) : (
-                      <EmptyBeneficiaires>
+                      <EmptyBeneficiaires colors={colors}>
                         Aucun bénéficiaire associé
                       </EmptyBeneficiaires>
                     )}
@@ -233,7 +236,7 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
             ))}
           </MilitairesList>
         ) : (
-          <Empty>Aucun militaire associé à cette affaire</Empty>
+          <Empty colors={colors}>Aucun militaire associé à cette affaire</Empty>
         )}
       </TreeContent>
       
@@ -269,11 +272,14 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   );
 };
 
+// Styled Components avec thématisation
 const Container = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   margin-bottom: 24px;
+  transition: all 0.3s ease;
 `;
 
 const TreeHeader = styled.div`
@@ -281,8 +287,11 @@ const TreeHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
-  background-color: #f9f9f9;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  background-color: ${props => props.colors.surfaceHover};
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Title = styled.h2`
@@ -291,10 +300,12 @@ const Title = styled.h2`
   font-weight: 500;
   display: flex;
   align-items: center;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   svg {
     margin-right: 8px;
-    color: #f57c00;
+    color: ${props => props.colors.cardIcon.affaires.color};
   }
 `;
 
@@ -305,21 +316,24 @@ const TreeControls = styled.div`
 `;
 
 const ToggleAllButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #ddd;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 12px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.surfaceHover};
+    border-color: ${props => props.colors.primary};
+    color: ${props => props.colors.primary};
   }
 `;
 
 const AddButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -328,18 +342,23 @@ const AddButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
 const TreeContent = styled.div`
   padding: 16px;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const MilitairesList = styled.ul`
@@ -350,16 +369,23 @@ const MilitairesList = styled.ul`
 
 const MilitaireItem = styled.li`
   margin-bottom: 16px;
-  border: 1px solid #eee;
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
+  background-color: ${props => props.colors.surface};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: ${props => props.colors.shadow};
+  }
 `;
 
 const MilitaireHeader = styled.div`
   display: flex;
   align-items: center;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
+  transition: background-color 0.3s ease;
 `;
 
 const ExpandButton = styled.button`
@@ -370,8 +396,16 @@ const ExpandButton = styled.button`
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   margin-right: 8px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
+    transform: scale(1.1);
+  }
 `;
 
 const MilitaireInfo = styled.div`
@@ -381,19 +415,22 @@ const MilitaireInfo = styled.div`
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(63, 81, 181, 0.1);
+    background-color: ${props => props.colors.primary}20;
   }
   
   svg {
     margin-right: 8px;
-    color: #3f51b5;
+    color: ${props => props.colors.cardIcon.militaires.color};
   }
 `;
 
 const MilitaireName = styled.span`
   margin-right: 10px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const StatusTag = styled.span`
@@ -404,18 +441,19 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.type === 'deces' ? `
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: ${props.colors.errorBg};
+    color: ${props.colors.error};
   ` : props.type === 'blesse' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
   ` : ''}
 `;
 
 const AddBeneficiaireButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -425,13 +463,16 @@ const AddBeneficiaireButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 4px;
   }
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
@@ -440,6 +481,8 @@ const BeneficiairesList = styled.ul`
   padding: 0;
   margin: 0;
   padding: 8px 16px 16px 40px;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const BeneficiaireItem = styled.li`
@@ -447,57 +490,71 @@ const BeneficiaireItem = styled.li`
   align-items: center;
   padding: 8px 12px;
   margin-bottom: 8px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
   cursor: pointer;
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
+    border-color: ${props => props.colors.primary};
+    transform: translateX(4px);
   }
   
   svg {
     margin-right: 8px;
-    color: #673ab7;
+    color: ${props => props.colors.cardIcon.beneficiaires.color};
   }
 `;
 
 const QualiteTag = styled.span`
-  background-color: #e3f2fd;
-  color: #0d47a1;
+  background-color: ${props => props.colors.cardIcon.affaires.bg};
+  color: ${props => props.colors.cardIcon.affaires.color};
   font-size: 12px;
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 8px;
+  transition: all 0.3s ease;
 `;
 
 const EmptyBeneficiaires = styled.div`
   padding: 12px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
   font-style: italic;
   text-align: center;
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Loading = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border: 1px solid ${props => props.colors.error}40;
   border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Empty = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 export default AffaireTree;

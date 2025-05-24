@@ -221,7 +221,9 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
                           <FaUsers />
                           <span>
                             {beneficiaire.prenom} {beneficiaire.nom}
-                            <QualiteTag colors={colors}>{beneficiaire.qualite}</QualiteTag>
+                            <QualiteTag qualite={beneficiaire.qualite} colors={colors}>
+                              {beneficiaire.qualite}
+                            </QualiteTag>
                           </span>
                         </BeneficiaireItem>
                       ))
@@ -510,13 +512,49 @@ const BeneficiaireItem = styled.li`
 `;
 
 const QualiteTag = styled.span`
-  background-color: ${props => props.colors.cardIcon.affaires.bg};
-  color: ${props => props.colors.cardIcon.affaires.color};
-  font-size: 12px;
+  display: inline-block;
   padding: 2px 6px;
   border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
   margin-left: 8px;
   transition: all 0.3s ease;
+  border: 1px solid;
+  
+  ${props => {
+    switch(props.qualite) {
+      case 'Militaire':
+        return `
+          background-color: ${props.colors.successBg};
+          color: ${props.colors.success};
+          border-color: ${props.colors.success}40;
+        `;
+      case 'Conjoint':
+        return `
+          background-color: ${props.colors.cardIcon.affaires.bg};
+          color: ${props.colors.cardIcon.affaires.color};
+          border-color: ${props.colors.cardIcon.affaires.color}40;
+        `;
+      case 'Enfant':
+        return `
+          background-color: ${props.colors.warningBg};
+          color: ${props.colors.warning};
+          border-color: ${props.colors.warning}40;
+        `;
+      case 'Parent':
+        return `
+          background-color: ${props.colors.cardIcon.finances.bg};
+          color: ${props.colors.cardIcon.finances.color};
+          border-color: ${props.colors.cardIcon.finances.color}40;
+        `;
+      default:
+        return `
+          background-color: ${props.colors.surfaceHover};
+          color: ${props.colors.textMuted};
+          border-color: ${props.colors.borderLight};
+        `;
+    }
+  }}
 `;
 
 const EmptyBeneficiaires = styled.div`

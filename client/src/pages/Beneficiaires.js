@@ -6,6 +6,7 @@ import { beneficiairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Beneficiaires = () => {
   const [beneficiaires, setBeneficiaires] = useState([]);
@@ -30,6 +31,7 @@ const Beneficiaires = () => {
   const [archivedBeneficiaires, setArchivedBeneficiaires] = useState(0);
 
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   useEffect(() => {
     fetchBeneficiaires();
@@ -148,6 +150,7 @@ const Beneficiaires = () => {
         {avocats.map((avocat, index) => (
           <AvocatBadge key={index} 
             title={`${avocat.prenom} ${avocat.nom}`}
+            colors={colors}
           >
             <AvocatContent>
               <FaUserTie />
@@ -213,6 +216,7 @@ const Beneficiaires = () => {
       onClick={handleOpenExportModal} 
       disabled={exportLoading}
       title="Exporter les données en Excel (XLSX)"
+      colors={colors}
     >
       {exportLoading ? 'Export en cours...' : (
         <>
@@ -235,7 +239,7 @@ const Beneficiaires = () => {
       Header: 'Qualité',
       accessor: 'qualite',
       Cell: ({ value }) => (
-        <QualiteTag qualite={value}>{value}</QualiteTag>
+        <QualiteTag qualite={value} colors={colors}>{value}</QualiteTag>
       ),
     },
     {
@@ -246,9 +250,9 @@ const Beneficiaires = () => {
       Header: 'N° et date de décision',
       accessor: row => ({ numero: row.numeroDecision, date: row.dateDecision }),
       Cell: ({ value }) => (
-        <DecisionContainer>
+        <DecisionContainer colors={colors}>
           <div>{value.numero || '-'}</div>
-          {value.date && <DecisionDate>{formatDate(value.date)}</DecisionDate>}
+          {value.date && <DecisionDate colors={colors}>{formatDate(value.date)}</DecisionDate>}
         </DecisionContainer>
       ),
     },
@@ -270,27 +274,27 @@ const Beneficiaires = () => {
       Header: 'Archive',
       accessor: row => row.archive ? 'Archivé' : 'Actif',
       Cell: ({ value }) => (
-        <StatusTag status={value === 'Archivé' ? 'archived' : 'active'}>
+        <StatusTag status={value === 'Archivé' ? 'archived' : 'active'} colors={colors}>
           {value}
         </StatusTag>
       ),
     },
-  ], []);
+  ], [colors]);
   
   // Contenu du modal d'export
   const exportModalContent = (
     <>
-      <ModalHeader>
-        <ModalTitle>
+      <ModalHeader colors={colors}>
+        <ModalTitle colors={colors}>
           <FaFileExcel /> 
           <span>Export Excel</span>
         </ModalTitle>
       </ModalHeader>
       
-      <ModalBody>
-        <InfoBox>
+      <ModalBody colors={colors}>
+        <InfoBox colors={colors}>
           <FaInfoCircle />
-          <InfoText>
+          <InfoText colors={colors}>
             Vous êtes sur le point d'exporter les données de la page dans un fichier Excel (.xlsx). 
             Le fichier contiendra trois onglets distincts avec toutes les informations associées.
             Vous pouvez choisir quelles informations exporter en appliquant des filtres sur la page.
@@ -298,39 +302,39 @@ const Beneficiaires = () => {
         </InfoBox>
         
         <ExportSheets>
-          <SheetInfo>
+          <SheetInfo colors={colors}>
             <SheetIcon className="beneficiaires">
               <FaTable />
             </SheetIcon>
             <SheetDetails>
-              <SheetName>Onglet "Bénéficiaires"</SheetName>
-              <SheetDescription>
+              <SheetName colors={colors}>Onglet "Bénéficiaires"</SheetName>
+              <SheetDescription colors={colors}>
                 Liste complète des {exportCount.beneficiaires} bénéficiaires avec leurs informations associées 
                 (militaire créateur de droit, numéro de décision, date, etc.)
               </SheetDescription>
             </SheetDetails>
           </SheetInfo>
           
-          <SheetInfo>
+          <SheetInfo colors={colors}>
             <SheetIcon className="conventions">
               <FaFileContract />
             </SheetIcon>
             <SheetDetails>
-              <SheetName>Onglet "Conventions"</SheetName>
-              <SheetDescription>
+              <SheetName colors={colors}>Onglet "Conventions"</SheetName>
+              <SheetDescription colors={colors}>
                 Les {exportCount.conventions} conventions d'honoraires liées aux bénéficiaires 
                 (montants, pourcentages, dates d'envoi et de validation, etc.)
               </SheetDescription>
             </SheetDetails>
           </SheetInfo>
           
-          <SheetInfo>
+          <SheetInfo colors={colors}>
             <SheetIcon className="paiements">
               <FaMoneyBillWave />
             </SheetIcon>
             <SheetDetails>
-              <SheetName>Onglet "Paiements"</SheetName>
-              <SheetDescription>
+              <SheetName colors={colors}>Onglet "Paiements"</SheetName>
+              <SheetDescription colors={colors}>
                 Les {exportCount.paiements} paiements effectués pour les bénéficiaires
                 (montants, dates, références, coordonnées bancaires, etc.)
               </SheetDescription>
@@ -339,11 +343,11 @@ const Beneficiaires = () => {
         </ExportSheets>
       </ModalBody>
       
-      <ModalFooter>
-        <CancelButton onClick={handleCloseExportModal}>
+      <ModalFooter colors={colors}>
+        <CancelButton onClick={handleCloseExportModal} colors={colors}>
           Annuler
         </CancelButton>
-        <ConfirmExportButton onClick={handleExportExcel}>
+        <ConfirmExportButton onClick={handleExportExcel} colors={colors}>
           <FaFileExcel /> Lancer l'export
         </ConfirmExportButton>
       </ModalFooter>
@@ -351,15 +355,15 @@ const Beneficiaires = () => {
   );
   
   return (
-    <Container>
-      <HeaderContainer>
+    <Container colors={colors}>
+      <HeaderContainer colors={colors}>
         <TitleArea>
-          <Title>Bénéficiaires</Title>
-          <Subtitle>Gestion des bénéficiaires de la protection juridique complémentaire</Subtitle>
+          <Title colors={colors}>Bénéficiaires</Title>
+          <Subtitle colors={colors}>Gestion des bénéficiaires de la protection juridique complémentaire</Subtitle>
           <StatPills>
-            <StatPill>{totalBeneficiaires} au total</StatPill>
-            <StatPill className="active">{activesBeneficiaires} actifs</StatPill>
-            <StatPill className="archived">{archivedBeneficiaires} archivés</StatPill>
+            <StatPill colors={colors}>{totalBeneficiaires} au total</StatPill>
+            <StatPill className="active" colors={colors}>{activesBeneficiaires} actifs</StatPill>
+            <StatPill className="archived" colors={colors}>{archivedBeneficiaires} archivés</StatPill>
           </StatPills>
         </TitleArea>
         
@@ -370,9 +374,9 @@ const Beneficiaires = () => {
         )}
       </HeaderContainer>
       
-      <FiltersContainer>
+      <FiltersContainer colors={colors}>
         <FiltersGroup>
-          <FilterLabel>
+          <FilterLabel colors={colors}>
             <FaFilter />
             <span>Filtres:</span>
           </FilterLabel>
@@ -380,6 +384,7 @@ const Beneficiaires = () => {
           <Select
             value={filterQualite}
             onChange={(e) => setFilterQualite(e.target.value)}
+            colors={colors}
           >
             <option value="">Toutes les qualités</option>
             <option value="Militaire">Militaire</option>
@@ -392,6 +397,7 @@ const Beneficiaires = () => {
           <Select
             value={filterDecision}
             onChange={(e) => setFilterDecision(e.target.value)}
+            colors={colors}
           >
             <option value="">Avec/sans décision</option>
             <option value="true">Avec décision</option>
@@ -401,6 +407,7 @@ const Beneficiaires = () => {
           <Select
             value={filterAvocat}
             onChange={(e) => setFilterAvocat(e.target.value)}
+            colors={colors}
           >
             <option value="">Avec/sans avocat</option>
             <option value="true">Avec avocat</option>
@@ -410,6 +417,7 @@ const Beneficiaires = () => {
           <Select
             value={filterRedacteur}
             onChange={(e) => setFilterRedacteur(e.target.value)}
+            colors={colors}
           >
             <option value="">Tous les rédacteurs</option>
             {redacteurs.map((redacteur, index) => (
@@ -420,22 +428,23 @@ const Beneficiaires = () => {
           <Select
             value={filterArchive}
             onChange={(e) => setFilterArchive(e.target.value)}
+            colors={colors}
           >
             <option value="false">Actifs</option>
             <option value="true">Archivés</option>
             <option value="">Tous</option>
           </Select>
           
-          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres" colors={colors}>
             Réinitialiser
           </ResetButton>
         </FiltersGroup>
       </FiltersContainer>
       
       {loading ? (
-        <Loading>Chargement des bénéficiaires...</Loading>
+        <Loading colors={colors}>Chargement des bénéficiaires...</Loading>
       ) : error ? (
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       ) : (
         <DataTable
           columns={columns}
@@ -457,8 +466,80 @@ const Beneficiaires = () => {
   );
 };
 
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+`;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+`;
+
+const TitleArea = styled.div`
+  flex: 1;
+`;
+
+const Title = styled.h1`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const Subtitle = styled.p`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  margin: 4px 0 0;
+  transition: color 0.3s ease;
+`;
+
+const StatPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const StatPill = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.colors.surfaceHover};
+  padding: 4px 12px;
+  border-radius: 12px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
+  
+  &.active {
+    background-color: ${props => props.colors.successBg};
+    color: ${props => props.colors.success};
+    border-color: ${props => props.colors.success}40;
+  }
+  
+  &.archived {
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
+    border-color: ${props => props.colors.borderLight};
+  }
+`;
+
+const ExportButtonContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;
 
 const FiltersContainer = styled.div`
@@ -467,6 +548,12 @@ const FiltersContainer = styled.div`
   gap: 16px;
   margin-bottom: 24px;
   align-items: center;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FiltersGroup = styled.div`
@@ -479,24 +566,40 @@ const FiltersGroup = styled.div`
 const FilterLabel = styled.div`
   display: flex;
   align-items: center;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
   
   svg {
-    margin-right: 4px;
+    margin-right: 6px;
+    color: ${props => props.colors.primary};
   }
 `;
 
 const Select = styled.select`
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
   min-width: 150px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &:hover {
+    border-color: ${props => props.colors.primary}80;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
@@ -506,33 +609,39 @@ const QualiteTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => {
     switch(props.qualite) {
       case 'Militaire':
         return `
-          background-color: #e8f5e9;
-          color: #388e3c;
+          background-color: ${props.colors.successBg};
+          color: ${props.colors.success};
+          border: 1px solid ${props.colors.success}40;
         `;
       case 'Conjoint':
         return `
-          background-color: #e3f2fd;
-          color: #1976d2;
+          background-color: ${props.colors.cardIcon.affaires.bg};
+          color: ${props.colors.cardIcon.affaires.color};
+          border: 1px solid ${props.colors.cardIcon.affaires.color}40;
         `;
       case 'Enfant':
         return `
-          background-color: #fff8e1;
-          color: #f57f17;
+          background-color: ${props.colors.warningBg};
+          color: ${props.colors.warning};
+          border: 1px solid ${props.colors.warning}40;
         `;
       case 'Parent':
         return `
-          background-color: #f3e5f5;
-          color: #8e24aa;
+          background-color: ${props.colors.cardIcon.finances.bg};
+          color: ${props.colors.cardIcon.finances.color};
+          border: 1px solid ${props.colors.cardIcon.finances.color}40;
         `;
       default:
         return `
-          background-color: #f5f5f5;
-          color: #757575;
+          background-color: ${props.colors.surfaceHover};
+          color: ${props.colors.textMuted};
+          border: 1px solid ${props.colors.borderLight};
         `;
     }
   }}
@@ -544,29 +653,33 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 
-// Nouveaux composants stylisés pour les dates de décision
 const DecisionContainer = styled.div`
   display: flex;
   flex-direction: column;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const DecisionDate = styled.span`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-top: 2px;
+  transition: color 0.3s ease;
 `;
 
-// Nouveaux composants stylisés pour les avocats
 const AvocatsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -577,14 +690,15 @@ const AvocatBadge = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  color: #616161;
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.borderLight};
+  color: ${props => props.colors.textSecondary};
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 12px;
   white-space: nowrap;
   height: 24px;
+  transition: all 0.3s ease;
 `;
 
 const AvocatContent = styled.div`
@@ -598,7 +712,7 @@ const AvocatContent = styled.div`
 `;
 
 const ResetButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
@@ -607,16 +721,18 @@ const ResetButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
-// Nouveau composant pour le bouton d'export Excel
 const ExportButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -628,15 +744,21 @@ const ExportButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &:disabled {
-    background-color: #a5d6a7;
+    background-color: ${props => props.colors.successBg};
+    color: ${props => props.colors.success};
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
   
   svg {
@@ -644,10 +766,10 @@ const ExportButton = styled.button`
   }
 `;
 
-// Styles pour le modal d'export
 const ModalHeader = styled.div`
   padding-bottom: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  transition: border-color 0.3s ease;
 `;
 
 const ModalTitle = styled.h2`
@@ -656,10 +778,11 @@ const ModalTitle = styled.h2`
   gap: 12px;
   font-size: 20px;
   margin: 0;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
   
   svg {
-    color: #4caf50;
+    color: ${props => props.colors.success};
     font-size: 24px;
   }
 `;
@@ -671,13 +794,15 @@ const ModalBody = styled.div`
 const InfoBox = styled.div`
   display: flex;
   align-items: flex-start;
-  background-color: #e3f2fd;
+  background-color: ${props => props.colors.cardIcon.affaires.bg};
   border-radius: 4px;
   padding: 12px;
   margin-bottom: 20px;
+  border: 1px solid ${props => props.colors.cardIcon.affaires.color}40;
+  transition: all 0.3s ease;
   
   svg {
-    color: #1976d2;
+    color: ${props => props.colors.cardIcon.affaires.color};
     font-size: 18px;
     margin-right: 12px;
     margin-top: 2px;
@@ -687,8 +812,9 @@ const InfoBox = styled.div`
 const InfoText = styled.p`
   margin: 0;
   font-size: 14px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   line-height: 1.5;
+  transition: color 0.3s ease;
 `;
 
 const ExportSheets = styled.div`
@@ -700,13 +826,15 @@ const ExportSheets = styled.div`
 const SheetInfo = styled.div`
   display: flex;
   align-items: flex-start;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   padding: 16px;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid ${props => props.colors.borderLight};
   
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${props => props.colors.surface};
+    border-color: ${props => props.colors.primary}40;
   }
 `;
 
@@ -725,15 +853,15 @@ const SheetIcon = styled.div`
   }
   
   &.beneficiaires {
-    background-color: #3f51b5;
+    background-color: ${props => props.colors.primary};
   }
   
   &.conventions {
-    background-color: #f57c00;
+    background-color: ${props => props.colors.warning};
   }
   
   &.paiements {
-    background-color: #4caf50;
+    background-color: ${props => props.colors.success};
   }
 `;
 
@@ -744,14 +872,16 @@ const SheetDetails = styled.div`
 const SheetName = styled.h3`
   margin: 0 0 8px 0;
   font-size: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const SheetDescription = styled.p`
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: ${props => props.colors.textSecondary};
   line-height: 1.4;
+  transition: color 0.3s ease;
 `;
 
 const ModalFooter = styled.div`
@@ -759,26 +889,30 @@ const ModalFooter = styled.div`
   justify-content: flex-end;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid ${props => props.colors.borderLight};
+  transition: border-color 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 10px 16px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    border-color: ${props => props.colors.primary};
+    color: ${props => props.colors.primary};
   }
 `;
 
 const ConfirmExportButton = styled.button`
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -789,10 +923,13 @@ const ConfirmExportButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   svg {
@@ -803,76 +940,23 @@ const ConfirmExportButton = styled.button`
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-`;
-
-const TitleArea = styled.div`
-  flex: 1;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0;
-  color: #212121;
-`;
-
-const Subtitle = styled.p`
-  font-size: 14px;
-  color: #757575;
-  margin: 4px 0 0;
-`;
-
-const StatPills = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const StatPill = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  color: #424242;
-  background-color: #e0e0e0;
-  padding: 3px 10px;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-  &.active {
-    background-color: #c8e6c9;
-    color: #2e7d32;
-  }
-  
-  &.archived {
-    background-color: #e0e0e0;
-    color: #616161;
-    border: 1px solid #bdbdbd;
-  }
-`;
-
-const ExportButtonContainer = styled.div`
-  display: flex;
-  align-items: flex-start;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default Beneficiaires;

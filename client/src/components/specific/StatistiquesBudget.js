@@ -66,15 +66,15 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
       {
         label: 'Montants engagés (€)',
         data: statistiques.parMois.map(mois => mois.gage.montant),
-        backgroundColor: darkMode ? 'rgba(92, 107, 192, 0.8)' : 'rgba(63, 81, 181, 0.6)',
-        borderColor: darkMode ? 'rgba(121, 134, 203, 1)' : 'rgba(63, 81, 181, 1)',
+        backgroundColor: darkMode ? 'rgba(121, 134, 203, 0.9)' : 'rgba(63, 81, 181, 0.6)',
+        borderColor: darkMode ? 'rgba(159, 168, 218, 1)' : 'rgba(63, 81, 181, 1)',
         borderWidth: 1,
       },
       {
         label: 'Montants payés (€)',
         data: statistiques.parMois.map(mois => mois.paye.montant),
-        backgroundColor: darkMode ? 'rgba(102, 187, 106, 0.8)' : 'rgba(76, 175, 80, 0.6)',
-        borderColor: darkMode ? 'rgba(129, 199, 132, 1)' : 'rgba(76, 175, 80, 1)',
+        backgroundColor: darkMode ? 'rgba(129, 199, 132, 0.9)' : 'rgba(76, 175, 80, 0.6)',
+        borderColor: darkMode ? 'rgba(165, 214, 167, 1)' : 'rgba(76, 175, 80, 1)',
         borderWidth: 1,
       }
     ]
@@ -106,22 +106,22 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
     scales: {
       x: {
         ticks: {
-          color: colors.textSecondary
+          color: darkMode ? '#e9ecef' : colors.textSecondary
         },
         grid: {
-          color: colors.border
+          color: darkMode ? '#495057' : colors.border
         }
       },
       y: {
         beginAtZero: true,
         ticks: {
-          color: colors.textSecondary,
+          color: darkMode ? '#e9ecef' : colors.textSecondary,
           callback: function(value) {
             return value.toLocaleString('fr-FR') + ' €';
           }
         },
         grid: {
-          color: colors.border
+          color: darkMode ? '#495057' : colors.border
         }
       }
     }
@@ -251,7 +251,7 @@ const SummaryLabel = styled.div`
 const SummaryValue = styled.div`
   font-size: 24px;
   font-weight: 500;
-  color: ${props => props.colors.primary};
+  color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
 `;
 

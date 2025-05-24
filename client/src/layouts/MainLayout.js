@@ -145,31 +145,39 @@ const Container = styled.div`
 
 const ThemeToggle = styled.button`
   position: fixed;
-  top: 20px;
-  right: 20px;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  width: 36px;
-  height: 36px;
+  top: 10px;
+  right: 10px;
+  background: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.2s ease;
-  color: ${props => props.colors.textSecondary};
-  opacity: 0.7;
-  z-index: 1000;
+  color: ${props => props.colors.textPrimary};
+  box-shadow: ${props => props.colors.shadow};
+  z-index: 9999;
 
   &:hover {
-    opacity: 1;
-    background: ${props => props.colors.surfaceHover};
-    box-shadow: ${props => props.colors.shadow};
+    transform: scale(1.05);
+    box-shadow: ${props => props.colors.shadowHover};
+    border-color: ${props => props.colors.primary};
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 `;
 

@@ -905,18 +905,18 @@ const StatIconContainer = styled.div`
   transition: all 0.3s ease;
   
   .finances & {
-    background-color: ${props => props.colors.cardIcon.finances.bg};
-    color: ${props => props.colors.cardIcon.finances.color};
+    background-color: ${props => props.colors?.cardIcon?.finances?.bg || '#e3f2fd'};
+    color: ${props => props.colors?.cardIcon?.finances?.color || '#1976d2'};
   }
   
   .affaires & {
-    background-color: ${props => props.colors.cardIcon.militaires.bg};
-    color: ${props => props.colors.cardIcon.militaires.color};
+    background-color: ${props => props.colors?.cardIcon?.militaires?.bg || '#e8f5e9'};
+    color: ${props => props.colors?.cardIcon?.militaires?.color || '#388e3c'};
   }
   
   .redacteurs & {
-    background-color: ${props => props.colors.cardIcon.beneficiaires.bg};
-    color: ${props => props.colors.cardIcon.beneficiaires.color};
+    background-color: ${props => props.colors?.cardIcon?.beneficiaires?.bg || '#fff8e1'};
+    color: ${props => props.colors?.cardIcon?.beneficiaires?.color || '#f57f17'};
   }
 `;
 
@@ -1205,7 +1205,7 @@ const TableDataCell = styled.td`
 `;
 
 const VariationUp = styled.span`
-  color: ${props => props.colors.success};
+  color: ${props => props.colors?.success || '#4caf50'};
   font-size: 11px;
   font-weight: 500;
   margin-left: 4px;
@@ -1223,7 +1223,7 @@ const VariationUp = styled.span`
 `;
 
 const VariationDown = styled.span`
-  color: ${props => props.colors.error};
+  color: ${props => props.colors?.error || '#f44336'};
   font-size: 11px;
   font-weight: 500;
   margin-left: 4px;
@@ -1257,7 +1257,7 @@ const HeaderActions = styled.div`
 const ExportButton = styled.button`
   display: flex;
   align-items: center;
-  background-color: ${props => props.colors.success};
+  background-color: ${props => props.colors?.success || '#4caf50'};
   color: white;
   border: none;
   padding: 8px 16px;
@@ -1266,16 +1266,16 @@ const ExportButton = styled.button`
   font-size: 14px;
   font-weight: 500;
   transition: all 0.3s ease;
-  box-shadow: ${props => props.colors.shadow};
+  box-shadow: ${props => props.colors?.shadow || '0 2px 4px rgba(0, 0, 0, 0.1)'};
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: ${props => props.colors.success}dd;
+    background-color: ${props => props.colors?.success ? `${props.colors.success}dd` : '#388e3c'};
     transform: translateY(-1px);
-    box-shadow: ${props => props.colors.shadowHover};
+    box-shadow: ${props => props.colors?.shadowHover || '0 4px 8px rgba(0, 0, 0, 0.15)'};
   }
   
   &:active {
@@ -1285,12 +1285,12 @@ const ExportButton = styled.button`
 
 const InfoMessage = styled.div`
   padding: 20px;
-  background-color: ${props => props.colors.successBg};
+  background-color: ${props => props.colors?.successBg || '#e8f5e9'};
   border-radius: 4px;
-  color: ${props => props.colors.success};
+  color: ${props => props.colors?.success || '#2e7d32'};
   text-align: center;
   font-size: 16px;
-  border: 1px solid ${props => props.colors.success}40;
+  border: 1px solid ${props => props.colors?.success ? `${props.colors.success}40` : '#4caf5040'};
   transition: all 0.3s ease;
   
   p {

@@ -901,12 +901,13 @@ const TdActions = styled.td`
 
 const RegionBadge = styled.span`
   display: inline-block;
-  background-color: ${props => props.colors.cardIcon.affaires.bg};
-  color: ${props => props.colors.cardIcon.affaires.color};
+  background-color: #e3f2fd;
+  color: #1976d2;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  border: 1px solid #bbdefb;
   transition: all 0.3s ease;
 `;
 
@@ -1061,18 +1062,19 @@ const VillesContainer = styled.div`
 `;
 
 const VilleTag = styled.span`
-  background-color: ${props => props.colors.cardIcon.beneficiaires.bg};
+  background-color: #e3f2fd;
   border-radius: 12px;
   padding: 3px 8px;
   font-size: 12px;
-  color: ${props => props.colors.cardIcon.beneficiaires.color};
+  color: #1976d2;
   white-space: nowrap;
   transition: all 0.3s ease;
-  border: 1px solid transparent;
+  border: 1px solid #bbdefb;
   
   &.more {
-    background-color: ${props => props.colors.surfaceHover};
-    color: ${props => props.colors.textMuted};
+    background-color: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
     
     &.highlighted {
       background-color: ${props => props.colors.warningBg};

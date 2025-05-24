@@ -8,20 +8,24 @@ const LoginContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: ${props => props.darkMode ? '#1a1a1a' : '#f8f9fa'};
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-  color: #212529;
+  color: ${props => props.darkMode ? '#e9ecef' : '#212529'};
+  transition: background-color 0.3s ease, color 0.3s ease;
 `;
 
 const LoginCard = styled.div`
-  background: #ffffff;
-  border: 1px solid #dee2e6;
+  background: ${props => props.darkMode ? '#2d2d2d' : '#ffffff'};
+  border: 1px solid ${props => props.darkMode ? '#404040' : '#dee2e6'};
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: ${props => props.darkMode 
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+    : '0 2px 8px rgba(0, 0, 0, 0.05)'};
   padding: 48px;
   width: 100%;
   max-width: 440px;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
   @media (max-width: 576px) {
     padding: 32px 24px;
@@ -29,27 +33,56 @@ const LoginCard = styled.div`
   }
 `;
 
+const ThemeToggle = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: ${props => props.darkMode ? '#404040' : '#ffffff'};
+  border: 1px solid ${props => props.darkMode ? '#555555' : '#dee2e6'};
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  color: ${props => props.darkMode ? '#ffd43b' : '#495057'};
+
+  &:hover {
+    background: ${props => props.darkMode ? '#555555' : '#f8f9fa'};
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
 const LoginHeader = styled.div`
   text-align: center;
   margin-bottom: 40px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid ${props => props.darkMode ? '#404040' : '#e9ecef'};
   padding-bottom: 32px;
+  transition: border-color 0.3s ease;
 `;
 
 const Logo = styled.div`
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background: #ffffff;
-  border: 2px solid #6c757d;
+  background: ${props => props.darkMode ? '#404040' : '#ffffff'};
+  border: 2px solid ${props => props.darkMode ? '#666666' : '#6c757d'};
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 20px;
-  color: #495057;
+  color: ${props => props.darkMode ? '#e9ecef' : '#495057'};
   letter-spacing: 1px;
+  transition: all 0.3s ease;
 
   @media (max-width: 576px) {
     width: 64px;
@@ -60,10 +93,11 @@ const Logo = styled.div`
 
 const Title = styled.h1`
   font-size: 20px;
-  color: #212529;
+  color: ${props => props.darkMode ? '#ffffff' : '#212529'};
   margin-bottom: 8px;
   font-weight: 600;
   letter-spacing: -0.025em;
+  transition: color 0.3s ease;
 
   @media (max-width: 576px) {
     font-size: 18px;
@@ -71,10 +105,11 @@ const Title = styled.h1`
 `;
 
 const Subtitle = styled.p`
-  color: #6c757d;
+  color: ${props => props.darkMode ? '#adb5bd' : '#6c757d'};
   font-size: 14px;
   line-height: 1.4;
   margin: 0;
+  transition: color 0.3s ease;
 `;
 
 const LoginForm = styled.form`
@@ -89,47 +124,57 @@ const FormGroup = styled.div`
 const FormLabel = styled.label`
   display: block;
   margin-bottom: 6px;
-  color: #212529;
+  color: ${props => props.darkMode ? '#ffffff' : '#212529'};
   font-weight: 500;
   font-size: 14px;
+  transition: color 0.3s ease;
 `;
 
 const Required = styled.span`
-  color: #dc3545;
+  color: ${props => props.darkMode ? '#ff6b6b' : '#dc3545'};
+  transition: color 0.3s ease;
 `;
 
 const FormInput = styled.input`
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #ced4da;
+  border: 1px solid ${props => props.darkMode ? '#555555' : '#ced4da'};
   border-radius: 4px;
   font-size: 16px;
-  background: #ffffff;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  background: ${props => props.darkMode ? '#404040' : '#ffffff'};
+  color: ${props => props.darkMode ? '#ffffff' : '#212529'};
+  transition: all 0.15s ease-in-out;
+
+  &::placeholder {
+    color: ${props => props.darkMode ? '#adb5bd' : '#6c757d'};
+  }
 
   &:focus {
     outline: none;
-    border-color: #495057;
-    box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.1);
+    border-color: ${props => props.darkMode ? '#666666' : '#495057'};
+    box-shadow: 0 0 0 2px ${props => props.darkMode 
+      ? 'rgba(102, 102, 102, 0.2)' 
+      : 'rgba(73, 80, 87, 0.1)'};
   }
 `;
 
 const ErrorMessage = styled.div`
-  background: #f8d7da;
-  color: #721c24;
+  background: ${props => props.darkMode ? '#3d1a1a' : '#f8d7da'};
+  color: ${props => props.darkMode ? '#ff9999' : '#721c24'};
   padding: 12px 16px;
-  border: 1px solid #f5c6cb;
+  border: 1px solid ${props => props.darkMode ? '#663333' : '#f5c6cb'};
   border-radius: 4px;
   margin-bottom: 20px;
   font-size: 14px;
   display: ${props => props.show ? 'block' : 'none'};
+  transition: all 0.3s ease;
 `;
 
 const LoginButton = styled.button`
   width: 100%;
-  background: #495057;
+  background: ${props => props.darkMode ? '#495057' : '#495057'};
   color: #ffffff;
-  border: 1px solid #495057;
+  border: 1px solid ${props => props.darkMode ? '#495057' : '#495057'};
   border-radius: 4px;
   padding: 12px 24px;
   font-size: 16px;
@@ -139,13 +184,13 @@ const LoginButton = styled.button`
   position: relative;
 
   &:hover:not(:disabled) {
-    background: #343a40;
-    border-color: #343a40;
+    background: ${props => props.darkMode ? '#343a40' : '#343a40'};
+    border-color: ${props => props.darkMode ? '#343a40' : '#343a40'};
   }
 
   &:disabled {
-    background: #6c757d;
-    border-color: #6c757d;
+    background: ${props => props.darkMode ? '#555555' : '#6c757d'};
+    border-color: ${props => props.darkMode ? '#555555' : '#6c757d'};
     cursor: not-allowed;
   }
 
@@ -173,29 +218,16 @@ const LoginButton = styled.button`
   }
 `;
 
-const FormFooter = styled.div`
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e9ecef;
-`;
-
-const HelpText = styled.p`
-  color: #6c757d;
-  font-size: 13px;
-  line-height: 1.4;
-  margin: 0;
-`;
-
 const SecurityNotice = styled.div`
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
+  background: ${props => props.darkMode ? '#1a1a1a' : '#f8f9fa'};
+  border: 1px solid ${props => props.darkMode ? '#404040' : '#dee2e6'};
   border-radius: 4px;
   padding: 16px;
   margin-top: 24px;
   font-size: 12px;
-  color: #495057;
+  color: ${props => props.darkMode ? '#e9ecef' : '#495057'};
   text-align: center;
+  transition: all 0.3s ease;
 `;
 
 const Login = () => {
@@ -203,9 +235,22 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Récupérer la préférence depuis localStorage ou utiliser la préférence système
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+      return JSON.parse(savedMode);
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   
   const { login, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Sauvegarder la préférence de thème
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
 
   // Rediriger si déjà authentifié
   useEffect(() => {
@@ -213,6 +258,10 @@ const Login = () => {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -242,18 +291,26 @@ const Login = () => {
   };
 
   return (
-    <LoginContainer>
-      <LoginCard>
-        <LoginHeader>
-          <Logo>PJC</Logo>
-          <Title>Protection Juridique Complémentaire</Title>
-          <Subtitle>Système de gestion des dossiers</Subtitle>
+    <LoginContainer darkMode={darkMode}>
+      <ThemeToggle 
+        darkMode={darkMode} 
+        onClick={toggleDarkMode}
+        title={darkMode ? 'Mode clair' : 'Mode sombre'}
+      >
+        {darkMode ? '☀️' : '🌙'}
+      </ThemeToggle>
+      
+      <LoginCard darkMode={darkMode}>
+        <LoginHeader darkMode={darkMode}>
+          <Logo darkMode={darkMode}>PJC</Logo>
+          <Title darkMode={darkMode}>Protection Juridique Complémentaire</Title>
+          <Subtitle darkMode={darkMode}>Système de gestion des dossiers</Subtitle>
         </LoginHeader>
         
         <LoginForm onSubmit={handleSubmit} noValidate autoComplete="on">
           <FormGroup>
-            <FormLabel htmlFor="username">
-              Nom d'utilisateur <Required>*</Required>
+            <FormLabel htmlFor="username" darkMode={darkMode}>
+              Nom d'utilisateur <Required darkMode={darkMode}>*</Required>
             </FormLabel>
             <FormInput
               type="text"
@@ -265,12 +322,13 @@ const Login = () => {
               required
               autoComplete="username"
               aria-describedby={error ? "error-message" : undefined}
+              darkMode={darkMode}
             />
           </FormGroup>
           
           <FormGroup>
-            <FormLabel htmlFor="password">
-              Mot de passe <Required>*</Required>
+            <FormLabel htmlFor="password" darkMode={darkMode}>
+              Mot de passe <Required darkMode={darkMode}>*</Required>
             </FormLabel>
             <FormInput
               type="password"
@@ -282,10 +340,11 @@ const Login = () => {
               required
               autoComplete="current-password"
               aria-describedby={error ? "error-message" : undefined}
+              darkMode={darkMode}
             />
           </FormGroup>
           
-          <ErrorMessage show={!!error} role="alert" id="error-message">
+          <ErrorMessage show={!!error} role="alert" id="error-message" darkMode={darkMode}>
             {error}
           </ErrorMessage>
           
@@ -294,11 +353,12 @@ const Login = () => {
             disabled={isLoading}
             className={isLoading ? 'loading' : ''}
             aria-describedby="login-status"
+            darkMode={darkMode}
           >
             {isLoading ? '' : 'Se connecter'}
           </LoginButton>
           
-          <SecurityNotice>
+          <SecurityNotice darkMode={darkMode}>
             <strong>CONFIDENTIEL</strong><br />
             Accès réservé au personnel autorisé (BRPF).<br />
             Toutes les connexions sont enregistrées.

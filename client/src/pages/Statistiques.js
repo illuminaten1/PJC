@@ -6,6 +6,7 @@ import PageHeader from '../components/common/PageHeader';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
 import { exportToExcel, exportToPDF } from '../utils/exportUtils';
 import ExportModal from '../components/specific/ExportModal';
+import { useTheme } from '../contexts/ThemeContext'; // Ajout du hook de thème
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,11 +36,14 @@ const Statistiques = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Nouvel état pour la modale d'export
+  // Nouveaux états pour la modale d'export
   const [showExportModal, setShowExportModal] = useState(false);
   
   // Référence pour les éléments à exporter en PDF
   const statsRef = useRef(null);
+  
+  // Hook de thème
+  const { colors } = useTheme();
   
   // Générer les années pour le sélecteur (à partir de 2023 jusqu'à l'année actuelle + 1)
   const generateYears = () => {
@@ -361,31 +365,31 @@ const Statistiques = () => {
 
   if (loading && !statistiques) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Statistiques" />
-        <Loading>Chargement des statistiques...</Loading>
+        <Loading colors={colors}>Chargement des statistiques...</Loading>
       </Container>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Statistiques" />
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       </Container>
     );
   }
   
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title="Statistiques" 
         subtitle="Analyse des données de protection juridique complémentaire"
       />
       
-      <SectionHeader>
-          <SectionTitle>
+      <SectionHeader colors={colors}>
+          <SectionTitle colors={colors}>
             <FaChartBar />
             <span>Synthèse globale depuis la mise en place du dispositif</span>
           </SectionTitle>
@@ -394,20 +398,20 @@ const Statistiques = () => {
       {/* Ajout de la référence pour l'export PDF */}
       <div ref={statsRef}>
         {/* Section des statistiques globales avec 3 tableaux côte à côte */}
-        <Section>       
+        <Section colors={colors}>       
           <TablesRow>
             {/* Premier tableau: Bénéficiaires - Conventions */}
-            <TableCard>
-              <TableTitle>Bénéficiaires - Conventions</TableTitle>
-              <CompactTable>
+            <TableCard colors={colors}>
+              <TableTitle colors={colors}>Bénéficiaires - Conventions</TableTitle>
+              <CompactTable colors={colors}>
                 <thead>
                   <tr className="bg-header">
-                    <SummaryTableHeader>Année</SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Nombre de bénéficiaires</span>
                       <span className="short-text">Bénéficiaires</span>
                     </SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Nombre de conventions</span>
                       <span className="short-text">Conventions</span>
                     </SummaryTableHeader>
@@ -415,9 +419,9 @@ const Statistiques = () => {
                 </thead>
                 <tbody>
                   {dataWithVariations.map(({ year, data, variations }) => (
-                    <Tr key={`conventions-${year}`}>
-                      <YearCell>{year}</YearCell>
-                      <Td>
+                    <Tr key={`conventions-${year}`} colors={colors}>
+                      <YearCell colors={colors}>{year}</YearCell>
+                      <Td colors={colors}>
                         <div className="value-container">
                           <span className="value">{data.nbBeneficiaires || 0}</span>
                           {variations.nbBeneficiaires && (
@@ -431,7 +435,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td>
+                      <Td colors={colors}>
                         <div className="value-container">
                           <span className="value">{data.nbConventions || 0}</span>
                           {variations.nbConventions && (
@@ -447,26 +451,27 @@ const Statistiques = () => {
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow>
-                    <TotalCell>TOTAL</TotalCell>
-                    <TotalCell>{totals.nbBeneficiaires}</TotalCell>
-                    <TotalCell>{totals.nbConventions}</TotalCell>
+                  <TotalRow colors={colors}>
+                    <TotalCell colors={colors}>TOTAL</TotalCell>
+                    <TotalCell colors={colors}>{totals.nbBeneficiaires}</TotalCell>
+                    <TotalCell colors={colors}>{totals.nbConventions}</TotalCell>
                   </TotalRow>
                 </tbody>
               </CompactTable>
             </TableCard>
+            
             {/* Deuxième tableau: Montants totaux gagés (HT et TTC) */}
-            <TableCard>
-              <TableTitle>Montant Total Gagé</TableTitle>
-              <CompactTable>
+            <TableCard colors={colors}>
+              <TableTitle colors={colors}>Montant Total Gagé</TableTitle>
+              <CompactTable colors={colors}>
                 <thead>
                   <tr className="bg-header">
-                    <SummaryTableHeader>Année</SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Montant total gagé HT</span>
                       <span className="short-text">Gagé HT</span>
                     </SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Montant total gagé TTC</span>
                       <span className="short-text">Gagé TTC</span>
                     </SummaryTableHeader>
@@ -478,9 +483,9 @@ const Statistiques = () => {
                     const montantTTC = montantHT * 1.2;
                     
                     return (
-                      <Tr key={`montants-${year}`}>
-                        <YearCell>{year}</YearCell>
-                        <Td>
+                      <Tr key={`montants-${year}`} colors={colors}>
+                        <YearCell colors={colors}>{year}</YearCell>
+                        <Td colors={colors}>
                           <div className="value-container">
                             <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -494,7 +499,7 @@ const Statistiques = () => {
                             )}
                           </div>
                         </Td>
-                        <Td>
+                        <Td colors={colors}>
                           <div className="value-container">
                             <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -511,26 +516,27 @@ const Statistiques = () => {
                       </Tr>
                     );
                   })}
-                  <TotalRow>
-                    <TotalCell>TOTAL</TotalCell>
-                    <TotalCell>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                    <TotalCell>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                  <TotalRow colors={colors}>
+                    <TotalCell colors={colors}>TOTAL</TotalCell>
+                    <TotalCell colors={colors}>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                    <TotalCell colors={colors}>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
                   </TotalRow>
                 </tbody>
               </CompactTable>
             </TableCard>
+            
             {/* Troisième tableau: Dépenses ordonnées */}
-            <TableCard>
-              <TableTitle>Dépenses Ordonnées</TableTitle>
-              <CompactTable>
+            <TableCard colors={colors}>
+              <TableTitle colors={colors}>Dépenses Ordonnées</TableTitle>
+              <CompactTable colors={colors}>
                 <thead>
                   <tr className="bg-header">
-                    <SummaryTableHeader>Année</SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Nombre de règlements</span>
                       <span className="short-text">Règlements</span>
                     </SummaryTableHeader>
-                    <SummaryTableHeader>
+                    <SummaryTableHeader colors={colors}>
                       <span className="full-text">Montant total ordonné TTC</span>
                       <span className="short-text">Ordonné TTC</span>
                     </SummaryTableHeader>
@@ -538,9 +544,9 @@ const Statistiques = () => {
                 </thead>
                 <tbody>
                   {dataWithVariations.map(({ year, data, variations }) => (
-                    <Tr key={`ordonnes-${year}`}>
-                      <YearCell>{year}</YearCell>
-                      <Td>
+                    <Tr key={`ordonnes-${year}`} colors={colors}>
+                      <YearCell colors={colors}>{year}</YearCell>
+                      <Td colors={colors}>
                         <div className="value-container">
                           <span className="value">{data.nbReglements || 0}</span>
                           {variations.nbReglements && (
@@ -554,7 +560,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td>
+                      <Td colors={colors}>
                         <div className="value-container">
                           <span className="value">
                             {(data.montantPaye || 0) > 0 
@@ -574,10 +580,10 @@ const Statistiques = () => {
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow>
-                    <TotalCell>TOTAL</TotalCell>
-                    <TotalCell>{totals.nbReglements}</TotalCell>
-                    <TotalCell>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
+                  <TotalRow colors={colors}>
+                    <TotalCell colors={colors}>TOTAL</TotalCell>
+                    <TotalCell colors={colors}>{totals.nbReglements}</TotalCell>
+                    <TotalCell colors={colors}>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
                   </TotalRow>
                 </tbody>
               </CompactTable>
@@ -585,20 +591,21 @@ const Statistiques = () => {
           </TablesRow>
         </Section>
         
-        <SectionHeader>
-            <SectionTitle>
+        <SectionHeader colors={colors}>
+            <SectionTitle colors={colors}>
               <FaCalendarAlt/>
               <span>Synthèse par année</span>
             </SectionTitle>
         </SectionHeader>
         
         {/* Remplacer le sélecteur d'année par les actions */}
-        <HeaderActions>
+        <HeaderActions colors={colors}>
           <YearSelector>
-            <YearLabel>Année budgétaire :</YearLabel>
+            <YearLabel colors={colors}>Année budgétaire :</YearLabel>
             <Select
               value={annee}
               onChange={(e) => setAnnee(parseInt(e.target.value))}
+              colors={colors}
             >
               {years.map(year => (
                 <option key={year} value={year}>
@@ -608,49 +615,49 @@ const Statistiques = () => {
             </Select>
           </YearSelector>
           
-          <ExportButton onClick={() => setShowExportModal(true)}>
+          <ExportButton onClick={() => setShowExportModal(true)} colors={colors}>
             <FaFileExport />
             <span>Exporter</span>
           </ExportButton>
         </HeaderActions>
 
-        <SummaryCards className="summary-cards">
-          <StatCard className="finances">
-            <StatIconContainer>
+        <SummaryCards className="summary-cards" colors={colors}>
+          <StatCard className="finances" colors={colors}>
+            <StatIconContainer colors={colors}>
               <FaEuroSign />
             </StatIconContainer>
             <StatContent>
-              <StatValue>{statistiques?.finances?.montantGage?.toLocaleString('fr-FR') || '0'} € HT</StatValue>
-              <StatLabel>Budget engagé</StatLabel>
-              <StatDetail>
+              <StatValue colors={colors}>{statistiques?.finances?.montantGage?.toLocaleString('fr-FR') || '0'} € HT</StatValue>
+              <StatLabel colors={colors}>Budget engagé</StatLabel>
+              <StatDetail colors={colors}>
                 <span>Conventions :</span>
                 <span>{statistiques?.finances?.nbConventions || 0}</span>
               </StatDetail>
-              <StatDetail>
+              <StatDetail colors={colors}>
                 <span>Payé :</span>
                 <span>{statistiques?.finances?.montantPaye?.toLocaleString('fr-FR') || '0'} € TTC</span>
               </StatDetail>
             </StatContent>
           </StatCard>
           
-          <StatCard className="affaires">
-            <StatIconContainer>
+          <StatCard className="affaires" colors={colors}>
+            <StatIconContainer colors={colors}>
               <FaFolder />
             </StatIconContainer>
             <StatContent>
-              <StatValue>{statistiques?.affaires?.total || 0}</StatValue>
-              <StatLabel>Affaires</StatLabel>
+              <StatValue colors={colors}>{statistiques?.affaires?.total || 0}</StatValue>
+              <StatLabel colors={colors}>Affaires</StatLabel>
             </StatContent>
           </StatCard>
           
-          <StatCard className="redacteurs">
-            <StatIconContainer>
+          <StatCard className="redacteurs" colors={colors}>
+            <StatIconContainer colors={colors}>
               <FaUsers />
             </StatIconContainer>
             <StatContent>
-              <StatValue>{Object.keys(statistiques?.parRedacteur || {}).length}</StatValue>
-              <StatLabel>Rédacteurs actifs</StatLabel>
-              <StatDetail>
+              <StatValue colors={colors}>{Object.keys(statistiques?.parRedacteur || {}).length}</StatValue>
+              <StatLabel colors={colors}>Rédacteurs actifs</StatLabel>
+              <StatDetail colors={colors}>
                 <span>Bénéficiaires :</span>
                 <span>{Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0)}</span>
               </StatDetail>
@@ -658,16 +665,16 @@ const Statistiques = () => {
           </StatCard>
         </SummaryCards>
         
-        <Section>
-          <SectionHeader>
-            <SectionTitle>
+        <Section colors={colors}>
+          <SectionHeader colors={colors}>
+            <SectionTitle colors={colors}>
               <FaChartBar />
               <span>Suivi budgétaire {annee === -1 ? "toutes années" : annee}</span>
             </SectionTitle>
           </SectionHeader>
           
           {annee === -1 ? (
-            <InfoMessage>
+            <InfoMessage colors={colors}>
               <p>Le suivi budgétaire mensuel n'est pas disponible pour l'option "Toutes les années".</p>
               <p>Veuillez sélectionner une année spécifique pour visualiser le graphique.</p>
             </InfoMessage>
@@ -677,14 +684,14 @@ const Statistiques = () => {
         </Section>
         
         <ChartsSection>
-        <ChartCard className="redacteur-table">
-          <BlockTitle>Répartition par rédacteur</BlockTitle>
-          <ResponsiveTable>
+        <ChartCard className="redacteur-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par rédacteur</BlockTitle>
+          <ResponsiveTable colors={colors}>
             <thead>
               <tr>
-                <TableHeader>Rédacteur</TableHeader>
-                <TableHeader>Bénéficiaires</TableHeader>
-                <TableHeader>Pourcentage</TableHeader>
+                <TableHeader colors={colors}>Rédacteur</TableHeader>
+                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
               </tr>
             </thead>
             <tbody>
@@ -693,10 +700,10 @@ const Statistiques = () => {
                 const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
                 
                 return (
-                  <TableRow key={`redacteur-${redacteur}`}>
-                    <TableDataCell>{redacteur}</TableDataCell>
-                    <TableDataCell>{count}</TableDataCell>
-                    <TableDataCell>{percentage}%</TableDataCell>
+                  <TableRow key={`redacteur-${redacteur}`} colors={colors}>
+                    <TableDataCell colors={colors}>{redacteur}</TableDataCell>
+                    <TableDataCell colors={colors}>{count}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
                   </TableRow>
                 );
               })}
@@ -704,14 +711,14 @@ const Statistiques = () => {
           </ResponsiveTable>
         </ChartCard>
           
-        <ChartCard className="circonstance-table">
-          <BlockTitle>Répartition par circonstance</BlockTitle>
-          <ResponsiveTable>
+        <ChartCard className="circonstance-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par circonstance</BlockTitle>
+          <ResponsiveTable colors={colors}>
             <thead>
               <tr>
-                <TableHeader>Circonstance</TableHeader>
-                <TableHeader>Militaires</TableHeader>
-                <TableHeader>Pourcentage</TableHeader>
+                <TableHeader colors={colors}>Circonstance</TableHeader>
+                <TableHeader colors={colors}>Militaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
               </tr>
             </thead>
             <tbody>
@@ -720,10 +727,10 @@ const Statistiques = () => {
                 const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
                 
                 return (
-                  <TableRow key={`circonstance-${circonstance}`}>
-                    <TableDataCell>{circonstance}</TableDataCell>
-                    <TableDataCell>{count}</TableDataCell>
-                    <TableDataCell>{percentage}%</TableDataCell>
+                  <TableRow key={`circonstance-${circonstance}`} colors={colors}>
+                    <TableDataCell colors={colors}>{circonstance}</TableDataCell>
+                    <TableDataCell colors={colors}>{count}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
                   </TableRow>
                 );
               })}
@@ -731,15 +738,15 @@ const Statistiques = () => {
           </ResponsiveTable>
         </ChartCard>
 
-        <ChartCard className="region-table">
-          <BlockTitle>Répartition par région</BlockTitle>
-          <ResponsiveTable>
+        <ChartCard className="region-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par région</BlockTitle>
+          <ResponsiveTable colors={colors}>
             <thead>
               <tr>
-                <TableHeader>Région</TableHeader>
-                <TableHeader>Militaires</TableHeader>
-                <TableHeader>Bénéficiaires</TableHeader>
-                <TableHeader>Pourcentage</TableHeader>
+                <TableHeader colors={colors}>Région</TableHeader>
+                <TableHeader colors={colors}>Militaires</TableHeader>
+                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
               </tr>
             </thead>
             <tbody>
@@ -748,11 +755,11 @@ const Statistiques = () => {
                 const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
                 
                 return (
-                  <TableRow key={`region-${region}`}>
-                    <TableDataCell>{region}</TableDataCell>
-                    <TableDataCell>{data.nbMilitaires}</TableDataCell>
-                    <TableDataCell>{data.nbBeneficiaires}</TableDataCell>
-                    <TableDataCell>{percentage}%</TableDataCell>
+                  <TableRow key={`region-${region}`} colors={colors}>
+                    <TableDataCell colors={colors}>{region}</TableDataCell>
+                    <TableDataCell colors={colors}>{data.nbMilitaires}</TableDataCell>
+                    <TableDataCell colors={colors}>{data.nbBeneficiaires}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
                   </TableRow>
                 );
               })}
@@ -774,13 +781,24 @@ const Statistiques = () => {
   );
 };
 
-// Styles existants non modifiés
+// Styled Components avec thématisation
+const Container = styled.div`
+  padding: 20px;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+`;
+
 const Section = styled.section`
   margin-bottom: 30px;
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const SectionHeader = styled.div`
@@ -793,14 +811,15 @@ const SectionHeader = styled.div`
 const SectionTitle = styled.h2`
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   display: flex;
   align-items: center;
   margin: 0;
+  transition: color 0.3s ease;
   
   svg {
     margin-right: 8px;
-    color: #3f51b5;
+    color: ${props => props.colors.primary};
   }
 `;
 
@@ -813,18 +832,29 @@ const YearLabel = styled.span`
   font-size: 16px;
   font-weight: 500;
   margin-right: 12px;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const Select = styled.select`
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
   min-width: 120px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
@@ -836,23 +866,30 @@ const SummaryCards = styled.div`
 `;
 
 const StatCard = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
   display: flex;
   align-items: center;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   
   &.finances {
-    border-left: 4px solid #3f51b5;
+    border-left: 4px solid ${props => props.colors.primary};
   }
   
   &.affaires {
-    border-left: 4px solid #4caf50;
+    border-left: 4px solid ${props => props.colors.success};
   }
   
   &.redacteurs {
-    border-left: 4px solid #f44336;
+    border-left: 4px solid ${props => props.colors.error};
+  }
+  
+  &:hover {
+    box-shadow: ${props => props.colors.shadowHover};
+    transform: translateY(-2px);
   }
 `;
 
@@ -865,20 +902,21 @@ const StatIconContainer = styled.div`
   justify-content: center;
   margin-right: 16px;
   font-size: 24px;
+  transition: all 0.3s ease;
   
   .finances & {
-    background-color: #e8eaf6;
-    color: #3f51b5;
+    background-color: ${props => props.colors.cardIcon.finances.bg};
+    color: ${props => props.colors.cardIcon.finances.color};
   }
   
   .affaires & {
-    background-color: #e8f5e9;
-    color: #4caf50;
+    background-color: ${props => props.colors.cardIcon.militaires.bg};
+    color: ${props => props.colors.cardIcon.militaires.color};
   }
   
   .redacteurs & {
-    background-color: #ffebee;
-    color: #f44336;
+    background-color: ${props => props.colors.cardIcon.beneficiaires.bg};
+    color: ${props => props.colors.cardIcon.beneficiaires.color};
   }
 `;
 
@@ -889,55 +927,69 @@ const StatContent = styled.div`
 const StatValue = styled.div`
   font-size: 24px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const StatLabel = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const StatDetail = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const BlockTitle = styled.h3`
   font-size: 14px;
   font-weight: 500;
   color: white;
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   margin: 0;
   padding: 10px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: background-color 0.3s ease;
 `;
 
 const TableRow = styled.tr`
+  transition: background-color 0.3s ease;
+  
   &:nth-child(even) {
-    background-color: rgba(63, 81, 181, 0.05);
+    background-color: ${props => props.colors.surfaceHover};
+  }
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
@@ -945,9 +997,10 @@ const TableRow = styled.tr`
 const TableTitle = styled.div`
   padding: 16px;
   font-weight: 600;
-  color: #424242;
-  background-color: #f7f7f7;
-  border-bottom: 2px solid #3f51b5;
+  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.colors.surfaceHover};
+  border-bottom: 2px solid ${props => props.colors.primary};
+  transition: all 0.3s ease;
 `;
 
 const TablesRow = styled.div`
@@ -974,15 +1027,20 @@ const TablesRow = styled.div`
 `;
 
 const TableCard = styled.div`
-  background: white;
+  background: ${props => props.colors.surface};
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border: 2px solid #ddd;
+  border: 2px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: ${props => props.colors.shadowHover};
+  }
   
   @media (max-width: 768px) {
     overflow-x: auto;
@@ -998,9 +1056,11 @@ const CompactTable = styled.table`
   border-collapse: collapse;
   font-size: 13px;
   table-layout: fixed;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
   
   .bg-header {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
   }
   
   @media (max-width: 1400px) {
@@ -1008,28 +1068,11 @@ const CompactTable = styled.table`
   }
 `;
 
-const Th = styled.th`
-  padding: 12px 8px;
-  color: #555;
-  font-weight: 600;
-  font-size: 12px;
-  border-bottom: 2px solid #ddd;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  
-  @media (max-width: 1400px) {
-    padding: 10px 6px;
-    font-size: 11px;
-  }
-`;
-
 const Tr = styled.tr`
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
   
   &:hover {
-    background-color: #f9f9f9;
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
@@ -1037,9 +1080,10 @@ const YearCell = styled.td`
   padding: 12px 8px;
   font-weight: 600;
   font-size: 16px;
-  color: #3f51b5;
-  border-bottom: 1px solid #eee;
+  color: ${props => props.colors.primary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
+  transition: all 0.3s ease;
   
   @media (max-width: 1400px) {
     padding: 10px 6px;
@@ -1049,12 +1093,13 @@ const YearCell = styled.td`
 
 const Td = styled.td`
   padding: 12px 8px;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: ${props => props.colors.textPrimary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
   
   /* Container pour les valeurs et variations */
   .value-container {
@@ -1075,19 +1120,20 @@ const Td = styled.td`
 `;
 
 const TotalRow = styled.tr`
-  background-color: #f5f5f5 !important;
+  background-color: ${props => props.colors.surfaceHover} !important;
   font-weight: 600;
 `;
 
 const TotalCell = styled.td`
   padding: 14px 8px;
-  color: #333;
-  border-top: 2px solid #ddd;
+  color: ${props => props.colors.textPrimary};
+  border-top: 2px solid ${props => props.colors.border};
   text-align: left;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
   
   @media (max-width: 1400px) {
     padding: 12px 6px;
@@ -1103,13 +1149,19 @@ const ChartsSection = styled.div`
 `;
 
 const ChartCard = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
   height: auto;
   min-height: 400px;
   overflow: hidden;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: ${props => props.colors.shadowHover};
+  }
 `;
 
 const ResponsiveTable = styled.table`
@@ -1117,17 +1169,20 @@ const ResponsiveTable = styled.table`
   border-collapse: collapse;
   font-size: 14px;
   table-layout: auto;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const TableHeader = styled.th`
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
   padding: 8px 12px;
   font-weight: 500;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid ${props => props.colors.border};
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
   
   &:nth-child(2), &:nth-child(3) {
     text-align: center;
@@ -1136,26 +1191,21 @@ const TableHeader = styled.th`
 
 const TableDataCell = styled.td`
   padding: 8px 12px;
-  color: #333;
-  border-bottom: 1px solid #e0e0e0;
+  color: ${props => props.colors.textPrimary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
   white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
   
   &:nth-child(2), &:nth-child(3) {
     text-align: center;
   }
 `;
 
-const Container = styled.div`
-  padding: 20px;
-  max-width: 100%;
-  overflow-x: hidden;
-`;
-
 const VariationUp = styled.span`
-  color: #4caf50;
+  color: ${props => props.colors.success};
   font-size: 11px;
   font-weight: 500;
   margin-left: 4px;
@@ -1173,7 +1223,7 @@ const VariationUp = styled.span`
 `;
 
 const VariationDown = styled.span`
-  color: #f44336;
+  color: ${props => props.colors.error};
   font-size: 11px;
   font-weight: 500;
   margin-left: 4px;
@@ -1196,12 +1246,18 @@ const HeaderActions = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const ExportButton = styled.button`
   display: flex;
   align-items: center;
-  background-color: #4caf50;
+  background-color: ${props => props.colors.success};
   color: white;
   border: none;
   padding: 8px 16px;
@@ -1209,28 +1265,33 @@ const ExportButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #388e3c;
+    background-color: ${props => props.colors.success}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &:active {
-    background-color: #2e7d32;
+    transform: translateY(0);
   }
 `;
 
 const InfoMessage = styled.div`
   padding: 20px;
-  background-color: #e8f5e9;
+  background-color: ${props => props.colors.successBg};
   border-radius: 4px;
-  color: #2e7d32;
+  color: ${props => props.colors.success};
   text-align: center;
   font-size: 16px;
+  border: 1px solid ${props => props.colors.success}40;
+  transition: all 0.3s ease;
   
   p {
     margin: 8px 0;
@@ -1239,14 +1300,15 @@ const InfoMessage = styled.div`
 
 const SummaryTableHeader = styled.th`
   padding: 12px 8px;
-  color: #555;
+  color: ${props => props.colors.textPrimary};
   font-weight: 600;
   font-size: 12px;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid ${props => props.colors.border};
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
   
   .full-text {
     display: inline;

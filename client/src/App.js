@@ -5,7 +5,7 @@ import './App.css';
 // Contextes
 import AppContext from './contexts/AppContext';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext'; // Nouveau import
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Composant de route privée
 import PrivateRoute from './utils/PrivateRoute';
@@ -28,12 +28,13 @@ import DetailBeneficiaire from './pages/DetailBeneficiaire';
 import Avocats from './pages/Avocats';
 import Statistiques from './pages/Statistiques';
 import Parametres from './pages/Parametres';
+import Documentation from './pages/Documentation';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <ThemeProvider> {/* Nouveau wrapper pour le thème */}
+        <ThemeProvider> {/* Wrapper pour le thème */}
           <AppContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
             <Routes>
               {/* Route publique */}
@@ -52,14 +53,9 @@ function App() {
                   <Route path="/avocats" element={<Avocats />} />
                   <Route path="/statistiques" element={<Statistiques />} />
                   <Route path="/parametres" element={<Parametres />} />
+                  <Route path="/documentation" element={<Documentation />} />
                 </Route>
               </Route>
-              
-              {/* Routes privées (admin uniquement)
-              <Route element={<PrivateRoute requireAdmin={true} />}>
-                <Route element={<MainLayout />}>
-                </Route>
-              </Route> */}
               
               {/* Redirection et route 404 */}
               <Route path="/404" element={<NotFound />} />

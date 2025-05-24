@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { 
   FaSignOutAlt, FaUser, FaChartPie, FaFileAlt, 
   FaShieldAlt, FaUsers, FaBriefcase, FaChartBar, 
-  FaCog
+  FaCog, FaBook // Nouvelle icône pour Documentation
 } from 'react-icons/fa';
 import { AuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -29,6 +29,7 @@ const MainLayout = () => {
     if (path.startsWith('/avocats')) return 'avocats';
     if (path.startsWith('/statistiques')) return 'statistiques';
     if (path.startsWith('/parametres')) return 'parametres';
+    if (path.startsWith('/documentation')) return 'documentation'; // Nouvelle condition
     return '';
   };
   
@@ -114,6 +115,15 @@ const MainLayout = () => {
               {activeTab === 'statistiques' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
+            {/* Nouvelle entrée pour Documentation */}
+            <NavItem active={activeTab === 'documentation'} colors={colors}>
+              <StyledLink to="/documentation" colors={colors}>
+                <NavIcon><FaBook /></NavIcon>
+                <span>Documentation</span>
+              </StyledLink>
+              {activeTab === 'documentation' && <ActiveIndicator colors={colors} />}
+            </NavItem>
+            
             <NavItem active={activeTab === 'parametres'} colors={colors}>
               <StyledLink to="/parametres" colors={colors}>
                 <NavIcon><FaCog /></NavIcon>
@@ -132,7 +142,7 @@ const MainLayout = () => {
   );
 };
 
-// Styled Components
+// Styled Components (identiques à votre version existante)
 const Container = styled.div`
   display: flex;
   flex-direction: column;

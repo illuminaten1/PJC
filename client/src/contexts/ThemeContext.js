@@ -48,7 +48,7 @@ export const ThemeProvider = ({ children }) => {
       borderLight: darkMode ? '#555555' : '#e9ecef',
       
       // Couleurs d'accent
-      primary: '#3f51b5',
+      primary: '#5c6bc0',
       primaryDark: '#303f9f',
       primaryLight: '#7986cb',
       

@@ -198,7 +198,7 @@ const AppTitle = styled.h1`
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  color: ${props => props.colors.primary};
+  color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
 `;
 
@@ -272,7 +272,7 @@ const NavItem = styled.li`
   position: relative;
   
   a {
-    color: ${props => props.active ? props.colors.primary : props.colors.navTextMuted};
+    color: ${props => props.active ? props.colors.textPrimary : props.colors.navTextMuted};
     background-color: ${props => props.active ? props.colors.navActive : 'transparent'};
     font-weight: ${props => props.active ? '500' : 'normal'};
   }

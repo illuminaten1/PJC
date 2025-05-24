@@ -244,55 +244,55 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
   };
   
   return (
-    <Form onSubmit={handleSubmit} colors={colors}>
-      <FormSection colors={colors}>
-        <SectionTitle colors={colors}>Identité</SectionTitle>
+    <Form onSubmit={handleSubmit}>
+      <FormSection $colors={colors}>
+        <SectionTitle $colors={colors}>Identité</SectionTitle>
         <FormRow>
           <FormGroup>
-            <Label htmlFor="nom" colors={colors}>NOM <Required>*</Required></Label>
+            <Label htmlFor="nom" $colors={colors}>NOM <Required $colors={colors}>*</Required></Label>
             <Input
               type="text"
               id="nom"
               name="nom"
               value={formData.nom}
               onChange={handleChange}
-              error={!!errors.nom}
-              colors={colors}
+              $error={!!errors.nom}
+              $colors={colors}
             />
-            {errors.nom && <ErrorText colors={colors}>{errors.nom}</ErrorText>}
+            {errors.nom && <ErrorText $colors={colors}>{errors.nom}</ErrorText>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="prenom" colors={colors}>Prénom <Required>*</Required></Label>
+            <Label htmlFor="prenom" $colors={colors}>Prénom <Required $colors={colors}>*</Required></Label>
             <Input
               type="text"
               id="prenom"
               name="prenom"
               value={formData.prenom}
               onChange={handleChange}
-              error={!!errors.prenom}
-              colors={colors}
+              $error={!!errors.prenom}
+              $colors={colors}
             />
-            {errors.prenom && <ErrorText colors={colors}>{errors.prenom}</ErrorText>}
+            {errors.prenom && <ErrorText $colors={colors}>{errors.prenom}</ErrorText>}
           </FormGroup>
         </FormRow>
         
         <FormGroup>
-          <Label htmlFor="email" colors={colors}>Email <Required>*</Required></Label>
+          <Label htmlFor="email" $colors={colors}>Email <Required $colors={colors}>*</Required></Label>
           <Input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            error={!!errors.email}
-            colors={colors}
+            $error={!!errors.email}
+            $colors={colors}
           />
-          {errors.email && <ErrorText colors={colors}>{errors.email}</ErrorText>}
+          {errors.email && <ErrorText $colors={colors}>{errors.email}</ErrorText>}
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="cabinet" colors={colors}>Cabinet</Label>
+          <Label htmlFor="cabinet" $colors={colors}>Cabinet</Label>
           <div style={{ position: 'relative' }}>
             <Input
               type="text"
@@ -302,15 +302,15 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               onChange={handleChange}
               onFocus={() => setShowCabinetsSuggestions(true)}
               onBlur={() => setTimeout(() => setShowCabinetsSuggestions(false), 200)}
-              colors={colors}
+              $colors={colors}
             />
             {showCabinetsSuggestions && getFilteredCabinetsSuggestions().length > 0 && (
-              <SuggestionList colors={colors}>
+              <SuggestionList $colors={colors}>
                 {getFilteredCabinetsSuggestions().map((suggestion, index) => (
                   <SuggestionItem 
                     key={index} 
                     onClick={() => handleCabinetSuggestionClick(suggestion)}
-                    colors={colors}
+                    $colors={colors}
                   >
                     {suggestion}
                   </SuggestionItem>
@@ -321,13 +321,13 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="region" colors={colors}>Région</Label>
+          <Label htmlFor="region" $colors={colors}>Région</Label>
           <Select
             id="region"
             name="region"
             value={formData.region}
             onChange={handleChange}
-            colors={colors}
+            $colors={colors}
           >
             <option value="">Sélectionnez une région</option>
             {regions.map((region, index) => (
@@ -337,26 +337,26 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="siretRidet" colors={colors}>SIRET/RIDET</Label>
+          <Label htmlFor="siretRidet" $colors={colors}>SIRET/RIDET</Label>
           <Input
             type="text"
             id="siretRidet"
             name="siretRidet"
             value={formData.siretRidet}
             onChange={handleChange}
-            error={!!errors.siretRidet}
+            $error={!!errors.siretRidet}
             placeholder="Ex: 123 456 789 00012"
-            colors={colors}
+            $colors={colors}
           />
-          {errors.siretRidet && <ErrorText colors={colors}>{errors.siretRidet}</ErrorText>}
+          {errors.siretRidet && <ErrorText $colors={colors}>{errors.siretRidet}</ErrorText>}
         </FormGroup>
       </FormSection>
       
-      <FormSection colors={colors}>
-        <SectionTitle colors={colors}>Villes d'intervention</SectionTitle>
+      <FormSection $colors={colors}>
+        <SectionTitle $colors={colors}>Villes d'intervention</SectionTitle>
         <FormRow>
-          <FormGroup flex={3}>
-            <Label htmlFor="nouvelleVille" colors={colors}>Ajouter une ville d'intervention</Label>
+          <FormGroup $flex={3}>
+            <Label htmlFor="nouvelleVille" $colors={colors}>Ajouter une ville d'intervention</Label>
             <div style={{ position: 'relative' }}>
               <Input
                 type="text"
@@ -366,15 +366,15 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
                 onFocus={() => setShowVillesSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowVillesSuggestions(false), 200)}
                 placeholder="Saisissez le nom d'une ville"
-                colors={colors}
+                $colors={colors}
               />
               {showVillesSuggestions && getFilteredVillesSuggestions().length > 0 && (
-                <SuggestionList colors={colors}>
+                <SuggestionList $colors={colors}>
                   {getFilteredVillesSuggestions().map((suggestion, index) => (
                     <SuggestionItem 
                       key={index} 
                       onClick={() => handleVilleSuggestionClick(suggestion)}
-                      colors={colors}
+                      $colors={colors}
                     >
                       {suggestion}
                     </SuggestionItem>
@@ -383,122 +383,122 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               )}
             </div>
           </FormGroup>
-          <FormGroup flex={1} style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <AddButton type="button" onClick={addVille} colors={colors}>
+          <FormGroup $flex={1} style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <AddButton type="button" onClick={addVille} $colors={colors}>
               <FaPlus />
               <span>Ajouter</span>
             </AddButton>
           </FormGroup>
         </FormRow>
         
-        <VillesContainer colors={colors}>
+        <VillesContainer $colors={colors}>
           {formData.villesIntervention.map((ville, index) => (
-            <VilleTag key={index} colors={colors}>
+            <VilleTag key={index} $colors={colors}>
               {ville}
-              <RemoveButton type="button" onClick={() => removeVille(index)} colors={colors}>
+              <RemoveButton type="button" onClick={() => removeVille(index)} $colors={colors}>
                 <FaTimes />
               </RemoveButton>
             </VilleTag>
           ))}
           {formData.villesIntervention.length === 0 && (
-            <EmptyVilles colors={colors}>Aucune ville d'intervention ajoutée</EmptyVilles>
+            <EmptyVilles $colors={colors}>Aucune ville d'intervention ajoutée</EmptyVilles>
           )}
         </VillesContainer>
       </FormSection>
       
-      <FormSection colors={colors}>
-        <SectionTitle colors={colors}>Adresse</SectionTitle>
+      <FormSection $colors={colors}>
+        <SectionTitle $colors={colors}>Adresse</SectionTitle>
         <FormRow>
-          <FormGroup flex={1}>
-            <Label htmlFor="adresse.numero" colors={colors}>N°</Label>
+          <FormGroup $flex={1}>
+            <Label htmlFor="adresse.numero" $colors={colors}>N°</Label>
             <Input
               type="text"
               id="adresse.numero"
               name="adresse.numero"
               value={formData.adresse.numero}
               onChange={handleChange}
-              colors={colors}
+              $colors={colors}
             />
           </FormGroup>
           
-          <FormGroup flex={3}>
-            <Label htmlFor="adresse.rue" colors={colors}>Rue</Label>
+          <FormGroup $flex={3}>
+            <Label htmlFor="adresse.rue" $colors={colors}>Rue</Label>
             <Input
               type="text"
               id="adresse.rue"
               name="adresse.rue"
               value={formData.adresse.rue}
               onChange={handleChange}
-              colors={colors}
+              $colors={colors}
             />
           </FormGroup>
         </FormRow>
         
         <FormRow>
           <FormGroup>
-            <Label htmlFor="adresse.codePostal" colors={colors}>Code postal</Label>
+            <Label htmlFor="adresse.codePostal" $colors={colors}>Code postal</Label>
             <Input
               type="text"
               id="adresse.codePostal"
               name="adresse.codePostal"
               value={formData.adresse.codePostal}
               onChange={handleChange}
-              colors={colors}
+              $colors={colors}
             />
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="adresse.ville" colors={colors}>Ville</Label>
+            <Label htmlFor="adresse.ville" $colors={colors}>Ville</Label>
             <Input
               type="text"
               id="adresse.ville"
               name="adresse.ville"
               value={formData.adresse.ville}
               onChange={handleChange}
-              colors={colors}
+              $colors={colors}
             />
           </FormGroup>
         </FormRow>
       </FormSection>
       
-      <FormSection colors={colors}>
-        <SectionTitle colors={colors}>Contacts</SectionTitle>
+      <FormSection $colors={colors}>
+        <SectionTitle $colors={colors}>Contacts</SectionTitle>
         <FormRow>
           <FormGroup>
-            <Label htmlFor="telephonePublic1" colors={colors}>Téléphone public 1</Label>
+            <Label htmlFor="telephonePublic1" $colors={colors}>Téléphone public 1</Label>
             <Input
               type="tel"
               id="telephonePublic1"
               name="telephonePublic1"
               value={formData.telephonePublic1}
               onChange={handleChange}
-              error={!!errors.telephonePublic1}
+              $error={!!errors.telephonePublic1}
               placeholder="Ex: 06 12 34 56 78"
-              colors={colors}
+              $colors={colors}
             />
-            {errors.telephonePublic1 && <ErrorText colors={colors}>{errors.telephonePublic1}</ErrorText>}
+            {errors.telephonePublic1 && <ErrorText $colors={colors}>{errors.telephonePublic1}</ErrorText>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="telephonePublic2" colors={colors}>Téléphone public 2</Label>
+            <Label htmlFor="telephonePublic2" $colors={colors}>Téléphone public 2</Label>
             <Input
               type="tel"
               id="telephonePublic2"
               name="telephonePublic2"
               value={formData.telephonePublic2}
               onChange={handleChange}
-              error={!!errors.telephonePublic2}
+              $error={!!errors.telephonePublic2}
               placeholder="Ex: 01 23 45 67 89"
-              colors={colors}
+              $colors={colors}
             />
-            {errors.telephonePublic2 && <ErrorText colors={colors}>{errors.telephonePublic2}</ErrorText>}
+            {errors.telephonePublic2 && <ErrorText $colors={colors}>{errors.telephonePublic2}</ErrorText>}
           </FormGroup>
         </FormRow>
         
         <FormGroup>
-          <Label htmlFor="telephonePrive" colors={colors}>
+          <Label htmlFor="telephonePrive" $colors={colors}>
             Téléphone privé
-            <PrivateNote colors={colors}> (non communiqué aux bénéficiaires)</PrivateNote>
+            <PrivateNote $colors={colors}> (non communiqué aux bénéficiaires)</PrivateNote>
           </Label>
           <Input
             type="tel"
@@ -506,17 +506,17 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             name="telephonePrive"
             value={formData.telephonePrive}
             onChange={handleChange}
-            error={!!errors.telephonePrive}
+            $error={!!errors.telephonePrive}
             placeholder="Ex: 07 98 76 54 32"
-            colors={colors}
+            $colors={colors}
           />
-          {errors.telephonePrive && <ErrorText colors={colors}>{errors.telephonePrive}</ErrorText>}
+          {errors.telephonePrive && <ErrorText $colors={colors}>{errors.telephonePrive}</ErrorText>}
         </FormGroup>
       </FormSection>
       
-      <FormSection colors={colors}>
-        <SectionTitle colors={colors}>Spécialisation et commentaires</SectionTitle>
-        <FormGroup inline>
+      <FormSection $colors={colors}>
+        <SectionTitle $colors={colors}>Spécialisation et commentaires</SectionTitle>
+        <FormGroup $inline>
           <CheckboxContainer>
             <Checkbox
               type="checkbox"
@@ -525,17 +525,17 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
               checked={formData.specialisationRPC}
               onChange={handleChange}
             />
-            <Label htmlFor="specialisationRPC" inline colors={colors}>
+            <Label htmlFor="specialisationRPC" $inline $colors={colors}>
               Spécialisé en réparation du préjudice corporel (RPC)
             </Label>
           </CheckboxContainer>
-          <SpecializationInfo colors={colors}>
+          <SpecializationInfo $colors={colors}>
             Cette spécialisation sera affichée sous forme de badge.
           </SpecializationInfo>
         </FormGroup>
         
         <FormGroup>
-          <Label htmlFor="commentaires" colors={colors}>Commentaires</Label>
+          <Label htmlFor="commentaires" $colors={colors}>Commentaires</Label>
           <Textarea
             id="commentaires"
             name="commentaires"
@@ -543,26 +543,26 @@ const AvocatForm = ({ onSubmit, initialData, isEditing }) => {
             onChange={handleChange}
             rows={4}
             placeholder="Informations complémentaires sur l'avocat..."
-            colors={colors}
+            $colors={colors}
           />
         </FormGroup>
       </FormSection>
       
-      <FloatingSubmitButton type="submit" colors={colors}>
+      <FloatingSubmitButton type="submit" $colors={colors}>
         {isEditing ? 'Mettre à jour' : 'Ajouter'} l'avocat
       </FloatingSubmitButton>
     </Form>
   );
 };
 
-// Styles thématisés
+// Styles thématisés avec props transients ($colors)
 const FormSection = styled.div`
   margin-bottom: 30px;
   padding: 20px;
-  background-color: ${props => props.colors.surface};
+  background-color: ${props => props.$colors.surface};
   border-radius: 8px;
-  box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props => props.colors.border};
+  box-shadow: ${props => props.$colors.shadow};
+  border: 1px solid ${props => props.$colors.border};
   transition: all 0.3s ease;
 `;
 
@@ -570,8 +570,8 @@ const SectionTitle = styled.h3`
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 18px;
-  color: ${props => props.colors.textPrimary};
-  border-bottom: 1px solid ${props => props.colors.borderLight};
+  color: ${props => props.$colors.textPrimary};
+  border-bottom: 1px solid ${props => props.$colors.borderLight};
   padding-bottom: 8px;
   transition: color 0.3s ease;
 `;
@@ -589,9 +589,9 @@ const FormRow = styled.div`
 
 const FormGroup = styled.div`
   margin-bottom: 16px;
-  flex: ${props => props.flex || 1};
+  flex: ${props => props.$flex || 1};
   
-  ${props => props.inline && `
+  ${props => props.$inline && `
     display: flex;
     flex-direction: column;
   `}
@@ -601,10 +601,10 @@ const Label = styled.label`
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: ${props => props.colors.textPrimary};
+  color: ${props => props.$colors.textPrimary};
   transition: color 0.3s ease;
   
-  ${props => props.inline && `
+  ${props => props.$inline && `
     margin-bottom: 0;
     margin-left: 8px;
   `}
@@ -613,65 +613,65 @@ const Label = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
+  border: 1px solid ${props => props.$error ? props.$colors.error : props.$colors.border};
   border-radius: 4px;
   font-size: 14px;
-  background-color: ${props => props.colors.surface};
-  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.$colors.surface};
+  color: ${props => props.$colors.textPrimary};
   transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
-    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+    border-color: ${props => props.$error ? props.$colors.error : props.$colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.$error ? props.$colors.error : props.$colors.primary};
   }
   
   &::placeholder {
-    color: ${props => props.colors.textMuted};
+    color: ${props => props.$colors.textMuted};
   }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
+  border: 1px solid ${props => props.$error ? props.$colors.error : props.$colors.border};
   border-radius: 4px;
   font-size: 14px;
-  background-color: ${props => props.colors.surface};
-  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.$colors.surface};
+  color: ${props => props.$colors.textPrimary};
   transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
-    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+    border-color: ${props => props.$error ? props.$colors.error : props.$colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.$error ? props.$colors.error : props.$colors.primary};
   }
   
   option {
-    background-color: ${props => props.colors.surface};
-    color: ${props => props.colors.textPrimary};
+    background-color: ${props => props.$colors.surface};
+    color: ${props => props.$colors.textPrimary};
   }
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${props => props.error ? props.colors.error : props.colors.border};
+  border: 1px solid ${props => props.$error ? props.$colors.error : props.$colors.border};
   border-radius: 4px;
   font-size: 14px;
   resize: vertical;
-  background-color: ${props => props.colors.surface};
-  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.$colors.surface};
+  color: ${props => props.$colors.textPrimary};
   transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? props.colors.error : props.colors.primary};
-    box-shadow: 0 0 0 1px ${props => props.error ? props.colors.error : props.colors.primary};
+    border-color: ${props => props.$error ? props.$colors.error : props.$colors.primary};
+    box-shadow: 0 0 0 1px ${props => props.$error ? props.$colors.error : props.$colors.primary};
   }
   
   &::placeholder {
-    color: ${props => props.colors.textMuted};
+    color: ${props => props.$colors.textMuted};
   }
 `;
 
@@ -688,32 +688,32 @@ const Checkbox = styled.input`
 
 const SpecializationInfo = styled.div`
   font-size: 12px;
-  color: ${props => props.colors.textMuted};
+  color: ${props => props.$colors.textMuted};
   margin-top: 4px;
   margin-left: 24px;
   transition: color 0.3s ease;
 `;
 
 const Required = styled.span`
-  color: ${props => props.colors.error};
+  color: ${props => props.$colors.error};
 `;
 
 const PrivateNote = styled.span`
   font-size: 12px;
-  color: ${props => props.colors.textMuted};
+  color: ${props => props.$colors.textMuted};
   font-style: italic;
   transition: color 0.3s ease;
 `;
 
 const ErrorText = styled.div`
-  color: ${props => props.colors.error};
+  color: ${props => props.$colors.error};
   font-size: 12px;
   margin-top: 4px;
   transition: color 0.3s ease;
 `;
 
 const AddButton = styled.button`
-  background-color: ${props => props.colors.success};
+  background-color: ${props => props.$colors.success};
   color: white;
   border: none;
   border-radius: 4px;
@@ -726,10 +726,10 @@ const AddButton = styled.button`
   transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.colors.success};
+    background-color: ${props => props.$colors.success};
     filter: brightness(0.9);
     transform: translateY(-1px);
-    box-shadow: ${props => props.colors.shadowHover};
+    box-shadow: ${props => props.$colors.shadowHover};
   }
 `;
 
@@ -740,28 +740,28 @@ const VillesContainer = styled.div`
   margin-top: 10px;
   min-height: 40px;
   padding: 10px;
-  background-color: ${props => props.colors.background};
+  background-color: ${props => props.$colors.background};
   border-radius: 4px;
-  border: 1px solid ${props => props.colors.borderLight};
+  border: 1px solid ${props => props.$colors.borderLight};
   transition: all 0.3s ease;
 `;
 
 const VilleTag = styled.div`
   display: flex;
   align-items: center;
-  background-color: ${props => props.colors.primary}20;
-  border: 1px solid ${props => props.colors.primary}40;
+  background-color: ${props => props.$colors.primary}20;
+  border: 1px solid ${props => props.$colors.primary}40;
   border-radius: 16px;
   padding: 5px 10px;
   font-size: 14px;
-  color: ${props => props.colors.primary};
+  color: ${props => props.$colors.primary};
   transition: all 0.3s ease;
 `;
 
 const RemoveButton = styled.button`
   background: none;
   border: none;
-  color: ${props => props.colors.primary};
+  color: ${props => props.$colors.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -771,12 +771,12 @@ const RemoveButton = styled.button`
   transition: color 0.3s ease;
   
   &:hover {
-    color: ${props => props.colors.error};
+    color: ${props => props.$colors.error};
   }
 `;
 
 const EmptyVilles = styled.div`
-  color: ${props => props.colors.textMuted};
+  color: ${props => props.$colors.textMuted};
   font-style: italic;
   font-size: 14px;
   transition: color 0.3s ease;
@@ -787,27 +787,27 @@ const SuggestionList = styled.ul`
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid ${props => props.colors.border};
+  border: 1px solid ${props => props.$colors.border};
   border-top: none;
   border-radius: 0 0 4px 4px;
-  background-color: ${props => props.colors.surface};
+  background-color: ${props => props.$colors.surface};
   z-index: 10;
   margin: 0;
   padding: 0;
   list-style: none;
-  box-shadow: ${props => props.colors.shadow};
+  box-shadow: ${props => props.$colors.shadow};
   transition: all 0.3s ease;
 `;
 
 const SuggestionItem = styled.li`
   padding: 8px 12px;
   cursor: pointer;
-  color: ${props => props.colors.textPrimary};
-  border-bottom: 1px solid ${props => props.colors.borderLight};
+  color: ${props => props.$colors.textPrimary};
+  border-bottom: 1px solid ${props => props.$colors.borderLight};
   transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.colors.surfaceHover};
+    background-color: ${props => props.$colors.surfaceHover};
   }
   
   &:last-child {
@@ -819,7 +819,7 @@ const Form = styled.form`
   padding: 20px;
   position: relative;
   padding-bottom: 60px;
-  background-color: ${props => props.colors.background};
+  background-color: ${props => props.theme?.colors?.background || '#f5f5f5'};
   transition: background-color 0.3s ease;
 `;
 
@@ -828,7 +828,7 @@ const FloatingSubmitButton = styled.button`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: ${props => props.colors.primary};
+  background-color: ${props => props.$colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -838,11 +838,11 @@ const FloatingSubmitButton = styled.button`
   margin-top: 20px;
   width: 100%;
   z-index: 10;
-  box-shadow: ${props => props.colors.shadowHover};
+  box-shadow: ${props => props.$colors.shadowHover};
   transition: all 0.3s ease;
   
   &:hover {
-    background-color: ${props => props.colors.primaryDark};
+    background-color: ${props => props.$colors.primaryDark};
     transform: translateY(-1px);
   }
 `;

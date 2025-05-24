@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FaUserEdit, FaKey, FaToggleOn, FaToggleOff, FaTrash } from 'react-icons/fa';
 import { AuthContext } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 /**
  * Composant qui affiche la liste des utilisateurs sous forme de tableau
@@ -23,48 +24,50 @@ const UtilisateursTable = ({
   onDelete 
 }) => {
   const { user } = useContext(AuthContext);
+  const { colors } = useTheme();
   
   // Si aucun utilisateur n'est fourni ou si la liste est vide
   if (!utilisateurs || utilisateurs.length === 0) {
     return (
-      <EmptyState>
+      <EmptyState colors={colors}>
         Aucun utilisateur trouvé.
       </EmptyState>
     );
   }
   
   return (
-    <TableContainer>
-      <Table>
-        <TableHead>
+    <TableContainer colors={colors}>
+      <Table colors={colors}>
+        <TableHead colors={colors}>
           <TableRow>
-            <TableHeader>Nom d'utilisateur</TableHeader>
-            <TableHeader>Nom complet</TableHeader>
-            <TableHeader>Rôle</TableHeader>
-            <TableHeader>Statut</TableHeader>
-            <TableHeader>Actions</TableHeader>
+            <TableHeader colors={colors}>Nom d'utilisateur</TableHeader>
+            <TableHeader colors={colors}>Nom complet</TableHeader>
+            <TableHeader colors={colors}>Rôle</TableHeader>
+            <TableHeader colors={colors}>Statut</TableHeader>
+            <TableHeader colors={colors}>Actions</TableHeader>
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody colors={colors}>
           {utilisateurs.map(utilisateur => (
-            <TableRow key={utilisateur._id} active={utilisateur.actif}>
-              <TableCell>{utilisateur.username}</TableCell>
-              <TableCell>{utilisateur.nom}</TableCell>
-              <TableCell>
-                <RoleBadge isAdmin={utilisateur.role === 'administrateur'}>
+            <TableRow key={utilisateur._id} active={utilisateur.actif} colors={colors}>
+              <TableCell colors={colors}>{utilisateur.username}</TableCell>
+              <TableCell colors={colors}>{utilisateur.nom}</TableCell>
+              <TableCell colors={colors}>
+                <RoleBadge isAdmin={utilisateur.role === 'administrateur'} colors={colors}>
                   {utilisateur.role === 'administrateur' ? 'Administrateur' : 'Rédacteur'}
                 </RoleBadge>
               </TableCell>
-              <TableCell>
-                <StatusBadge active={utilisateur.actif}>
+              <TableCell colors={colors}>
+                <StatusBadge active={utilisateur.actif} colors={colors}>
                   {utilisateur.actif ? 'Actif' : 'Inactif'}
                 </StatusBadge>
               </TableCell>
-              <TableCell>
+              <TableCell colors={colors}>
                 <ActionsContainer>
                   <ActionButton 
                     title="Modifier" 
                     onClick={() => onEdit(utilisateur)}
+                    colors={colors}
                   >
                     <FaUserEdit />
                   </ActionButton>
@@ -72,6 +75,7 @@ const UtilisateursTable = ({
                   <ActionButton 
                     title="Changer le mot de passe" 
                     onClick={() => onChangePassword(utilisateur)}
+                    colors={colors}
                   >
                     <FaKey />
                   </ActionButton>
@@ -80,6 +84,7 @@ const UtilisateursTable = ({
                     title={utilisateur.actif ? "Désactiver" : "Activer"} 
                     onClick={() => onToggleStatus(utilisateur)}
                     variant={utilisateur.actif ? "warning" : "success"}
+                    colors={colors}
                   >
                     {utilisateur.actif ? <FaToggleOff /> : <FaToggleOn />}
                   </ActionButton>
@@ -90,6 +95,7 @@ const UtilisateursTable = ({
                       title="Supprimer" 
                       onClick={() => onDelete(utilisateur)}
                       variant="danger"
+                      colors={colors}
                     >
                       <FaTrash />
                     </ActionButton>
@@ -112,46 +118,57 @@ UtilisateursTable.propTypes = {
   onDelete: PropTypes.func.isRequired
 };
 
-// Styles
+// Styles avec thématisation
 const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const TableHead = styled.thead`
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
+  transition: background-color 0.3s ease;
 `;
 
 const TableBody = styled.tbody`
-  background-color: white;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
 `;
 
 const TableRow = styled.tr`
-  border-bottom: 1px solid #eee;
-  background-color: ${props => props.active ? 'white' : 'rgba(0, 0, 0, 0.02)'};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  background-color: ${props => props.active ? props.colors.surface : props.colors.surface + 'f0'};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
 const TableCell = styled.td`
   padding: 0.75rem 1rem;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const TableHeader = styled.th`
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const RoleBadge = styled.span`
@@ -160,8 +177,9 @@ const RoleBadge = styled.span`
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
-  background-color: ${props => props.isAdmin ? '#4caf50' : '#3f51b5'};
+  background-color: ${props => props.isAdmin ? props.colors.success : props.colors.primary};
   color: white;
+  transition: background-color 0.3s ease;
 `;
 
 const StatusBadge = styled.span`
@@ -170,8 +188,10 @@ const StatusBadge = styled.span`
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
-  background-color: ${props => props.active ? '#e8f5e9' : '#ffebee'};
-  color: ${props => props.active ? '#2e7d32' : '#c62828'};
+  background-color: ${props => props.active ? props.colors.successBg : props.colors.errorBg};
+  color: ${props => props.active ? props.colors.success : props.colors.error};
+  border: 1px solid ${props => props.active ? props.colors.success + '40' : props.colors.error + '40'};
+  transition: all 0.3s ease;
 `;
 
 const ActionsContainer = styled.div`
@@ -188,13 +208,13 @@ const ActionButton = styled.button`
   background-color: ${props => {
     switch (props.variant) {
       case 'danger':
-        return '#f44336';
+        return props.colors.error;
       case 'warning':
-        return '#ff9800';
+        return props.colors.warning;
       case 'success':
-        return '#4caf50';
+        return props.colors.success;
       default:
-        return '#3f51b5';
+        return props.colors.primary;
     }
   }};
   color: white;
@@ -202,34 +222,38 @@ const ActionButton = styled.button`
   height: 32px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  transition: all 0.3s ease;
   
   &:hover {
     background-color: ${props => {
       switch (props.variant) {
         case 'danger':
-          return '#d32f2f';
+          return props.colors.error + 'dd';
         case 'warning':
-          return '#f57c00';
+          return props.colors.warning + 'dd';
         case 'success':
-          return '#388e3c';
+          return props.colors.success + 'dd';
         default:
-          return '#303f9f';
+          return props.colors.primaryDark;
       }
     }};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &:active {
-    transform: scale(0.95);
+    transform: translateY(0) scale(0.95);
   }
 `;
 
 const EmptyState = styled.div`
   padding: 2rem;
   text-align: center;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.borderLight};
   border-radius: 4px;
-  color: #666;
+  color: ${props => props.colors.textMuted};
+  transition: all 0.3s ease;
 `;
 
 export default UtilisateursTable;

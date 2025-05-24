@@ -10,7 +10,7 @@ const CirconstancesTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
       showSuccessMessage={showSuccessMessage}
       setErrorMessage={setErrorMessage}
       colors={colors}
-      canReorder={false}
+      canReorder={true}
     />
   );
 };

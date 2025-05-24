@@ -10,19 +10,21 @@ import AffaireTree from '../components/specific/AffaireTree';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
 import SyntheseDropdownButton from '../components/specific/SyntheseDropdownButton';
 import { MarkdownEditor, MarkdownDisplay } from '../components/common/MarkdownEditor';
+import { useTheme } from '../contexts/ThemeContext';
 import {
-  HeaderCard,
+  ThemedHeaderCard,
   HeaderGrid,
   HeaderItem,
-  HeaderLabel,
-  HeaderValue,
+  ThemedHeaderLabel,
+  ThemedHeaderValue,
   HeaderFullWidth,
-  ArchiveNote
+  ThemedArchiveNote
 } from '../components/common/HeaderComponents';
 
 const DetailAffaire = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   const [affaire, setAffaire] = useState(null);
   const [statistiques, setStatistiques] = useState(null);
@@ -165,37 +167,37 @@ const DetailAffaire = () => {
 
   if (loading) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails de l'affaire" 
           backButton
         />
-        <Loading>Chargement des détails de l'affaire...</Loading>
+        <Loading colors={colors}>Chargement des détails de l'affaire...</Loading>
       </Container>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails de l'affaire" 
           backButton
         />
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       </Container>
     );
   }
-  
+
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title={affaire.nom}
         subtitle={`Affaire créée le ${new Date(affaire.dateCreation).toLocaleDateString('fr-FR')}`}
         backButton
         actionButton={
           <ActionButtons>
-            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier l'affaire">
+            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier l'affaire" colors={colors}>
               <FaEdit />
               <ButtonText>Modifier</ButtonText>
             </ActionButton>
@@ -203,6 +205,8 @@ const DetailAffaire = () => {
             <ActionButton 
               onClick={handleArchiveToggle} 
               title={affaire.archive ? "Désarchiver l'affaire et tous ses éléments" : "Archiver l'affaire et tous ses éléments"}
+              colors={colors}
+              className={affaire.archive ? "archived" : ""}
             >
               <FaArchive />
               <ButtonText>{affaire.archive ? "Désarchiver tout" : "Archiver tout"}</ButtonText>
@@ -214,6 +218,7 @@ const DetailAffaire = () => {
               onClick={() => setDeleteModalOpen(true)} 
               title="Supprimer l'affaire"
               className="delete"
+              colors={colors}
             >
               <FaTrash />
               <ButtonText>Supprimer</ButtonText>
@@ -222,46 +227,46 @@ const DetailAffaire = () => {
         }
       />
       
-      <HeaderCard>
+      <ThemedHeaderCard>
         <HeaderFullWidth>
-          <HeaderLabel>Description</HeaderLabel>
-          <HeaderValue>{affaire.description || 'Aucune description'}</HeaderValue>
+          <ThemedHeaderLabel>Description</ThemedHeaderLabel>
+          <ThemedHeaderValue>{affaire.description || 'Aucune description'}</ThemedHeaderValue>
         </HeaderFullWidth>
         
         <HeaderGrid>
           <HeaderItem>
-            <HeaderLabel>Lieu</HeaderLabel>
-            <HeaderValue>{affaire.lieu || 'Non spécifié'}</HeaderValue>
+            <ThemedHeaderLabel>Lieu</ThemedHeaderLabel>
+            <ThemedHeaderValue>{affaire.lieu || 'Non spécifié'}</ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Date des faits</HeaderLabel>
-            <HeaderValue>{formatDateFaits(affaire.dateFaits)}</HeaderValue>
+            <ThemedHeaderLabel>Date des faits</ThemedHeaderLabel>
+            <ThemedHeaderValue>{formatDateFaits(affaire.dateFaits)}</ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Rédacteur</HeaderLabel>
-            <HeaderValue>{affaire.redacteur}</HeaderValue>
+            <ThemedHeaderLabel>Rédacteur</ThemedHeaderLabel>
+            <ThemedHeaderValue>{affaire.redacteur}</ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Statut</HeaderLabel>
-            <StatusTag status={affaire.archive ? 'archived' : 'active'}>
+            <ThemedHeaderLabel>Statut</ThemedHeaderLabel>
+            <StatusTag status={affaire.archive ? 'archived' : 'active'} colors={colors}>
               {affaire.archive ? 'Archivé' : 'Actif'}
             </StatusTag>
             {affaire.archive && (
-              <ArchiveNote>
+              <ThemedArchiveNote>
                 Cette affaire est archivée. Tous les militaires et bénéficiaires associés sont également archivés.
-              </ArchiveNote>
+              </ThemedArchiveNote>
             )}
           </HeaderItem>
         </HeaderGrid>
-      </HeaderCard>
+      </ThemedHeaderCard>
       
       {/* Section Notes */}
-      <Section>
+      <Section colors={colors}>
         <SectionHeader>
-          <SectionTitle>
+          <SectionTitle colors={colors}>
             <FaStickyNote />
             <span>Notes du dossier</span>
           </SectionTitle>
@@ -272,6 +277,7 @@ const DetailAffaire = () => {
                   onClick={handleNotesSave} 
                   disabled={notesUpdating}
                   title="Enregistrer les modifications"
+                  colors={colors}
                 >
                   {notesUpdating ? 'Enregistrement...' : 'Enregistrer'}
                 </ActionButton>
@@ -283,6 +289,7 @@ const DetailAffaire = () => {
                   disabled={notesUpdating}
                   title="Annuler les modifications"
                   className="cancel"
+                  colors={colors}
                 >
                   Annuler
                 </ActionButton>
@@ -291,6 +298,7 @@ const DetailAffaire = () => {
               <ActionButton 
                 onClick={() => setEditingNotes(true)} 
                 title="Modifier les notes"
+                colors={colors}
               >
                 <FaEdit />
                 <ButtonText>Modifier les notes</ButtonText>
@@ -299,7 +307,7 @@ const DetailAffaire = () => {
           </SectionActions>
         </SectionHeader>
         
-        <NotesContainer>
+        <NotesContainer colors={colors}>
           {editingNotes ? (
             <MarkdownEditor 
               value={notes} 
@@ -313,9 +321,9 @@ const DetailAffaire = () => {
         </NotesContainer>
       </Section>
       
-      <Section>
+      <Section colors={colors}>
         <SectionHeader>
-          <SectionTitle>Structure de l'affaire</SectionTitle>
+          <SectionTitle colors={colors}>Structure de l'affaire</SectionTitle>
         </SectionHeader>
         
         <AffaireTree 
@@ -328,58 +336,58 @@ const DetailAffaire = () => {
       </Section>
       
       {statistiques && (
-        <Section>
+        <Section colors={colors}>
           <SectionHeader>
-            <SectionTitle>
+            <SectionTitle colors={colors}>
               <FaChartBar />
               <span>Statistiques de l'affaire</span>
             </SectionTitle>
           </SectionHeader>
           
           <StatsGrid>
-            <StatsCard>
-              <StatsTitle>Militaires</StatsTitle>
-              <StatsValue>{statistiques.militaires.total}</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Militaires</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.militaires.total}</StatsValue>
+              <StatsDetails colors={colors}>
                 <StatDetail>
-                  <StatDetailLabel>Blessés :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.militaires.blesses}</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Blessés :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.militaires.blesses}</StatDetailValue>
                 </StatDetail>
                 <StatDetail>
-                  <StatDetailLabel>Décédés :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.militaires.decedes}</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Décédés :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.militaires.decedes}</StatDetailValue>
                 </StatDetail>
               </StatsDetails>
             </StatsCard>
             
-            <StatsCard>
-              <StatsTitle>Bénéficiaires</StatsTitle>
-              <StatsValue>{statistiques.beneficiaires.total}</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Bénéficiaires</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.beneficiaires.total}</StatsValue>
+              <StatsDetails colors={colors}>
                 {Object.entries(statistiques.beneficiaires.parQualite).map(([qualite, nombre]) => (
                   <StatDetail key={qualite}>
-                    <StatDetailLabel>{qualite} :</StatDetailLabel>
-                    <StatDetailValue>{nombre}</StatDetailValue>
+                    <StatDetailLabel colors={colors}>{qualite} :</StatDetailLabel>
+                    <StatDetailValue colors={colors}>{nombre}</StatDetailValue>
                   </StatDetail>
                 ))}
               </StatsDetails>
             </StatsCard>
             
-            <StatsCard>
-              <StatsTitle>Finances</StatsTitle>
-              <StatsValue>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Finances</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatsValue>
+              <StatsDetails colors={colors}>
                 <StatDetail>
-                  <StatDetailLabel>Engagé :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Engagé :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatDetailValue>
                 </StatDetail>
                 <StatDetail>
-                  <StatDetailLabel>Payé :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.montantPaye.toLocaleString('fr-FR')} € TTC</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Payé :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.montantPaye.toLocaleString('fr-FR')} € TTC</StatDetailValue>
                 </StatDetail>
                 <StatDetail>
-                  <StatDetailLabel>Ratio :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.ratio.toFixed(1)}%</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Ratio :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.ratio.toFixed(1)}%</StatDetailValue>
                 </StatDetail>
               </StatsDetails>
             </StatsCard>
@@ -409,10 +417,10 @@ const DetailAffaire = () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setDeleteModalOpen(false)}>
+            <CancelButton onClick={() => setDeleteModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <DeleteButton onClick={handleDelete}>
+            <DeleteButton onClick={handleDelete} colors={colors}>
               Supprimer
             </DeleteButton>
           </>
@@ -422,26 +430,77 @@ const DetailAffaire = () => {
           <p>Êtes-vous sûr de vouloir supprimer définitivement cette affaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également tous les militaires et bénéficiaires associés à cette affaire.</p>
           
-          {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+          {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
     </Container>
   );
 };
 
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const NotesContainer = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
   margin-bottom: 20px;
   overflow: hidden;
+  transition: all 0.3s ease;
   
   .CodeMirror {
     height: 250px;
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
+    
+    .CodeMirror-cursor {
+      border-left: 1px solid ${props => props.colors.primary};
+    }
+    
+    .CodeMirror-selected {
+      background-color: ${props => props.colors.primary}20;
+    }
+    
+    .CodeMirror-gutters {
+      background-color: ${props => props.colors.surfaceHover};
+      border-right: 1px solid ${props => props.colors.borderLight};
+    }
+    
+    .CodeMirror-linenumber {
+      color: ${props => props.colors.textMuted};
+    }
+  }
+  
+  .markdown-display {
+    padding: 20px;
+    color: ${props => props.colors.textPrimary};
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: ${props => props.colors.textPrimary};
+      border-bottom-color: ${props => props.colors.borderLight};
+    }
+    
+    code {
+      background-color: ${props => props.colors.surfaceHover};
+      color: ${props => props.colors.textPrimary};
+      border: 1px solid ${props => props.colors.borderLight};
+    }
+    
+    pre {
+      background-color: ${props => props.colors.surfaceHover};
+      border: 1px solid ${props => props.colors.borderLight};
+    }
+    
+    blockquote {
+      border-left-color: ${props => props.colors.primary};
+      background-color: ${props => props.colors.surfaceHover};
+    }
   }
 `;
 
@@ -451,24 +510,35 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'deces' ? `
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: ${props.colors.errorBg};
+    color: ${props.colors.error};
+    border: 1px solid ${props.colors.error}40;
   ` : props.status === 'blesse' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 
 const Section = styled.section`
   margin-bottom: 30px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const SectionHeader = styled.div`
@@ -476,18 +546,22 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid ${props => props.colors ? props.colors.borderLight : '#e0e0e0'};
 `;
 
 const SectionTitle = styled.h2`
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   display: flex;
   align-items: center;
+  margin: 0;
+  transition: color 0.3s ease;
   
   svg {
     margin-right: 8px;
-    color: #3f51b5;
+    color: ${props => props.colors.primary};
   }
 `;
 
@@ -499,12 +573,17 @@ const SectionActions = styled.div`
 const ActionButtons = styled.div`
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ActionButton = styled.button`
-  background-color: #fff;
-  color: #3f51b5;
-  border: 1px solid #3f51b5;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.primary};
+  border: 1px solid ${props => props.colors.primary};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -512,47 +591,51 @@ const ActionButton = styled.button`
   padding: 0 12px;
   height: 36px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
   
-  &:hover {
-    background-color: #3f51b5;
-    color: #fff;
+  &:hover:not(:disabled) {
+    background-color: ${props => props.colors.primary};
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &.archived {
-    background-color: #f5f5f5;
-    color: #757575;
-    border-color: #757575;
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
+    border-color: ${props => props.colors.textMuted};
     
-    &:hover {
-      background-color: #757575;
-      color: #fff;
+    &:hover:not(:disabled) {
+      background-color: ${props => props.colors.textMuted};
+      color: white;
     }
   }
   
   &.delete {
-    color: #f44336;
-    border-color: #f44336;
+    color: ${props => props.colors.error};
+    border-color: ${props => props.colors.error};
     
-    &:hover {
-      background-color: #f44336;
-      color: #fff;
+    &:hover:not(:disabled) {
+      background-color: ${props => props.colors.error};
+      color: white;
     }
   }
   
   &.cancel {
-    color: #757575;
-    border-color: #757575;
+    color: ${props => props.colors.textSecondary};
+    border-color: ${props => props.colors.textSecondary};
     
-    &:hover {
-      background-color: #757575;
-      color: #fff;
+    &:hover:not(:disabled) {
+      background-color: ${props => props.colors.textSecondary};
+      color: white;
     }
   }
   
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
   }
   
   svg {
@@ -563,6 +646,10 @@ const ActionButton = styled.button`
 const ButtonText = styled.span`
   font-size: 14px;
   font-weight: 500;
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
 `;
 
 const StatsGrid = styled.div`
@@ -573,27 +660,37 @@ const StatsGrid = styled.div`
 `;
 
 const StatsCard = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
 `;
 
 const StatsTitle = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
+  font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const StatsValue = styled.div`
   font-size: 24px;
-  font-weight: 500;
-  color: #3f51b5;
+  font-weight: 600;
+  color: ${props => props.colors.primary};
   margin-bottom: 16px;
+  transition: color 0.3s ease;
 `;
 
 const StatsDetails = styled.div`
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.colors.borderLight};
   padding-top: 12px;
 `;
 
@@ -605,70 +702,92 @@ const StatDetail = styled.div`
 `;
 
 const StatDetailLabel = styled.span`
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const StatDetailValue = styled.span`
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
+    color: ${props => props.colors ? props.colors.textPrimary : '#333'};
+    
+    strong {
+      color: ${props => props.colors ? props.colors.error : '#f44336'};
+    }
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  padding: 8px 12px;
+  border-radius: 4px;
   margin-top: 12px;
   font-size: 14px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    border-color: ${props => props.colors.primary};
+    transform: translateY(-1px);
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default DetailAffaire;

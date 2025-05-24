@@ -36,14 +36,6 @@ const MainLayout = () => {
   
   return (
     <Container colors={colors}>
-      <ThemeToggle 
-        onClick={toggleDarkMode}
-        colors={colors}
-        title={darkMode ? 'Mode clair' : 'Mode sombre'}
-      >
-        {darkMode ? '☀' : '●'}
-      </ThemeToggle>
-      
       <Header colors={colors}>
         <HeaderContent>
           <AppTitle colors={colors}>Protection Juridique Complémentaire - BRPF</AppTitle>
@@ -66,6 +58,13 @@ const MainLayout = () => {
         </HeaderContent>
         
         <Nav colors={colors}>
+          <ThemeToggle 
+            onClick={toggleDarkMode}
+            colors={colors}
+            title={darkMode ? 'Mode clair' : 'Mode sombre'}
+          >
+            {darkMode ? '☀' : '●'}
+          </ThemeToggle>
           <NavList>
             <NavItem active={activeTab === 'dashboard'} colors={colors}>
               <StyledLink to="/" colors={colors}>
@@ -144,40 +143,40 @@ const Container = styled.div`
 `;
 
 const ThemeToggle = styled.button`
-  position: fixed;
-  top: 10px;
-  right: 10px;
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
   background: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.border};
-  border-radius: 6px;
-  width: 40px;
-  height: 40px;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
   transition: all 0.2s ease;
   color: ${props => props.colors.textPrimary};
   box-shadow: ${props => props.colors.shadow};
-  z-index: 9999;
+  z-index: 100;
 
   &:hover {
-    transform: scale(1.05);
+    transform: translateY(-50%) scale(1.1);
     box-shadow: ${props => props.colors.shadowHover};
     border-color: ${props => props.colors.primary};
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: translateY(-50%) scale(0.95);
   }
 
   @media (max-width: 768px) {
-    top: 8px;
-    right: 8px;
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 `;
 
@@ -259,6 +258,7 @@ const Nav = styled.nav`
   background-color: ${props => props.colors.navBackground};
   border-top: 1px solid ${props => props.colors.borderLight};
   transition: all 0.3s ease;
+  position: relative;
 `;
 
 const NavList = styled.ul`

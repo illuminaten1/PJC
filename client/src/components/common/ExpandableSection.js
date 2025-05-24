@@ -1,52 +1,55 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ExpandableSection = ({ title, children, defaultExpanded = false, headerAction = null }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const { colors } = useTheme();
   
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
   
   return (
-    <Container expanded={expanded}>
-      <Header onClick={toggleExpand}>
+    <Container colors={colors} expanded={expanded}>
+      <Header colors={colors} onClick={toggleExpand}>
         <HeaderLeft>
-          <ExpandIcon>
+          <ExpandIcon colors={colors}>
             {expanded ? <FaChevronDown /> : <FaChevronRight />}
           </ExpandIcon>
-          <Title>{title}</Title>
+          <Title colors={colors}>{title}</Title>
         </HeaderLeft>
         
         {headerAction && <ActionContainer onClick={e => e.stopPropagation()}>{headerAction}</ActionContainer>}
       </Header>
       
-      {expanded && <Content>{children}</Content>}
+      {expanded && <Content colors={colors}>{children}</Content>}
     </Container>
   );
 };
 
 const Container = styled.div`
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   margin-bottom: 16px;
-  background-color: #fff;
-  box-shadow: ${props => props.expanded ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'};
-  transition: box-shadow 0.2s;
+  background-color: ${props => props.colors.surface};
+  box-shadow: ${props => props.expanded ? props.colors.shadow : 'none'};
+  transition: all 0.3s ease;
 `;
 
 const Header = styled.div`
   padding: 12px 16px;
   cursor: pointer;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
@@ -61,14 +64,16 @@ const ExpandIcon = styled.span`
   justify-content: center;
   margin-right: 12px;
   width: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
 `;
 
 const Title = styled.h3`
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const ActionContainer = styled.div`
@@ -77,7 +82,9 @@ const ActionContainer = styled.div`
 
 const Content = styled.div`
   padding: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.colors.borderLight};
+  background-color: ${props => props.colors.surface};
+  transition: all 0.3s ease;
 `;
 
 export default ExpandableSection;

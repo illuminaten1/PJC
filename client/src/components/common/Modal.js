@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { FaTimes } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Modal = ({ 
   isOpen, 
@@ -13,6 +14,8 @@ const Modal = ({
   noPadding = false,
   isPreview = false
 }) => {
+  const { colors } = useTheme();
+  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -35,20 +38,20 @@ const Modal = ({
   
   return (
     <Backdrop onClick={handleBackdropClick} size={size}>
-      <ModalContainer size={size} isPreview={isPreview}>
-        <ModalHeader>
-          <ModalTitle>{title}</ModalTitle>
+      <ModalContainer colors={colors} size={size} isPreview={isPreview}>
+        <ModalHeader colors={colors}>
+          <ModalTitle colors={colors}>{title}</ModalTitle>
           {headerContent && <HeaderActions>{headerContent}</HeaderActions>}
-          <CloseButton onClick={onClose}>
+          <CloseButton colors={colors} onClick={onClose}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
         
-        <ModalContent noPadding={noPadding} isPreview={isPreview}>
+        <ModalContent colors={colors} noPadding={noPadding} isPreview={isPreview}>
           {children}
         </ModalContent>
         
-        {actions && <ModalActions>{actions}</ModalActions>}
+        {actions && <ModalActions colors={colors}>{actions}</ModalActions>}
       </ModalContainer>
     </Backdrop>
   );
@@ -84,9 +87,9 @@ const getModalWidth = (size) => {
 };
 
 const ModalContainer = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: ${props => props.colors.shadowHover};
   max-width: ${props => getModalWidth(props.size)};
   width: 100%;
   max-height: ${props => (props.size === 'full' || props.size === 'fullscreen') ? '95vh' : '90vh'};
@@ -94,22 +97,28 @@ const ModalContainer = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const ModalHeader = styled.div`
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0; /* Empêche l'en-tête de rétrécir */
+  flex-shrink: 0;
+  background-color: ${props => props.colors.surfaceHover};
+  transition: all 0.3s ease;
 `;
 
 const ModalTitle = styled.h2`
   margin: 0;
   font-size: 18px;
   font-weight: 500;
-  flex: 1; /* Permet au titre de prendre l'espace disponible */
+  flex: 1;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const HeaderActions = styled.div`
@@ -127,10 +136,14 @@ const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #777;
+  color: ${props => props.colors.textMuted};
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
   
   &:hover {
-    color: #333;
+    color: ${props => props.colors.textPrimary};
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
@@ -138,6 +151,9 @@ const ModalContent = styled.div`
   padding: ${props => props.noPadding ? '0' : '20px'};
   overflow-y: auto;
   flex: 1;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   /* Styles spécifiques pour les prévisualisations */
   ${props => props.isPreview && `
@@ -156,11 +172,13 @@ const ModalContent = styled.div`
 
 const ModalActions = styled.div`
   padding: 12px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.colors.borderLight};
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  flex-shrink: 0; /* Empêche le pied de page de rétrécir */
+  flex-shrink: 0;
+  background-color: ${props => props.colors.surfaceHover};
+  transition: all 0.3s ease;
 `;
 
 export default Modal;

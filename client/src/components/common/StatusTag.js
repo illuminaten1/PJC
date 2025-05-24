@@ -1,9 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const StatusTag = ({ status, text }) => {
+  const { colors } = useTheme();
+  
   return (
-    <Tag status={status}>
+    <Tag colors={colors} status={status}>
       {text}
     </Tag>
   );
@@ -16,29 +19,34 @@ const Tag = styled.span`
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
+  transition: all 0.3s ease;
   
   ${props => {
     switch(props.status) {
       case 'success':
         return `
-          background-color: #e8f5e9;
-          color: #2e7d32;
+          background-color: ${props.colors.successBg};
+          color: ${props.colors.success};
+          border: 1px solid ${props.colors.success}40;
         `;
       case 'warning':
         return `
-          background-color: #fff8e1;
-          color: #f57f17;
+          background-color: ${props.colors.warningBg};
+          color: ${props.colors.warning};
+          border: 1px solid ${props.colors.warning}40;
         `;
       case 'error':
         return `
-          background-color: #ffebee;
-          color: #c62828;
+          background-color: ${props.colors.errorBg};
+          color: ${props.colors.error};
+          border: 1px solid ${props.colors.error}40;
         `;
       case 'info':
       default:
         return `
-          background-color: #e3f2fd;
-          color: #0d47a1;
+          background-color: ${props.colors.primary}20;
+          color: ${props.colors.primary};
+          border: 1px solid ${props.colors.primary}40;
         `;
     }
   }}

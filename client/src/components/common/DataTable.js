@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTable, useSortBy, useGlobalFilter } from 'react-table';
 import styled from 'styled-components';
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const DataTable = ({
   columns,
@@ -12,6 +13,7 @@ const DataTable = ({
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [globalFilterTimeout, setGlobalFilterTimeout] = useState(null);
+  const { colors } = useTheme();
   
   const {
     getTableProps,
@@ -53,12 +55,13 @@ const DataTable = ({
   }, [searchValue, setGlobalFilter]);
 
   return (
-    <TableContainer>
-      <SearchContainer>
-        <SearchIconWrapper>
+    <TableContainer colors={colors}>
+      <SearchContainer colors={colors}>
+        <SearchIconWrapper colors={colors}>
           <FaSearch />
         </SearchIconWrapper>
         <SearchInput
+          colors={colors}
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           placeholder={searchPlaceholder}
@@ -66,7 +69,7 @@ const DataTable = ({
       </SearchContainer>
       
       <TableWrapper>
-        <StyledTable {...getTableProps()}>
+        <StyledTable colors={colors} {...getTableProps()}>
           <thead>
             {headerGroups.map(headerGroup => (
               <tr {...headerGroup.getHeaderGroupProps()}>
@@ -74,7 +77,7 @@ const DataTable = ({
                   <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                     <HeaderContent>
                       {column.render('Header')}
-                      <SortIcon>
+                      <SortIcon colors={colors}>
                         {column.isSorted
                           ? column.isSortedDesc
                             ? <FaSortDown />
@@ -107,7 +110,7 @@ const DataTable = ({
               })
             ) : (
               <tr>
-                <EmptyMessage colSpan={columns.length}>
+                <EmptyMessage colors={colors} colSpan={columns.length}>
                   Aucun élément trouvé
                 </EmptyMessage>
               </tr>
@@ -116,7 +119,7 @@ const DataTable = ({
         </StyledTable>
       </TableWrapper>
       
-      <ResultCount>
+      <ResultCount colors={colors}>
         {rows.length} élément{rows.length !== 1 ? 's' : ''} trouvé{rows.length !== 1 ? 's' : ''}
       </ResultCount>
     </TableContainer>
@@ -124,37 +127,49 @@ const DataTable = ({
 };
 
 const TableContainer = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   overflow: hidden;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const SearchContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #eee;
+  background-color: ${props => props.colors.surfaceHover};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
   position: relative;
+  transition: all 0.3s ease;
 `;
 
 const SearchIconWrapper = styled.div`
   position: absolute;
   left: 26px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 8px 16px 8px 36px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
@@ -170,13 +185,15 @@ const StyledTable = styled.table`
   th, td {
     padding: 12px 16px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid ${props => props.colors.borderLight};
+    color: ${props => props.colors.textPrimary};
+    transition: all 0.3s ease;
   }
   
   th {
-    background-color: #f9f9f9;
+    background-color: ${props => props.colors.surfaceHover};
     font-weight: 600;
-    color: #333;
+    color: ${props => props.colors.textPrimary};
   }
   
   tbody tr {
@@ -184,7 +201,7 @@ const StyledTable = styled.table`
     transition: background-color 0.2s;
     
     &:hover {
-      background-color: #f5f5f5;
+      background-color: ${props => props.colors.surfaceHover};
     }
     
     &:last-child td {
@@ -200,7 +217,8 @@ const StyledTable = styled.table`
 const EmptyMessage = styled.td`
   text-align: center;
   padding: 40px !important;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
 `;
 
 const HeaderContent = styled.div`
@@ -214,17 +232,19 @@ const SortIcon = styled.span`
   display: flex;
   align-items: center;
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  transition: color 0.3s ease;
 `;
 
 const ResultCount = styled.div`
   display: flex;
   justify-content: flex-end;
   padding: 12px 16px;
-  background-color: #f9f9f9;
-  border-top: 1px solid #eee;
+  background-color: ${props => props.colors.surfaceHover};
+  border-top: 1px solid ${props => props.colors.borderLight};
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: all 0.3s ease;
 `;
 
 export default DataTable;

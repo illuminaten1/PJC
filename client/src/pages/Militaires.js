@@ -406,13 +406,13 @@ const ArchiveTag = styled.span`
   transition: all 0.3s ease;
   
   ${props => props.status === 'archived' ? `
-    background-color: ${props => props.colors.surfaceHover};
-    color: ${props => props.colors.textMuted};
-    border: 1px solid ${props => props.colors.borderLight};
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: ${props => props.colors.successBg};
-    color: ${props => props.colors.success};
-    border: 1px solid ${props => props.colors.success}40;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 

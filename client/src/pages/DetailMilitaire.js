@@ -7,18 +7,20 @@ import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import MilitaireForm from '../components/forms/MilitaireForm';
 import BeneficiaireForm from '../components/forms/BeneficiaireForm';
+import { useTheme } from '../contexts/ThemeContext';
 import {
-  HeaderCard,
+  ThemedHeaderCard,
   HeaderGrid,
   HeaderItem,
-  HeaderLabel,
-  HeaderValue,
-  ArchiveNote
+  ThemedHeaderLabel,
+  ThemedHeaderValue,
+  ThemedArchiveNote
 } from '../components/common/HeaderComponents';
 
 const DetailMilitaire = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   const [militaire, setMilitaire] = useState(null);
   const [statistiques, setStatistiques] = useState(null);
@@ -130,30 +132,30 @@ const DetailMilitaire = () => {
   
   if (loading) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails du militaire" 
           backButton
         />
-        <Loading>Chargement des détails du militaire...</Loading>
+        <Loading colors={colors}>Chargement des détails du militaire...</Loading>
       </Container>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails du militaire" 
           backButton
         />
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       </Container>
     );
   }
   
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title={`${militaire.grade} ${militaire.prenom} ${militaire.nom}`}
         subtitle={
@@ -164,7 +166,7 @@ const DetailMilitaire = () => {
         backButton
         actionButton={
           <ActionButtons>
-            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le militaire">
+            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le militaire" colors={colors}>
               <FaEdit />
               <ButtonText>Modifier</ButtonText>
             </ActionButton>
@@ -173,6 +175,7 @@ const DetailMilitaire = () => {
               onClick={() => setDeleteModalOpen(true)} 
               title="Supprimer le militaire"
               className="delete"
+              colors={colors}
             >
               <FaTrash />
               <ButtonText>Supprimer</ButtonText>
@@ -181,124 +184,124 @@ const DetailMilitaire = () => {
         }
       />
       
-      <HeaderCard>
+      <ThemedHeaderCard>
         <HeaderGrid>
           <HeaderItem>
-            <HeaderLabel>Affaire</HeaderLabel>
-            <AffaireLink onClick={() => navigateToAffaire(militaire.affaire._id)}>
+            <ThemedHeaderLabel>Affaire</ThemedHeaderLabel>
+            <AffaireLink onClick={() => navigateToAffaire(militaire.affaire._id)} colors={colors}>
               {militaire.affaire.nom}
             </AffaireLink>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Unité d'affectation</HeaderLabel>
-            <HeaderValue>{militaire.unite}</HeaderValue>
+            <ThemedHeaderLabel>Unité d'affectation</ThemedHeaderLabel>
+            <ThemedHeaderValue>{militaire.unite}</ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Région / Département</HeaderLabel>
-            <HeaderValue>{militaire.region || '-'} / {militaire.departement || '-'}</HeaderValue>
+            <ThemedHeaderLabel>Région / Département</ThemedHeaderLabel>
+            <ThemedHeaderValue>{militaire.region || '-'} / {militaire.departement || '-'}</ThemedHeaderValue>
           </HeaderItem>
 
           <HeaderItem>
-            <HeaderLabel>Statut d'archivage</HeaderLabel>
-            <StatusTag status={militaire.archive ? 'archived' : 'active'}>
+            <ThemedHeaderLabel>Statut d'archivage</ThemedHeaderLabel>
+            <StatusTag status={militaire.archive ? 'archived' : 'active'} colors={colors}>
               {militaire.archive ? 'Archivé' : 'Actif'}
             </StatusTag>
             {militaire.archive && (
-              <ArchiveNote>
+              <ThemedArchiveNote>
                 Ce militaire est archivé car il fait partie d'une affaire archivée.
                 Pour le désarchiver, veuillez désarchiver l'affaire correspondante.
-              </ArchiveNote>
+              </ThemedArchiveNote>
             )}
           </HeaderItem>
         </HeaderGrid>
 
         <HeaderGrid>
           <HeaderItem>
-            <HeaderLabel>Circonstance</HeaderLabel>
-            <HeaderValue>{militaire.circonstance}</HeaderValue>
+            <ThemedHeaderLabel>Circonstance</ThemedHeaderLabel>
+            <ThemedHeaderValue>{militaire.circonstance}</ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Statut</HeaderLabel>
-            <StatusTag status={militaire.decede ? 'deces' : 'blesse'}>
+            <ThemedHeaderLabel>Statut</ThemedHeaderLabel>
+            <StatusTag status={militaire.decede ? 'deces' : 'blesse'} colors={colors}>
               {militaire.decede ? 'Décédé' : 'Blessé'}
             </StatusTag>
           </HeaderItem>
           
           {!militaire.decede && (
             <HeaderItem>
-              <HeaderLabel>Jours d'ITT</HeaderLabel>
-              <HeaderValue>{militaire.itt || '0'} jours</HeaderValue>
+              <ThemedHeaderLabel>Jours d'ITT</ThemedHeaderLabel>
+              <ThemedHeaderValue>{militaire.itt || '0'} jours</ThemedHeaderValue>
             </HeaderItem>
           )}
         
           {militaire.natureDesBlessures && (
             <HeaderItem>
-              <HeaderLabel>Nature des blessures</HeaderLabel>
-              <HeaderValue>{militaire.natureDesBlessures}</HeaderValue>
+              <ThemedHeaderLabel>Nature des blessures</ThemedHeaderLabel>
+              <ThemedHeaderValue>{militaire.natureDesBlessures}</ThemedHeaderValue>
             </HeaderItem>
           )}
         </HeaderGrid>
-      </HeaderCard>
+      </ThemedHeaderCard>
       
       {statistiques && (
-        <StatsCard>
-          <StatsHeader>
-            <StatsTitle>
+        <Section colors={colors}>
+          <SectionHeader>
+            <SectionTitle colors={colors}>
               <FaChartBar />
               <span>Statistiques</span>
-            </StatsTitle>
-          </StatsHeader>
+            </SectionTitle>
+          </SectionHeader>
           
           <StatsGrid>
-            <StatsItem>
-              <StatsLabel>Nombre de bénéficiaires</StatsLabel>
-              <StatsValue>{statistiques.beneficiaires.total}</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Nombre de bénéficiaires</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.beneficiaires.total}</StatsValue>
+              <StatsDetails colors={colors}>
                 {Object.entries(statistiques.beneficiaires.parQualite).map(([qualite, nombre]) => (
                   <StatDetail key={qualite}>
-                    <StatDetailLabel>{qualite} :</StatDetailLabel>
-                    <StatDetailValue>{nombre}</StatDetailValue>
+                    <StatDetailLabel colors={colors}>{qualite} :</StatDetailLabel>
+                    <StatDetailValue colors={colors}>{nombre}</StatDetailValue>
                   </StatDetail>
                 ))}
               </StatsDetails>
-            </StatsItem>
+            </StatsCard>
             
-            <StatsItem>
-              <StatsLabel>Total engagé</StatsLabel>
-              <StatsValue>{statistiques.finances.montantGage.toLocaleString('fr-FR')} €</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Total engagé</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.finances.montantGage.toLocaleString('fr-FR')} €</StatsValue>
+              <StatsDetails colors={colors}>
                 <StatDetail>
-                  <StatDetailLabel>Conventions :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.nombreConventions}</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Conventions :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.nombreConventions}</StatDetailValue>
                 </StatDetail>
               </StatsDetails>
-            </StatsItem>
+            </StatsCard>
             
-            <StatsItem>
-              <StatsLabel>Total payé</StatsLabel>
-              <StatsValue>{statistiques.finances.montantPaye.toLocaleString('fr-FR')} €</StatsValue>
-              <StatsDetails>
+            <StatsCard colors={colors}>
+              <StatsTitle colors={colors}>Total payé</StatsTitle>
+              <StatsValue colors={colors}>{statistiques.finances.montantPaye.toLocaleString('fr-FR')} €</StatsValue>
+              <StatsDetails colors={colors}>
                 <StatDetail>
-                  <StatDetailLabel>Paiements :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.nombrePaiements}</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Paiements :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.nombrePaiements}</StatDetailValue>
                 </StatDetail>
                 <StatDetail>
-                  <StatDetailLabel>Ratio :</StatDetailLabel>
-                  <StatDetailValue>{statistiques.finances.ratio.toFixed(1)}%</StatDetailValue>
+                  <StatDetailLabel colors={colors}>Ratio :</StatDetailLabel>
+                  <StatDetailValue colors={colors}>{statistiques.finances.ratio.toFixed(1)}%</StatDetailValue>
                 </StatDetail>
               </StatsDetails>
-            </StatsItem>
+            </StatsCard>
           </StatsGrid>
-        </StatsCard>
+        </Section>
       )}
       
-      <Section>
+      <Section colors={colors}>
         <SectionHeader>
-          <SectionTitle>Bénéficiaires associés</SectionTitle>
-          <AddButton onClick={() => setBeneficiaireModalOpen(true)}>
+          <SectionTitle colors={colors}>Bénéficiaires associés</SectionTitle>
+          <AddButton onClick={() => setBeneficiaireModalOpen(true)} colors={colors}>
             <FaPlus />
             <span>Ajouter un bénéficiaire</span>
           </AddButton>
@@ -310,21 +313,22 @@ const DetailMilitaire = () => {
               <BeneficiaireItem 
                 key={beneficiaire._id}
                 onClick={() => navigateToBeneficiaire(beneficiaire._id)}
+                colors={colors}
               >
                 <BeneficiaireHeader>
                   <BeneficiaireNameContainer>
-                    <BeneficiaireName>
+                    <BeneficiaireName colors={colors}>
                       <FaUser />
                       {beneficiaire.prenom} {beneficiaire.nom}
                     </BeneficiaireName>
-                    <BeneficiaireQualite>{beneficiaire.qualite}</BeneficiaireQualite>
+                    <BeneficiaireQualite colors={colors}>{beneficiaire.qualite}</BeneficiaireQualite>
                   </BeneficiaireNameContainer>
                 </BeneficiaireHeader>
                 
                 <BeneficiaireDetails>
                   <BeneficiaireDetail>
-                    <DetailLabel>Avocats :</DetailLabel>
-                    <DetailValue>
+                    <DetailLabel colors={colors}>Avocats :</DetailLabel>
+                    <DetailValue colors={colors}>
                       {beneficiaire.avocats && beneficiaire.avocats.length > 0
                         ? beneficiaire.avocats.map(a => {
                             return `${a.prenom || ''} ${a.nom || ''}`.trim() || 'Détails manquants';
@@ -334,8 +338,8 @@ const DetailMilitaire = () => {
                   </BeneficiaireDetail>
                   
                   <BeneficiaireDetail>
-                    <DetailLabel>Conventions :</DetailLabel>
-                    <DetailValue>
+                    <DetailLabel colors={colors}>Conventions :</DetailLabel>
+                    <DetailValue colors={colors}>
                       {beneficiaire.conventions && beneficiaire.conventions.length
                         ? beneficiaire.conventions.length
                         : 'Aucune'}
@@ -343,8 +347,8 @@ const DetailMilitaire = () => {
                   </BeneficiaireDetail>
                   
                   <BeneficiaireDetail>
-                    <DetailLabel>Paiements :</DetailLabel>
-                    <DetailValue>
+                    <DetailLabel colors={colors}>Paiements :</DetailLabel>
+                    <DetailValue colors={colors}>
                       {beneficiaire.paiements && beneficiaire.paiements.length > 0
                         ? beneficiaire.paiements.length
                         : 'Aucun'}
@@ -355,7 +359,7 @@ const DetailMilitaire = () => {
             ))}
           </BeneficiairesList>
         ) : (
-          <EmptyMessage>Aucun bénéficiaire associé à ce militaire</EmptyMessage>
+          <EmptyMessage colors={colors}>Aucun bénéficiaire associé à ce militaire</EmptyMessage>
         )}
       </Section>
       
@@ -396,10 +400,10 @@ const DetailMilitaire = () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setDeleteModalOpen(false)}>
+            <CancelButton onClick={() => setDeleteModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <DeleteButton onClick={handleDelete}>
+            <DeleteButton onClick={handleDelete} colors={colors}>
               Supprimer
             </DeleteButton>
           </>
@@ -409,24 +413,31 @@ const DetailMilitaire = () => {
           <p>Êtes-vous sûr de vouloir supprimer définitivement ce militaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également tous les bénéficiaires associés à ce militaire.</p>
           
-          {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+          {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
     </Container>
   );
 };
 
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const AffaireLink = styled.div`
   font-size: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
   
   &:hover {
     text-decoration: underline;
+    color: ${props => props.colors.primaryDark};
   }
 `;
 
@@ -436,90 +447,35 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'deces' ? `
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: ${props.colors.errorBg};
+    color: ${props.colors.error};
+    border: 1px solid ${props.colors.error}40;
   ` : props.status === 'blesse' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
-`;
-
-const StatsCard = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 24px;
-`;
-
-const StatsHeader = styled.div`
-  margin-bottom: 16px;
-`;
-
-const StatsTitle = styled.h2`
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-  display: flex;
-  align-items: center;
-  margin: 0;
-  
-  svg {
-    margin-right: 8px;
-    color: #3f51b5;
-  }
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-`;
-
-const StatsItem = styled.div``;
-
-const StatsLabel = styled.div`
-  font-size: 14px;
-  color: #757575;
-  margin-bottom: 4px;
-`;
-
-const StatsValue = styled.div`
-  font-size: 20px;
-  font-weight: 500;
-  color: #3f51b5;
-  margin-bottom: 8px;
-`;
-
-const StatsDetails = styled.div`
-  font-size: 14px;
-`;
-
-const StatDetail = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2px;
-`;
-
-const StatDetailLabel = styled.span`
-  color: #757575;
-`;
-
-const StatDetailValue = styled.span`
-  font-weight: 500;
-  color: #333;
 `;
 
 const Section = styled.section`
   margin-bottom: 30px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const SectionHeader = styled.div`
@@ -527,17 +483,87 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid ${props => props.colors ? props.colors.borderLight : '#e0e0e0'};
 `;
 
 const SectionTitle = styled.h2`
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  display: flex;
+  align-items: center;
   margin: 0;
+  transition: color 0.3s ease;
+  
+  svg {
+    margin-right: 8px;
+    color: ${props => props.colors.primary};
+  }
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+`;
+
+const StatsCard = styled.div`
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  padding: 20px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
+const StatsTitle = styled.div`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  margin-bottom: 8px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+`;
+
+const StatsValue = styled.div`
+  font-size: 24px;
+  font-weight: 600;
+  color: ${props => props.colors.primary};
+  margin-bottom: 16px;
+  transition: color 0.3s ease;
+`;
+
+const StatsDetails = styled.div`
+  border-top: 1px solid ${props => props.colors.borderLight};
+  padding-top: 12px;
+`;
+
+const StatDetail = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+`;
+
+const StatDetailLabel = styled.span`
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
+`;
+
+const StatDetailValue = styled.span`
+  font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const AddButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -546,13 +572,17 @@ const AddButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors.shadow};
   
   svg {
     margin-right: 8px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -563,16 +593,18 @@ const BeneficiairesList = styled.div`
 `;
 
 const BeneficiaireItem = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
   padding: 16px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid ${props => props.colors.border};
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: ${props => props.colors.shadowHover};
+    border-color: ${props => props.colors.primary}40;
   }
 `;
 
@@ -582,7 +614,7 @@ const BeneficiaireHeader = styled.div`
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${props => props.colors ? props.colors.borderLight : '#eee'};
 `;
 
 const BeneficiaireNameContainer = styled.div`
@@ -595,13 +627,14 @@ const BeneficiaireNameContainer = styled.div`
 const BeneficiaireName = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
   
   svg {
     margin-right: 8px;
-    color: #3f51b5;
+    color: ${props => props.colors.primary};
     font-size: 16px;
   }
 `;
@@ -611,10 +644,13 @@ const BeneficiaireQualite = styled.span`
   align-items: center;
   font-size: 14px;
   padding: 4px 8px;
-  background-color: #e3f2fd;
-  color: #0d47a1;
+  background-color: ${props => props.colors.primary}20;
+  color: ${props => props.colors.primary};
   border-radius: 4px;
   height: 24px;
+  font-weight: 500;
+  border: 1px solid ${props => props.colors.primary}40;
+  transition: all 0.3s ease;
 `;
 
 const BeneficiaireDetails = styled.div`
@@ -631,33 +667,43 @@ const BeneficiaireDetail = styled.div`
 `;
 
 const DetailLabel = styled.span`
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   min-width: 100px;
   margin-right: 10px;
+  font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const DetailValue = styled.span`
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const EmptyMessage = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ActionButton = styled.button`
-  background-color: #fff;
-  color: #3f51b5;
-  border: 1px solid #3f51b5;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.primary};
+  border: 1px solid ${props => props.colors.primary};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -665,20 +711,23 @@ const ActionButton = styled.button`
   padding: 0 12px;
   height: 36px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
   
-  &:hover {
-    background-color: #3f51b5;
-    color: #fff;
+  &:hover:not(:disabled) {
+    background-color: ${props => props.colors.primary};
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
   
   &.delete {
-    color: #f44336;
-    border-color: #f44336;
+    color: ${props => props.colors.error};
+    border-color: ${props => props.colors.error};
     
-    &:hover {
-      background-color: #f44336;
-      color: #fff;
+    &:hover:not(:disabled) {
+      background-color: ${props => props.colors.error};
+      color: white;
     }
   }
   
@@ -690,64 +739,88 @@ const ActionButton = styled.button`
 const ButtonText = styled.span`
   font-size: 14px;
   font-weight: 500;
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
 `;
 
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
+    color: ${props => props.colors ? props.colors.textPrimary : '#333'};
+    
+    strong {
+      color: ${props => props.colors ? props.colors.error : '#f44336'};
+    }
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  padding: 8px 12px;
+  border-radius: 4px;
   margin-top: 12px;
   font-size: 14px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    border-color: ${props => props.colors.primary};
+    transform: translateY(-1px);
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default DetailMilitaire;

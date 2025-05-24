@@ -13,18 +13,20 @@ import ConventionsTable from '../components/specific/ConventionsTable';
 import PaiementsTable from '../components/specific/PaiementsTable';
 import DocumentsSection from '../components/specific/DocumentsSection';
 import AvocatDetail from '../components/specific/AvocatDetail';
+import { useTheme } from '../contexts/ThemeContext';
 import {
-  HeaderCard,
+  ThemedHeaderCard,
   HeaderGrid,
   HeaderItem,
-  HeaderLabel,
-  HeaderValue,
-  ArchiveNote
+  ThemedHeaderLabel,
+  ThemedHeaderValue,
+  ThemedArchiveNote
 } from '../components/common/HeaderComponents';
 
 const DetailBeneficiaire = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   const [beneficiaire, setBeneficiaire] = useState(null);
   const [affaire, setAffaire] = useState(null);
@@ -216,24 +218,24 @@ const DetailBeneficiaire = () => {
 
   if (loading) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails du bénéficiaire" 
           backButton
         />
-        <Loading>Chargement des détails du bénéficiaire...</Loading>
+        <Loading colors={colors}>Chargement des détails du bénéficiaire...</Loading>
       </Container>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader 
           title="Détails du bénéficiaire" 
           backButton
         />
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       </Container>
     );
   }
@@ -244,14 +246,14 @@ const DetailBeneficiaire = () => {
   const paiementRatio = totalConventions > 0 ? (totalPaiements / totalConventions) * 100 : 0;
   
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title={`${beneficiaire.prenom} ${beneficiaire.nom}`}
         subtitle={`Bénéficiaire ${beneficiaire.qualite} - ${beneficiaire.numeroDecision ? `Décision n°${beneficiaire.numeroDecision}` : 'Sans numéro de décision'}`}
         backButton
         actionButton={
           <ActionButtons>
-            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire">
+            <ActionButton onClick={() => setEditModalOpen(true)} title="Modifier le bénéficiaire" colors={colors}>
               <FaEdit />
               <ButtonText>Modifier</ButtonText>
             </ActionButton>
@@ -260,6 +262,7 @@ const DetailBeneficiaire = () => {
               onClick={() => setDeleteModalOpen(true)} 
               title="Supprimer le bénéficiaire"
               className="delete"
+              colors={colors}
             >
               <FaTrash />
               <ButtonText>Supprimer</ButtonText>
@@ -268,102 +271,102 @@ const DetailBeneficiaire = () => {
         }
       />
       
-      <HeaderCard>
+      <ThemedHeaderCard>
         <HeaderGrid>
           <HeaderItem>
-            <HeaderLabel>Affaire</HeaderLabel>
-            <AffaireLink onClick={() => navigateToAffaire(beneficiaire.militaire.affaire._id)}>
+            <ThemedHeaderLabel>Affaire</ThemedHeaderLabel>
+            <AffaireLink onClick={() => navigateToAffaire(beneficiaire.militaire.affaire._id)} colors={colors}>
               {beneficiaire.militaire.affaire.nom}
             </AffaireLink>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Militaire créateur de droit</HeaderLabel>
-            <MilitaireLink onClick={() => navigateToMilitaire(beneficiaire.militaire._id)}>
+            <ThemedHeaderLabel>Militaire créateur de droit</ThemedHeaderLabel>
+            <MilitaireLink onClick={() => navigateToMilitaire(beneficiaire.militaire._id)} colors={colors}>
               {beneficiaire.militaire.grade} {beneficiaire.militaire.prenom} {beneficiaire.militaire.nom}
             </MilitaireLink>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Qualité du bénéficiaire</HeaderLabel>
-            <QualiteTag qualite={beneficiaire.qualite}>
+            <ThemedHeaderLabel>Qualité du bénéficiaire</ThemedHeaderLabel>
+            <QualiteTag qualite={beneficiaire.qualite} colors={colors}>
               {beneficiaire.qualite}
             </QualiteTag>
           </HeaderItem>
 
           <HeaderItem>
-            <HeaderLabel>Statut d'archivage</HeaderLabel>
-            <StatusTag status={beneficiaire.archive ? 'archived' : 'active'}>
+            <ThemedHeaderLabel>Statut d'archivage</ThemedHeaderLabel>
+            <StatusTag status={beneficiaire.archive ? 'archived' : 'active'} colors={colors}>
               {beneficiaire.archive ? 'Archivé' : 'Actif'}
             </StatusTag>
             {beneficiaire.archive && (
-              <ArchiveNote>
+              <ThemedArchiveNote>
                 Ce bénéficiaire est archivé car il fait partie d'une affaire archivée.
                 Pour le désarchiver, veuillez désarchiver l'affaire correspondante.
-              </ArchiveNote>
+              </ThemedArchiveNote>
             )}
           </HeaderItem>
         </HeaderGrid>
         
         <HeaderGrid>
-        <HeaderItem>
-            <HeaderLabel>Date des faits</HeaderLabel>
-            <HeaderValue>
+          <HeaderItem>
+            <ThemedHeaderLabel>Date des faits</ThemedHeaderLabel>
+            <ThemedHeaderValue>
               {affaire && affaire.dateFaits ? 
                 formatDate(affaire.dateFaits) : 
                 'Non définie'}
-            </HeaderValue>
+            </ThemedHeaderValue>
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Numéro de décision</HeaderLabel>
+            <ThemedHeaderLabel>Numéro de décision</ThemedHeaderLabel>
             {beneficiaire.numeroDecision ? (
-              <HeaderValue>{beneficiaire.numeroDecision}</HeaderValue>
+              <ThemedHeaderValue>{beneficiaire.numeroDecision}</ThemedHeaderValue>
             ) : (
-              <MissingValue>Non attribué</MissingValue>
+              <MissingValue colors={colors}>Non attribué</MissingValue>
             )}
           </HeaderItem>
 
           <HeaderItem>
-            <HeaderLabel>Date de la décision</HeaderLabel>
+            <ThemedHeaderLabel>Date de la décision</ThemedHeaderLabel>
             {beneficiaire.dateDecision ? (
-              <HeaderValue>{formatDate(beneficiaire.dateDecision)}</HeaderValue>
+              <ThemedHeaderValue>{formatDate(beneficiaire.dateDecision)}</ThemedHeaderValue>
             ) : (
-              <MissingValue>Non définie</MissingValue>
+              <MissingValue colors={colors}>Non définie</MissingValue>
             )}
           </HeaderItem>
           
           <HeaderItem>
-            <HeaderLabel>Rédacteur en charge</HeaderLabel>
-            <HeaderValue>{beneficiaire.militaire.affaire.redacteur}</HeaderValue>
+            <ThemedHeaderLabel>Rédacteur en charge</ThemedHeaderLabel>
+            <ThemedHeaderValue>{beneficiaire.militaire.affaire.redacteur}</ThemedHeaderValue>
           </HeaderItem>
         </HeaderGrid>
-      </HeaderCard>
+      </ThemedHeaderCard>
       
-      <FinancesSection>
+      <FinancesSection colors={colors}>
         <FinancesSummary>
-          <FinanceCard>
-            <FinanceTitle>Montant engagé</FinanceTitle>
-            <FinanceValue>{totalConventions.toLocaleString('fr-FR')} € HT</FinanceValue>
-            <FinanceDetail>
+          <FinanceCard colors={colors}>
+            <FinanceTitle colors={colors}>Montant engagé</FinanceTitle>
+            <FinanceValue colors={colors}>{totalConventions.toLocaleString('fr-FR')} € HT</FinanceValue>
+            <FinanceDetail colors={colors}>
               <span>Conventions :</span>
               <span>{beneficiaire.conventions.length}</span>
             </FinanceDetail>
           </FinanceCard>
           
-          <FinanceCard>
-            <FinanceTitle>Montant payé</FinanceTitle>
-            <FinanceValue>{totalPaiements.toLocaleString('fr-FR')} € TTC</FinanceValue>
-            <FinanceDetail>
+          <FinanceCard colors={colors}>
+            <FinanceTitle colors={colors}>Montant payé</FinanceTitle>
+            <FinanceValue colors={colors}>{totalPaiements.toLocaleString('fr-FR')} € TTC</FinanceValue>
+            <FinanceDetail colors={colors}>
               <span>Paiements :</span>
               <span>{beneficiaire.paiements.length}</span>
             </FinanceDetail>
           </FinanceCard>
           
-          <FinanceCard>
-            <FinanceTitle>Ratio de paiement</FinanceTitle>
-            <FinanceValue>{paiementRatio.toFixed(1)} %</FinanceValue>
-            <FinanceDetail>
+          <FinanceCard colors={colors}>
+            <FinanceTitle colors={colors}>Ratio de paiement</FinanceTitle>
+            <FinanceValue colors={colors}>{paiementRatio.toFixed(1)} %</FinanceValue>
+            <FinanceDetail colors={colors}>
               <span>Reste à payer :</span>
               <span>{(totalConventions - totalPaiements).toLocaleString('fr-FR')} €</span>
             </FinanceDetail>
@@ -371,12 +374,12 @@ const DetailBeneficiaire = () => {
         </FinancesSummary>
       </FinancesSection>
 
-      <TabsSection>
+      <TabsSection colors={colors}>
         <ExpandableSection
           title="Avocats désignés"
           defaultExpanded={true}
           headerAction={
-            <TabActionButton onClick={() => setAvocatsModalOpen(true)}>
+            <TabActionButton onClick={() => setAvocatsModalOpen(true)} colors={colors}>
               <FaPlus />
               <span>Ajouter / Modifier avocats</span>
             </TabActionButton>
@@ -385,40 +388,40 @@ const DetailBeneficiaire = () => {
         {beneficiaire.avocats && beneficiaire.avocats.length > 0 ? (
           <AvocatsGrid>
             {beneficiaire.avocats.map((avocat, index) => (
-              <AvocatCard key={index}>
-                <AvocatHeader>
+              <AvocatCard key={index} colors={colors}>
+                <AvocatHeader colors={colors}>
                   <FaUserTie />
                   <div>
                   <AvocatName 
                     onClick={() => handleOpenAvocatDetail(avocat)} 
-                    style={{ cursor: 'pointer', color: '#3f51b5' }}
+                    colors={colors}
                   >
                     Me {avocat.prenom} {avocat.nom}
                   </AvocatName>
                     {hasRPCSpecialization(avocat) && (
-                      <SpecializationTag>RPC</SpecializationTag>
+                      <SpecializationTag colors={colors}>RPC</SpecializationTag>
                     )}
                   </div>
                 </AvocatHeader>
-                <AvocatContent>
+                <AvocatContent colors={colors}>
                   {avocat.email && (
-                    <AvocatEmail href={`mailto:${avocat.email}`}>
+                    <AvocatEmail href={`mailto:${avocat.email}`} colors={colors}>
                       <FaEnvelope style={{ fontSize: '12px' }} /> {avocat.email}
                     </AvocatEmail>
                   )}
                   {avocat.telephonePublic1 && (
-                    <AvocatPhone href={`tel:${avocat.telephonePublic1}`}>
+                    <AvocatPhone href={`tel:${avocat.telephonePublic1}`} colors={colors}>
                       <FaPhone /> {avocat.telephonePublic1}
                     </AvocatPhone>
                   )}
                   {avocat.telephonePublic2 && (
-                    <AvocatPhone href={`tel:${avocat.telephonePublic2}`}>
+                    <AvocatPhone href={`tel:${avocat.telephonePublic2}`} colors={colors}>
                       <FaPhone /> {avocat.telephonePublic2}
                     </AvocatPhone>
                   )}
                   {avocat.telephonePrive && (
-                    <AvocatPhone href={`tel:${avocat.telephonePrive}`} isPrivate={true}>
-                      <FaPhone /> {avocat.telephonePrive} <PrivateTag>privé</PrivateTag>
+                    <AvocatPhone href={`tel:${avocat.telephonePrive}`} isPrivate={true} colors={colors}>
+                      <FaPhone /> {avocat.telephonePrive} <PrivateTag colors={colors}>privé</PrivateTag>
                     </AvocatPhone>
                   )}
                 </AvocatContent>
@@ -426,7 +429,7 @@ const DetailBeneficiaire = () => {
             ))}
           </AvocatsGrid>
         ) : (
-          <EmptyMessage>Aucun avocat désigné</EmptyMessage>
+          <EmptyMessage colors={colors}>Aucun avocat désigné</EmptyMessage>
         )}
         </ExpandableSection>
         
@@ -434,7 +437,7 @@ const DetailBeneficiaire = () => {
           title="Conventions d'honoraires"
           defaultExpanded={true}
           headerAction={
-            <TabActionButton onClick={() => setConventionModalOpen(true)}>
+            <TabActionButton onClick={() => setConventionModalOpen(true)} colors={colors}>
               <FaPlus />
               <span>Nouvelle convention</span>
             </TabActionButton>
@@ -452,7 +455,7 @@ const DetailBeneficiaire = () => {
           title="Paiements"
           defaultExpanded={true}
           headerAction={
-            <TabActionButton onClick={() => setPaiementModalOpen(true)}>
+            <TabActionButton onClick={() => setPaiementModalOpen(true)} colors={colors}>
               <FaPlus />
               <span>Nouveau paiement</span>
             </TabActionButton>
@@ -513,40 +516,40 @@ const DetailBeneficiaire = () => {
         size="default"
         actions={
           <>
-            <CancelButton onClick={() => setAvocatsModalOpen(false)}>
+            <CancelButton onClick={() => setAvocatsModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <SaveButton onClick={handleAvocatsUpdate}>
+            <SaveButton onClick={handleAvocatsUpdate} colors={colors}>
               Enregistrer
             </SaveButton>
           </>
         }
       >
-        <AvocatsModalContent>
-          <ModalDescription>
+        <AvocatsModalContent colors={colors}>
+          <ModalDescription colors={colors}>
             Ajoutez ou supprimez des avocats pour ce bénéficiaire.
           </ModalDescription>
           
-          <SelectedAvocatsSection>
+          <SelectedAvocatsSection colors={colors}>
             {selectedAvocats.length === 0 ? (
-              <EmptyAvocatsMessage>Aucun avocat sélectionné</EmptyAvocatsMessage>
+              <EmptyAvocatsMessage colors={colors}>Aucun avocat sélectionné</EmptyAvocatsMessage>
             ) : (
               <SelectedAvocatsList>
                 {selectedAvocats.map(avocat => (
-                  <SelectedAvocatItem key={avocat._id}>
+                  <SelectedAvocatItem key={avocat._id} colors={colors}>
                     <AvocatInfo>
-                      <AvocatIcon><FaUserTie /></AvocatIcon>
+                      <AvocatIcon colors={colors}><FaUserTie /></AvocatIcon>
                       <AvocatDetails>
-                        <AvocatNameRow>
-                          <AvocatName>{avocat.nom.toUpperCase()} {avocat.prenom}</AvocatName>
+                        <AvocatNameRowModal>
+                          <AvocatNameModal colors={colors}>{avocat.nom.toUpperCase()} {avocat.prenom}</AvocatNameModal>
                           {hasRPCSpecialization(avocat) && (
-                            <SpecializationTag>RPC</SpecializationTag>
+                            <SpecializationTag colors={colors}>RPC</SpecializationTag>
                           )}
-                        </AvocatNameRow>
-                        <AvocatEmailText>{avocat.email}</AvocatEmailText>
+                        </AvocatNameRowModal>
+                        <AvocatEmailText colors={colors}>{avocat.email}</AvocatEmailText>
                       </AvocatDetails>
                     </AvocatInfo>
-                    <RemoveButton onClick={() => removeAvocat(avocat._id)}>
+                    <RemoveButton onClick={() => removeAvocat(avocat._id)} colors={colors}>
                       <FaTimes />
                     </RemoveButton>
                   </SelectedAvocatItem>
@@ -556,21 +559,22 @@ const DetailBeneficiaire = () => {
           </SelectedAvocatsSection>
           
           <SearchSection>
-            <SearchBarWrapper>
-              <SearchIcon><FaSearch /></SearchIcon>
+            <SearchBarWrapper colors={colors}>
+              <SearchIcon colors={colors}><FaSearch /></SearchIcon>
               <SearchInput 
                 type="text" 
                 placeholder="Rechercher un avocat..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={() => setShowSearchResults(true)}
+                colors={colors}
               />
             </SearchBarWrapper>
             
             {showSearchResults && (
-              <SearchResultsDropdown>
+              <SearchResultsDropdown colors={colors}>
                 {searchResults.length === 0 ? (
-                  <NoResultsMessage>
+                  <NoResultsMessage colors={colors}>
                     {searchTerm.trim() === '' ? 'Commencez à taper pour rechercher' : 'Aucun avocat trouvé'}
                   </NoResultsMessage>
                 ) : (
@@ -578,21 +582,22 @@ const DetailBeneficiaire = () => {
                     <SearchResultItem 
                       key={avocat._id} 
                       onClick={() => addAvocat(avocat)}
+                      colors={colors}
                     >
-                      <AvocatIcon><FaUserTie /></AvocatIcon>
+                      <AvocatIcon colors={colors}><FaUserTie /></AvocatIcon>
                       <AvocatDetails>
-                        <AvocatNameRow>
-                          <AvocatName>{avocat.nom.toUpperCase()} {avocat.prenom}</AvocatName>
+                        <AvocatNameRowModal>
+                          <AvocatNameModal colors={colors}>{avocat.nom.toUpperCase()} {avocat.prenom}</AvocatNameModal>
                           {hasRPCSpecialization(avocat) && (
-                            <SpecializationTag>RPC</SpecializationTag>
+                            <SpecializationTag colors={colors}>RPC</SpecializationTag>
                           )}
-                        </AvocatNameRow>
-                        <AvocatEmailText>{avocat.email}</AvocatEmailText>
+                        </AvocatNameRowModal>
+                        <AvocatEmailText colors={colors}>{avocat.email}</AvocatEmailText>
                       </AvocatDetails>
                     </SearchResultItem>
                   ))
                 )}
-                <CloseResultsButton onClick={() => setShowSearchResults(false)}>
+                <CloseResultsButton onClick={() => setShowSearchResults(false)} colors={colors}>
                   Fermer
                 </CloseResultsButton>
               </SearchResultsDropdown>
@@ -609,20 +614,20 @@ const DetailBeneficiaire = () => {
         size="small"
         actions={
           <>
-            <CancelButton onClick={() => setDeleteModalOpen(false)}>
+            <CancelButton onClick={() => setDeleteModalOpen(false)} colors={colors}>
               Annuler
             </CancelButton>
-            <DeleteButton onClick={handleDelete}>
+            <DeleteButton onClick={handleDelete} colors={colors}>
               Supprimer
             </DeleteButton>
           </>
         }
       >
-        <DeleteConfirmContent>
+        <DeleteConfirmContent colors={colors}>
           <p>Êtes-vous sûr de vouloir supprimer définitivement ce bénéficiaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également toutes les conventions et paiements associés.</p>
           
-          {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+          {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
 
@@ -645,16 +650,20 @@ const DetailBeneficiaire = () => {
   );
 };
 
-// Styles des composants
-
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const AffaireLink = styled.div`
   font-size: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
   
   &:hover {
     text-decoration: underline;
@@ -663,8 +672,10 @@ const AffaireLink = styled.div`
 
 const MilitaireLink = styled.div`
   font-size: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
   
   &:hover {
     text-decoration: underline;
@@ -677,33 +688,39 @@ const QualiteTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => {
     switch(props.qualite) {
       case 'Militaire':
         return `
-          background-color: #e8f5e9;
-          color: #388e3c;
+          background-color: ${props.colors.successBg};
+          color: ${props.colors.success};
+          border: 1px solid ${props.colors.success}40;
         `;
       case 'Conjoint':
         return `
-          background-color: #e3f2fd;
-          color: #1976d2;
+          background-color: ${props.colors.cardIcon.affaires.bg};
+          color: ${props.colors.cardIcon.affaires.color};
+          border: 1px solid ${props.colors.cardIcon.affaires.color}40;
         `;
       case 'Enfant':
         return `
-          background-color: #fff8e1;
-          color: #f57f17;
+          background-color: ${props.colors.warningBg};
+          color: ${props.colors.warning};
+          border: 1px solid ${props.colors.warning}40;
         `;
       case 'Parent':
         return `
-          background-color: #f3e5f5;
-          color: #8e24aa;
+          background-color: ${props.colors.cardIcon.finances.bg};
+          color: ${props.colors.cardIcon.finances.color};
+          border: 1px solid ${props.colors.cardIcon.finances.color}40;
         `;
       default:
         return `
-          background-color: #f5f5f5;
-          color: #757575;
+          background-color: ${props.colors.surfaceHover};
+          color: ${props.colors.textMuted};
+          border: 1px solid ${props.colors.borderLight};
         `;
     }
   }}
@@ -715,31 +732,36 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props.colors.surfaceHover};
+    color: ${props.colors.textMuted};
+    border: 1px solid ${props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 
 const MissingValue = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
   font-size: 16px;
   font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const SpecializationTag = styled.span`
   display: inline-block;
-  background-color: #ff5722;
+  background-color: ${props => props.colors.error};
   color: white;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: bold;
   margin-left: 8px;
+  transition: all 0.3s ease;
 `;
 
 const FinancesSection = styled.section`
@@ -753,41 +775,58 @@ const FinancesSummary = styled.div`
 `;
 
 const FinanceCard = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
   padding: 16px;
   text-align: center;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
 `;
 
 const FinanceTitle = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
+  font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 const FinanceValue = styled.div`
   font-size: 24px;
-  font-weight: 500;
-  color: #3f51b5;
+  font-weight: 600;
+  color: ${props => props.colors.primary};
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const FinanceDetail = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   padding-top: 8px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const TabsSection = styled.section`
   margin-bottom: 24px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const TabActionButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
@@ -797,13 +836,16 @@ const TabActionButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
   
   svg {
     margin-right: 4px;
   }
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
@@ -814,31 +856,40 @@ const AvocatsGrid = styled.div`
 `;
 
 const AvocatCard = styled.div`
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
   padding: 16px;
   display: flex;
   flex-direction: column;
   height: 100%;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.colors.shadowHover};
+  }
 `;
 
 const AvocatContent = styled.div`
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid ${props => props.colors.borderLight};
   display: flex;
   flex-direction: column;
   gap: 6px;
+  transition: border-color 0.3s ease;
 `;
 
 const AvocatPhone = styled.a`
   font-size: 14px;
-  color: ${props => props.isPrivate ? '#f44336' : '#3f51b5'};
+  color: ${props => props.isPrivate ? props.colors.error : props.colors.primary};
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 4px;
+  transition: color 0.3s ease;
   
   svg {
     font-size: 12px;
@@ -851,12 +902,13 @@ const AvocatPhone = styled.a`
 
 const PrivateTag = styled.span`
   font-size: 10px;
-  color: #f44336;
-  background-color: #ffebee;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
   padding: 2px 4px;
   border-radius: 2px;
   margin-left: 4px;
   font-weight: 500;
+  transition: all 0.3s ease;
 `;
 
 const AvocatHeader = styled.div`
@@ -866,28 +918,33 @@ const AvocatHeader = styled.div`
   margin-bottom: 12px;
   
   svg {
-    color: #3f51b5;
+    color: ${props => props.colors.primary};
     font-size: 18px;
     flex-shrink: 0;
+    transition: color 0.3s ease;
   }
 `;
 
 const AvocatName = styled.div`
   font-size: 16px;
   font-weight: 500;
-  color: #333;
-`;
-
-const AvocatNameRow = styled.div`
-  display: flex;
-  align-items: center;
+  color: ${props => props.colors.primary};
+  cursor: pointer;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const AvocatEmail = styled.a`
   font-size: 14px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   text-decoration: none;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.3s ease;
   
   &:hover {
     text-decoration: underline;
@@ -897,20 +954,27 @@ const AvocatEmail = styled.a`
 const EmptyMessage = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 8px;
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ActionButton = styled.button`
-  background-color: #fff;
-  color: #3f51b5;
-  border: 1px solid #3f51b5;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.primary};
+  border: 1px solid ${props => props.colors.primary};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -918,20 +982,23 @@ const ActionButton = styled.button`
   padding: 0 12px;
   height: 36px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
   
   &:hover {
-    background-color: #3f51b5;
-    color: #fff;
+    background-color: ${props => props.colors.primary};
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
   
   &.delete {
-    color: #f44336;
-    border-color: #f44336;
+    color: ${props => props.colors.error};
+    border-color: ${props => props.colors.error};
     
     &:hover {
-      background-color: #f44336;
-      color: #fff;
+      background-color: ${props => props.colors.error};
+      color: white;
     }
   }
   
@@ -943,59 +1010,84 @@ const ActionButton = styled.button`
 const ButtonText = styled.span`
   font-size: 14px;
   font-weight: 500;
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
 `;
 
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
+    color: ${props => props.colors.textPrimary};
+    transition: color 0.3s ease;
+    
+    strong {
+      color: ${props => props.colors.error};
+    }
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #f44336;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  padding: 8px 12px;
+  border-radius: 4px;
   margin-top: 12px;
   font-size: 14px;
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 const CancelButton = styled.button`
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    border-color: ${props => props.colors.primary};
+    color: ${props => props.colors.primary};
+    transform: translateY(-1px);
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background-color: ${props => props.colors.error};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #d32f2f;
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
 const SaveButton = styled.button`
-  background-color: #3f51b5;
+  background-color: ${props => props.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #303f9f;
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadow};
   }
 `;
 
@@ -1005,16 +1097,18 @@ const AvocatsModalContent = styled.div`
 
 const ModalDescription = styled.p`
   margin-bottom: 16px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 // Styles pour la liste des avocats sélectionnés
 const SelectedAvocatsSection = styled.div`
   margin-bottom: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 12px;
-  background-color: #f9f9f9;
+  background-color: ${props => props.colors.surfaceHover};
+  transition: all 0.3s ease;
 `;
 
 const SelectedAvocatsList = styled.div`
@@ -1027,7 +1121,8 @@ const SelectedAvocatItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  transition: border-color 0.3s ease;
   
   &:last-child {
     border-bottom: none;
@@ -1041,9 +1136,10 @@ const AvocatInfo = styled.div`
 `;
 
 const AvocatIcon = styled.div`
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
 `;
 
 const AvocatDetails = styled.div`
@@ -1051,22 +1147,37 @@ const AvocatDetails = styled.div`
   flex-direction: column;
 `;
 
+const AvocatNameRowModal = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const AvocatNameModal = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
 const AvocatEmailText = styled.div`
   font-size: 12px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const RemoveButton = styled.button`
   background: none;
   border: none;
-  color: #f44336;
+  color: ${props => props.colors.error};
   cursor: pointer;
   font-size: 18px;
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
   
   &:hover {
-    color: #d32f2f;
+    color: ${props => props.colors.error}dd;
+    transform: scale(1.1);
   }
 `;
 
@@ -1080,16 +1191,24 @@ const SearchBarWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   overflow: hidden;
+  background-color: ${props => props.colors.surface};
+  transition: all 0.3s ease;
+  
+  &:focus-within {
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
 `;
 
 const SearchIcon = styled.div`
   display: flex;
   align-items: center;
   padding: 0 12px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const SearchInput = styled.input`
@@ -1098,20 +1217,24 @@ const SearchInput = styled.input`
   padding: 10px 0;
   font-size: 14px;
   outline: none;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
-  &:focus {
-    border-color: #3f51b5;
+  &::placeholder {
+    color: ${props => props.colors.textMuted};
   }
 `;
 
 const SearchResultsDropdown = styled.div`
-  background-color: white;
-  border: 1px solid #e0e0e0;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadowHover};
   margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
+  transition: all 0.3s ease;
 `;
 
 const SearchResultItem = styled.div`
@@ -1120,10 +1243,11 @@ const SearchResultItem = styled.div`
   gap: 8px;
   padding: 12px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
   }
   
   &:last-child {
@@ -1134,22 +1258,25 @@ const SearchResultItem = styled.div`
 const NoResultsMessage = styled.div`
   padding: 16px;
   text-align: center;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const CloseResultsButton = styled.button`
   width: 100%;
   padding: 8px;
   text-align: center;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
   border: none;
-  border-top: 1px solid #e0e0e0;
-  color: #616161;
+  border-top: 1px solid ${props => props.colors.borderLight};
+  color: ${props => props.colors.textSecondary};
   cursor: pointer;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.colors.borderLight};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 
@@ -1157,25 +1284,30 @@ const EmptyAvocatsMessage = styled.div`
   padding: 16px;
   text-align: center;
   font-style: italic;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default DetailBeneficiaire;

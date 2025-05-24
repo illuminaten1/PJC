@@ -2,9 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaFolder, FaUser, FaUsers, FaMoneyBill } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const DashboardSummary = ({ statistiques = {} }) => {
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   const navigateToAffaires = () => {
     navigate('/affaires');
@@ -34,69 +36,69 @@ const DashboardSummary = ({ statistiques = {} }) => {
   return (
     <Container>
       <CardGrid>
-        <StatCard onClick={navigateToAffaires}>
-          <IconContainer className="affaires">
+        <StatCard onClick={navigateToAffaires} colors={colors}>
+          <IconContainer className="affaires" colors={colors}>
             <FaFolder />
           </IconContainer>
           <StatContent>
-            <StatValue>{statistiques.affaires || 0}</StatValue>
-            <StatLabel>Affaires</StatLabel>
+            <StatValue colors={colors}>{statistiques.affaires || 0}</StatValue>
+            <StatLabel colors={colors}>Affaires</StatLabel>
           </StatContent>
         </StatCard>
         
-        <StatCard onClick={navigateToMilitaires}>
-          <IconContainer className="militaires">
+        <StatCard onClick={navigateToMilitaires} colors={colors}>
+          <IconContainer className="militaires" colors={colors}>
             <FaUser />
           </IconContainer>
           <StatContent>
-            <StatValue>{statistiques.militaires?.total || 0}</StatValue>
-            <StatLabel>Militaires</StatLabel>
+            <StatValue colors={colors}>{statistiques.militaires?.total || 0}</StatValue>
+            <StatLabel colors={colors}>Militaires</StatLabel>
             <StatDetail>
               <DetailItem>
-                <DetailLabel>Blessés :</DetailLabel>
-                <DetailValue>{statistiques.militaires?.blesses || 0}</DetailValue>
+                <DetailLabel colors={colors}>Blessés :</DetailLabel>
+                <DetailValue colors={colors}>{statistiques.militaires?.blesses || 0}</DetailValue>
               </DetailItem>
               <DetailItem>
-                <DetailLabel>Décédés :</DetailLabel>
-                <DetailValue>{statistiques.militaires?.decedes || 0}</DetailValue>
+                <DetailLabel colors={colors}>Décédés :</DetailLabel>
+                <DetailValue colors={colors}>{statistiques.militaires?.decedes || 0}</DetailValue>
               </DetailItem>
             </StatDetail>
           </StatContent>
         </StatCard>
         
-        <StatCard onClick={navigateToBeneficiaires}>
-          <IconContainer className="beneficiaires">
+        <StatCard onClick={navigateToBeneficiaires} colors={colors}>
+          <IconContainer className="beneficiaires" colors={colors}>
             <FaUsers />
           </IconContainer>
           <StatContent>
-            <StatValue>{totalBeneficiaires}</StatValue>
-            <StatLabel>Bénéficiaires</StatLabel>
+            <StatValue colors={colors}>{totalBeneficiaires}</StatValue>
+            <StatLabel colors={colors}>Bénéficiaires</StatLabel>
             <StatDetail>
               {statistiques.beneficiaires && Object.entries(statistiques.beneficiaires).map(([qualite, count]) => (
                 <DetailItem key={qualite}>
-                  <DetailLabel>{qualite} :</DetailLabel>
-                  <DetailValue>{count}</DetailValue>
+                  <DetailLabel colors={colors}>{qualite} :</DetailLabel>
+                  <DetailValue colors={colors}>{count}</DetailValue>
                 </DetailItem>
               ))}
             </StatDetail>
           </StatContent>
         </StatCard>
         
-        <StatCard onClick={navigateToStatistiques}>
-          <IconContainer className="finances">
+        <StatCard onClick={navigateToStatistiques} colors={colors}>
+          <IconContainer className="finances" colors={colors}>
             <FaMoneyBill />
           </IconContainer>
           <StatContent>
-            <StatValue>{currentYearFinances.montantGage.toLocaleString('fr-FR')} € HT</StatValue>
-            <StatLabel>Budget {currentYear}</StatLabel>
+            <StatValue colors={colors}>{currentYearFinances.montantGage.toLocaleString('fr-FR')} € HT</StatValue>
+            <StatLabel colors={colors}>Budget {currentYear}</StatLabel>
             <StatDetail>
               <DetailItem>
-                <DetailLabel>Engagé :</DetailLabel>
-                <DetailValue>{currentYearFinances.montantGage.toLocaleString('fr-FR')} €</DetailValue>
+                <DetailLabel colors={colors}>Engagé :</DetailLabel>
+                <DetailValue colors={colors}>{currentYearFinances.montantGage.toLocaleString('fr-FR')} €</DetailValue>
               </DetailItem>
               <DetailItem>
-                <DetailLabel>Payé :</DetailLabel>
-                <DetailValue>{currentYearFinances.montantPaye.toLocaleString('fr-FR')} €</DetailValue>
+                <DetailLabel colors={colors}>Payé :</DetailLabel>
+                <DetailValue colors={colors}>{currentYearFinances.montantPaye.toLocaleString('fr-FR')} €</DetailValue>
               </DetailItem>
             </StatDetail>
           </StatContent>
@@ -117,18 +119,20 @@ const CardGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: ${props => props.colors.shadowHover};
+    border-color: ${props => props.colors.primary};
   }
 `;
 
@@ -141,25 +145,26 @@ const IconContainer = styled.div`
   justify-content: center;
   margin-right: 16px;
   font-size: 24px;
+  transition: all 0.3s ease;
   
   &.affaires {
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background-color: ${props => props.colors.cardIcon.affaires.bg};
+    color: ${props => props.colors.cardIcon.affaires.color};
   }
   
   &.militaires {
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props => props.colors.cardIcon.militaires.bg};
+    color: ${props => props.colors.cardIcon.militaires.color};
   }
   
   &.beneficiaires {
-    background-color: #fff8e1;
-    color: #f57f17;
+    background-color: ${props => props.colors.cardIcon.beneficiaires.bg};
+    color: ${props => props.colors.cardIcon.beneficiaires.color};
   }
   
   &.finances {
-    background-color: #f3e5f5;
-    color: #8e24aa;
+    background-color: ${props => props.colors.cardIcon.finances.bg};
+    color: ${props => props.colors.cardIcon.finances.color};
   }
 `;
 
@@ -170,13 +175,15 @@ const StatContent = styled.div`
 const StatValue = styled.div`
   font-size: 24px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const StatLabel = styled.div`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const StatDetail = styled.div`
@@ -190,12 +197,14 @@ const DetailItem = styled.div`
 `;
 
 const DetailLabel = styled.span`
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
+  transition: color 0.3s ease;
 `;
 
 const DetailValue = styled.span`
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 export default DashboardSummary;

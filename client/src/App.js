@@ -5,6 +5,7 @@ import './App.css';
 // Contextes
 import AppContext from './contexts/AppContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext'; // Nouveau import
 
 // Composant de route privée
 import PrivateRoute from './utils/PrivateRoute';
@@ -32,38 +33,40 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
-          <Routes>
-            {/* Route publique */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Routes privées (utilisateurs authentifiés) */}
-            <Route element={<PrivateRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/affaires" element={<Affaires />} />
-                <Route path="/affaires/:id" element={<DetailAffaire />} />
-                <Route path="/militaires" element={<Militaires />} />
-                <Route path="/militaires/:id" element={<DetailMilitaire />} />
-                <Route path="/beneficiaires" element={<Beneficiaires />} />
-                <Route path="/beneficiaires/:id" element={<DetailBeneficiaire />} />
-                <Route path="/avocats" element={<Avocats />} />
-                <Route path="/statistiques" element={<Statistiques />} />
-                <Route path="/parametres" element={<Parametres />} />
+        <ThemeProvider> {/* Nouveau wrapper pour le thème */}
+          <AppContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
+            <Routes>
+              {/* Route publique */}
+              <Route path="/login" element={<Login />} />
+              
+              {/* Routes privées (utilisateurs authentifiés) */}
+              <Route element={<PrivateRoute />}>
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/affaires" element={<Affaires />} />
+                  <Route path="/affaires/:id" element={<DetailAffaire />} />
+                  <Route path="/militaires" element={<Militaires />} />
+                  <Route path="/militaires/:id" element={<DetailMilitaire />} />
+                  <Route path="/beneficiaires" element={<Beneficiaires />} />
+                  <Route path="/beneficiaires/:id" element={<DetailBeneficiaire />} />
+                  <Route path="/avocats" element={<Avocats />} />
+                  <Route path="/statistiques" element={<Statistiques />} />
+                  <Route path="/parametres" element={<Parametres />} />
+                </Route>
               </Route>
-            </Route>
-            
-            {/* Routes privées (admin uniquement)
-            <Route element={<PrivateRoute requireAdmin={true} />}>
-              <Route element={<MainLayout />}>
-              </Route>
-            </Route> */}
-            
-            {/* Redirection et route 404 */}
-            <Route path="/404" element={<NotFound />} />
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-        </AppContext.Provider>
+              
+              {/* Routes privées (admin uniquement)
+              <Route element={<PrivateRoute requireAdmin={true} />}>
+                <Route element={<MainLayout />}>
+                </Route>
+              </Route> */}
+              
+              {/* Redirection et route 404 */}
+              <Route path="/404" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
+          </AppContext.Provider>
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );

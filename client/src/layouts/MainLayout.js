@@ -7,11 +7,13 @@ import {
   FaCog
 } from 'react-icons/fa';
 import { AuthContext } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MainLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useContext(AuthContext);
+  const { darkMode, toggleDarkMode, colors } = useTheme();
   
   const handleLogout = () => {
     logout();
@@ -33,90 +35,98 @@ const MainLayout = () => {
   const activeTab = getActiveTab();
   
   return (
-    <Container>
-      <Header>
+    <Container colors={colors}>
+      <ThemeToggle 
+        onClick={toggleDarkMode}
+        colors={colors}
+        title={darkMode ? 'Mode clair' : 'Mode sombre'}
+      >
+        {darkMode ? '☀' : '●'}
+      </ThemeToggle>
+      
+      <Header colors={colors}>
         <HeaderContent>
-          <AppTitle>Protection Juridique Complémentaire - BRPF</AppTitle>
+          <AppTitle colors={colors}>Protection Juridique Complémentaire - BRPF</AppTitle>
           
           <UserSection>
-            <UserInfo>
-              <UserIcon>
+            <UserInfo colors={colors}>
+              <UserIcon colors={colors}>
                 <FaUser />
               </UserIcon>
               <span>{user?.nom}</span>
-              <UserRole isAdmin={isAdmin()}>
+              <UserRole isAdmin={isAdmin()} colors={colors}>
                 {isAdmin() ? 'Administrateur' : 'Rédacteur'}
               </UserRole>
             </UserInfo>
             
-            <LogoutButton onClick={handleLogout}>
+            <LogoutButton onClick={handleLogout} colors={colors}>
               <FaSignOutAlt />
             </LogoutButton>
           </UserSection>
         </HeaderContent>
         
-        <Nav>
+        <Nav colors={colors}>
           <NavList>
-            <NavItem active={activeTab === 'dashboard'}>
-              <StyledLink to="/">
+            <NavItem active={activeTab === 'dashboard'} colors={colors}>
+              <StyledLink to="/" colors={colors}>
                 <NavIcon><FaChartPie /></NavIcon>
                 <span>Tableau de bord</span>
               </StyledLink>
-              {activeTab === 'dashboard' && <ActiveIndicator />}
+              {activeTab === 'dashboard' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'affaires'}>
-              <StyledLink to="/affaires">
+            <NavItem active={activeTab === 'affaires'} colors={colors}>
+              <StyledLink to="/affaires" colors={colors}>
                 <NavIcon><FaFileAlt /></NavIcon>
                 <span>Affaires</span>
               </StyledLink>
-              {activeTab === 'affaires' && <ActiveIndicator />}
+              {activeTab === 'affaires' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'militaires'}>
-              <StyledLink to="/militaires">
+            <NavItem active={activeTab === 'militaires'} colors={colors}>
+              <StyledLink to="/militaires" colors={colors}>
                 <NavIcon><FaShieldAlt /></NavIcon>
                 <span>Militaires</span>
               </StyledLink>
-              {activeTab === 'militaires' && <ActiveIndicator />}
+              {activeTab === 'militaires' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'beneficiaires'}>
-              <StyledLink to="/beneficiaires">
+            <NavItem active={activeTab === 'beneficiaires'} colors={colors}>
+              <StyledLink to="/beneficiaires" colors={colors}>
                 <NavIcon><FaUsers /></NavIcon>
                 <span>Bénéficiaires</span>
               </StyledLink>
-              {activeTab === 'beneficiaires' && <ActiveIndicator />}
+              {activeTab === 'beneficiaires' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'avocats'}>
-              <StyledLink to="/avocats">
+            <NavItem active={activeTab === 'avocats'} colors={colors}>
+              <StyledLink to="/avocats" colors={colors}>
                 <NavIcon><FaBriefcase /></NavIcon>
                 <span>Avocats</span>
               </StyledLink>
-              {activeTab === 'avocats' && <ActiveIndicator />}
+              {activeTab === 'avocats' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'statistiques'}>
-              <StyledLink to="/statistiques">
+            <NavItem active={activeTab === 'statistiques'} colors={colors}>
+              <StyledLink to="/statistiques" colors={colors}>
                 <NavIcon><FaChartBar /></NavIcon>
                 <span>Statistiques</span>
               </StyledLink>
-              {activeTab === 'statistiques' && <ActiveIndicator />}
+              {activeTab === 'statistiques' && <ActiveIndicator colors={colors} />}
             </NavItem>
             
-            <NavItem active={activeTab === 'parametres'}>
-              <StyledLink to="/parametres">
+            <NavItem active={activeTab === 'parametres'} colors={colors}>
+              <StyledLink to="/parametres" colors={colors}>
                 <NavIcon><FaCog /></NavIcon>
                 <span>Paramètres</span>
               </StyledLink>
-              {activeTab === 'parametres' && <ActiveIndicator />}
+              {activeTab === 'parametres' && <ActiveIndicator colors={colors} />}
             </NavItem>
           </NavList>
         </Nav>
       </Header>
       
-      <Content>
+      <Content colors={colors}>
         <Outlet />
       </Content>
     </Container>
@@ -128,13 +138,46 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.background};
+  transition: background-color 0.3s ease;
+  position: relative;
+`;
+
+const ThemeToggle = styled.button`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  color: ${props => props.colors.textSecondary};
+  opacity: 0.7;
+  z-index: 1000;
+
+  &:hover {
+    opacity: 1;
+    background: ${props => props.colors.surfaceHover};
+    box-shadow: ${props => props.colors.shadow};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 `;
 
 const Header = styled.header`
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: ${props => props.colors.navBackground};
+  border-bottom: 1px solid ${props => props.colors.navBorder};
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 const HeaderContent = styled.div`
@@ -148,7 +191,8 @@ const AppTitle = styled.h1`
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  color: #003366;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
 `;
 
 const UserSection = styled.div`
@@ -162,7 +206,8 @@ const UserInfo = styled.div`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const UserIcon = styled.span`
@@ -170,15 +215,17 @@ const UserIcon = styled.span`
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
-  color: #003366;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
 `;
 
 const UserRole = styled.span`
-  background-color: ${props => props.isAdmin ? '#e8f5e9' : '#e3f2fd'};
-  color: ${props => props.isAdmin ? '#2e7d32' : '#0d47a1'};
+  background-color: ${props => props.isAdmin ? props.colors.successBg : props.colors.warningBg};
+  color: ${props => props.isAdmin ? props.colors.success : props.colors.warning};
   padding: 0.15rem 0.4rem;
   border-radius: 0.75rem;
   font-size: 0.65rem;
+  transition: all 0.3s ease;
 `;
 
 const LogoutButton = styled.button`
@@ -186,22 +233,24 @@ const LogoutButton = styled.button`
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: #6c6c6c;
+  color: ${props => props.colors.navTextMuted};
   border: none;
   padding: 0.25rem;
   font-size: 0.85rem;
   cursor: pointer;
   border-radius: 0.25rem;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.navText};
   }
 `;
 
 const Nav = styled.nav`
-  background-color: #fff;
-  border-top: 1px solid #f0f0f0;
+  background-color: ${props => props.colors.navBackground};
+  border-top: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
 `;
 
 const NavList = styled.ul`
@@ -215,8 +264,8 @@ const NavItem = styled.li`
   position: relative;
   
   a {
-    color: ${props => props.active ? '#003366' : '#6c6c6c'};
-    background-color: ${props => props.active ? '#f5f5f5' : 'transparent'};
+    color: ${props => props.active ? props.colors.primary : props.colors.navTextMuted};
+    background-color: ${props => props.active ? props.colors.navActive : 'transparent'};
     font-weight: ${props => props.active ? '500' : 'normal'};
   }
 `;
@@ -227,11 +276,11 @@ const StyledLink = styled(Link)`
   padding: 0.5rem 0.75rem;
   text-decoration: none;
   font-size: 0.85rem;
-  transition: color 0.3s, background-color 0.3s;
+  transition: all 0.3s ease;
   
   &:hover {
-    color: #003366;
-    background-color: #f5f5f5;
+    color: ${props => props.colors.primary};
+    background-color: ${props => props.colors.navActive};
   }
 `;
 
@@ -248,12 +297,14 @@ const ActiveIndicator = styled.div`
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #003366;
+  background-color: ${props => props.colors.primary};
 `;
 
 const Content = styled.main`
   flex: 1;
   padding: 1rem;
+  background-color: ${props => props.colors.background};
+  transition: background-color 0.3s ease;
 `;
 
 export default MainLayout;

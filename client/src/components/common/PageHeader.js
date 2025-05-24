@@ -2,9 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const PageHeader = ({ title, subtitle, backButton = false, backTo = -1, actionButton = null }) => {
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   const handleBack = () => {
     if (typeof backTo === 'number') {
@@ -15,16 +17,16 @@ const PageHeader = ({ title, subtitle, backButton = false, backTo = -1, actionBu
   };
   
   return (
-    <HeaderContainer>
+    <HeaderContainer colors={colors}>
       <TitleSection>
         {backButton && (
-          <BackButton onClick={handleBack}>
+          <BackButton onClick={handleBack} colors={colors}>
             <FaArrowLeft />
           </BackButton>
         )}
         <div>
-          <Title>{title}</Title>
-          {subtitle && <Subtitle>{subtitle}</Subtitle>}
+          <Title colors={colors}>{title}</Title>
+          {subtitle && <Subtitle colors={colors}>{subtitle}</Subtitle>}
         </div>
       </TitleSection>
       
@@ -38,6 +40,11 @@ const HeaderContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  padding: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 const TitleSection = styled.div`
@@ -53,13 +60,15 @@ const BackButton = styled.button`
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
   margin-right: 16px;
   padding: 8px;
   border-radius: 50%;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: rgba(63, 81, 181, 0.1);
+    background-color: ${props => props.colors.surfaceHover};
+    transform: scale(1.1);
   }
 `;
 
@@ -67,13 +76,15 @@ const Title = styled.h1`
   font-size: 24px;
   font-weight: 500;
   margin: 0;
-  color: #212121;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const Subtitle = styled.p`
   font-size: 14px;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   margin: 4px 0 0;
+  transition: color 0.3s ease;
 `;
 
 const ActionSection = styled.div`

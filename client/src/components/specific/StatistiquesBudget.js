@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { statistiquesAPI } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Enregistrement des composants Chart.js
 ChartJS.register(
@@ -26,6 +27,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   const [statistiques, setStatistiques] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { darkMode, colors } = useTheme();
   
   useEffect(() => {
     fetchStatistiques();
@@ -46,33 +48,33 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   };
   
   if (loading) {
-    return <Loading>Chargement des statistiques...</Loading>;
+    return <Loading colors={colors}>Chargement des statistiques...</Loading>;
   }
   
   if (error) {
-    return <Error>{error}</Error>;
+    return <Error colors={colors}>{error}</Error>;
   }
   
   if (!statistiques) {
-    return <Empty>Aucune donnée disponible</Empty>;
+    return <Empty colors={colors}>Aucune donnée disponible</Empty>;
   }
   
-  // Préparation des données pour le graphique
+  // Préparation des données pour le graphique avec support du thème sombre
   const chartData = {
     labels: statistiques.parMois.map(mois => mois.nomMois),
     datasets: [
       {
         label: 'Montants engagés (€)',
         data: statistiques.parMois.map(mois => mois.gage.montant),
-        backgroundColor: 'rgba(63, 81, 181, 0.6)',
-        borderColor: 'rgba(63, 81, 181, 1)',
+        backgroundColor: darkMode ? 'rgba(92, 107, 192, 0.8)' : 'rgba(63, 81, 181, 0.6)',
+        borderColor: darkMode ? 'rgba(121, 134, 203, 1)' : 'rgba(63, 81, 181, 1)',
         borderWidth: 1,
       },
       {
         label: 'Montants payés (€)',
         data: statistiques.parMois.map(mois => mois.paye.montant),
-        backgroundColor: 'rgba(76, 175, 80, 0.6)',
-        borderColor: 'rgba(76, 175, 80, 1)',
+        backgroundColor: darkMode ? 'rgba(102, 187, 106, 0.8)' : 'rgba(76, 175, 80, 0.6)',
+        borderColor: darkMode ? 'rgba(129, 199, 132, 1)' : 'rgba(76, 175, 80, 1)',
         borderWidth: 1,
       }
     ]
@@ -84,55 +86,75 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          color: colors.textPrimary,
+          font: {
+            family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+          }
+        }
       },
       title: {
         display: true,
         text: `Répartition budgétaire par mois - ${annee}`,
+        color: colors.textPrimary,
         font: {
-          size: 16
+          size: 16,
+          family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
         }
       },
     },
     scales: {
+      x: {
+        ticks: {
+          color: colors.textSecondary
+        },
+        grid: {
+          color: colors.border
+        }
+      },
       y: {
         beginAtZero: true,
         ticks: {
+          color: colors.textSecondary,
           callback: function(value) {
             return value.toLocaleString('fr-FR') + ' €';
           }
+        },
+        grid: {
+          color: colors.border
         }
       }
     }
   };
   
   return (
-    <Container className="budget-section">
-      <FullWidthChartContainer className="budget-chart">
+    <Container className="budget-section" colors={colors}>
+      <FullWidthChartContainer className="budget-chart" colors={colors}>
         <Bar data={chartData} options={chartOptions} />
       </FullWidthChartContainer>
       
       <SummaryContainer>
-        <SummaryTitle>Synthèse annuelle {annee}</SummaryTitle>
+        <SummaryTitle colors={colors}>Synthèse annuelle {annee}</SummaryTitle>
         
         <SummaryGrid className="budget-summary">
-          <SummaryCard>
-            <SummaryLabel>Total engagé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} € HT</SummaryValue>
+          <SummaryCard colors={colors}>
+            <SummaryLabel colors={colors}>Total engagé</SummaryLabel>
+            <SummaryValue colors={colors}>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} € HT</SummaryValue>
           </SummaryCard>
           
-          <SummaryCard>
-            <SummaryLabel>Total payé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} € TTC</SummaryValue>
+          <SummaryCard colors={colors}>
+            <SummaryLabel colors={colors}>Total payé</SummaryLabel>
+            <SummaryValue colors={colors}>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} € TTC</SummaryValue>
           </SummaryCard>
           
-          <SummaryCard>
-            <SummaryLabel>Ratio payé/engagé</SummaryLabel>
-            <SummaryValue>{statistiques.totaux.ratio.toFixed(2)} %</SummaryValue>
+          <SummaryCard colors={colors}>
+            <SummaryLabel colors={colors}>Ratio payé/engagé</SummaryLabel>
+            <SummaryValue colors={colors}>{statistiques.totaux.ratio.toFixed(2)} %</SummaryValue>
           </SummaryCard>
         </SummaryGrid>
       </SummaryContainer>
       
-      <DetailTable className="budget-detail-table">
+      <DetailTable className="budget-detail-table" colors={colors}>
         <thead>
           <tr>
             <th>Mois</th>
@@ -166,18 +188,24 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
 };
 
 const Container = styled.div`
-  background-color: #fff;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
   padding: 20px;
   margin-bottom: 24px;
   width: 100%;
+  transition: all 0.3s ease;
 `;
 
 const FullWidthChartContainer = styled.div`
   margin-bottom: 24px;
   height: 400px;
   width: 100%;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  padding: 10px;
+  transition: background-color 0.3s ease;
 `;
 
 const SummaryContainer = styled.div`
@@ -189,7 +217,8 @@ const SummaryTitle = styled.h3`
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 16px;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const SummaryGrid = styled.div`
@@ -199,22 +228,31 @@ const SummaryGrid = styled.div`
 `;
 
 const SummaryCard = styled.div`
-  background-color: #f5f5f5;
+  background-color: ${props => props.colors.surfaceHover};
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   padding: 16px;
   text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: ${props => props.colors.shadow};
+    transform: translateY(-2px);
+  }
 `;
 
 const SummaryLabel = styled.div`
   font-size: 14px;
-  color: #666;
+  color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
+  transition: color 0.3s ease;
 `;
 
 const SummaryValue = styled.div`
   font-size: 24px;
   font-weight: 500;
-  color: #3f51b5;
+  color: ${props => props.colors.primary};
+  transition: color 0.3s ease;
 `;
 
 const DetailTable = styled.table`
@@ -225,45 +263,54 @@ const DetailTable = styled.table`
   th, td {
     padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid ${props => props.colors.border};
+    color: ${props => props.colors.textPrimary};
+    transition: all 0.3s ease;
   }
   
   th {
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
     font-weight: 500;
-    color: #333;
+    color: ${props => props.colors.textPrimary};
   }
   
   tr:hover {
-    background-color: #f9f9f9;
+    background-color: ${props => props.colors.surfaceHover};
   }
   
   .total-row {
     font-weight: 500;
-    background-color: #f5f5f5;
+    background-color: ${props => props.colors.surfaceHover};
   }
 `;
 
 const Loading = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border: 1px solid ${props => props.colors.error};
   border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Empty = styled.div`
   padding: 20px;
   text-align: center;
-  color: #757575;
-  background-color: #f5f5f5;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 export default StatistiquesBudget;

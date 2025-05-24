@@ -5,11 +5,13 @@ import PageHeader from '../components/common/PageHeader';
 import DashboardSummary from '../components/specific/DashboardSummary';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
 import { FaChartBar } from 'react-icons/fa';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Dashboard = () => {
   const [statistiques, setStatistiques] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { colors } = useTheme();
   const anneeActuelle = new Date().getFullYear();
   
   useEffect(() => {
@@ -32,24 +34,24 @@ const Dashboard = () => {
   
   if (loading) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Tableau de bord" />
-        <Loading>Chargement du tableau de bord...</Loading>
+        <Loading colors={colors}>Chargement du tableau de bord...</Loading>
       </Container>
     );
   }
   
   if (error) {
     return (
-      <Container>
+      <Container colors={colors}>
         <PageHeader title="Tableau de bord" />
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       </Container>
     );
   }
   
   return (
-    <Container>
+    <Container colors={colors}>
       <PageHeader 
         title="Tableau de bord" 
         subtitle="Aperçu général de la protection juridique"
@@ -57,9 +59,9 @@ const Dashboard = () => {
       
       <DashboardSummary statistiques={statistiques} />
       
-      <Section>
+      <Section colors={colors}>
         <SectionHeader>
-          <SectionTitle>
+          <SectionTitle colors={colors}>
             <FaChartBar />
             <span>Suivi budgétaire {anneeActuelle}</span>
           </SectionTitle>
@@ -73,6 +75,9 @@ const Dashboard = () => {
 
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 `;
 
 const Section = styled.section`
@@ -89,32 +94,35 @@ const SectionHeader = styled.div`
 const SectionTitle = styled.h2`
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: ${props => props.colors.textPrimary};
   display: flex;
   align-items: center;
+  transition: color 0.3s ease;
   
   svg {
     margin-right: 8px;
-    color: #3f51b5;
+    color: ${props => props.colors.primary};
   }
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surface};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
 `;
 
 export default Dashboard;

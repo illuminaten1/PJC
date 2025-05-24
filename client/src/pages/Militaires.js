@@ -5,6 +5,7 @@ import { FaFilter } from 'react-icons/fa';
 import { militairesAPI, affairesAPI, parametresAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Militaires = () => {
   const [militaires, setMilitaires] = useState([]);
@@ -21,6 +22,7 @@ const Militaires = () => {
   const [archivedMilitaires, setArchivedMilitaires] = useState(0);
   
   const navigate = useNavigate();
+  const { colors } = useTheme();
   
   useEffect(() => {
     fetchMilitaires();
@@ -108,11 +110,11 @@ const Militaires = () => {
       accessor: 'nom',
     },
     {
-      Header: 'Unité', // Nouvelle colonne
+      Header: 'Unité',
       accessor: 'unite',
     },
     {
-      Header: 'Région / Département', // Nouvelle colonne
+      Header: 'Région / Département',
       accessor: row => `${row.region || '-'} / ${row.departement || '-'}`,
     },
     {
@@ -123,7 +125,7 @@ const Militaires = () => {
       Header: 'Statut',
       accessor: row => row.decede ? 'Décédé' : 'Blessé',
       Cell: ({ value }) => (
-        <StatusTag status={value === 'Décédé' ? 'deces' : 'blesse'}>
+        <StatusTag status={value === 'Décédé' ? 'deces' : 'blesse'} colors={colors}>
           {value}
         </StatusTag>
       ),
@@ -140,30 +142,30 @@ const Militaires = () => {
       Header: 'Archive',
       accessor: row => row.archive ? 'Archivé' : 'Actif',
       Cell: ({ value }) => (
-        <ArchiveTag status={value === 'Archivé' ? 'archived' : 'active'}>
+        <ArchiveTag status={value === 'Archivé' ? 'archived' : 'active'} colors={colors}>
           {value}
         </ArchiveTag>
       ),
     },
-  ], []);
+  ], [colors]);
   
   return (
-    <Container>
-    <HeaderContainer> 
-      <TitleArea>
-        <Title>Militaires</Title>
-        <Subtitle>Gestion des militaires créateurs de droit</Subtitle>
-        <StatPills>
-          <StatPill>{totalMilitaires} au total</StatPill>
-          <StatPill className="active">{activesMilitaires} actifs</StatPill>
-          <StatPill className="archived">{archivedMilitaires} archivés</StatPill>
-        </StatPills>
-      </TitleArea>
-    </HeaderContainer>
+    <Container colors={colors}>
+      <HeaderContainer colors={colors}> 
+        <TitleArea>
+          <Title colors={colors}>Militaires</Title>
+          <Subtitle colors={colors}>Gestion des militaires créateurs de droit</Subtitle>
+          <StatPills>
+            <StatPill colors={colors}>{totalMilitaires} au total</StatPill>
+            <StatPill className="active" colors={colors}>{activesMilitaires} actifs</StatPill>
+            <StatPill className="archived" colors={colors}>{archivedMilitaires} archivés</StatPill>
+          </StatPills>
+        </TitleArea>
+      </HeaderContainer>
 
-      <FiltersContainer>
+      <FiltersContainer colors={colors}>
         <FiltersGroup>
-          <FilterLabel>
+          <FilterLabel colors={colors}>
             <FaFilter />
             <span>Filtres:</span>
           </FilterLabel>
@@ -171,6 +173,7 @@ const Militaires = () => {
           <Select
             value={filterAffaire}
             onChange={(e) => setFilterAffaire(e.target.value)}
+            colors={colors}
           >
             <option value="">Toutes les affaires</option>
             {affaires.map(affaire => (
@@ -181,6 +184,7 @@ const Militaires = () => {
           <Select
             value={filterRedacteur}
             onChange={(e) => setFilterRedacteur(e.target.value)}
+            colors={colors}
           >
             <option value="">Tous les rédacteurs</option>
             {redacteurs.map((redacteur, index) => (
@@ -191,13 +195,14 @@ const Militaires = () => {
           <Select
             value={filterArchive}
             onChange={(e) => setFilterArchive(e.target.value)}
+            colors={colors}
           >
             <option value="false">Actifs</option>
             <option value="true">Archivés</option>
             <option value="">Tous</option>
           </Select>
 
-          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres">
+          <ResetButton onClick={resetFilters} title="Réinitialiser les filtres" colors={colors}>
             Réinitialiser
           </ResetButton>
 
@@ -205,9 +210,9 @@ const Militaires = () => {
       </FiltersContainer>
       
       {loading ? (
-        <Loading>Chargement des militaires...</Loading>
+        <Loading colors={colors}>Chargement des militaires...</Loading>
       ) : error ? (
-        <Error>{error}</Error>
+        <Error colors={colors}>{error}</Error>
       ) : (
         <DataTable
           columns={columns}
@@ -220,8 +225,75 @@ const Militaires = () => {
   );
 };
 
+// Styled Components avec thématisation complète
 const Container = styled.div`
   padding: 20px;
+  background-color: ${props => props.colors.background};
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+`;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
+`;
+
+const TitleArea = styled.div`
+  flex: 1;
+`;
+
+const Title = styled.h1`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
+`;
+
+const Subtitle = styled.p`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  margin: 4px 0 0;
+  transition: color 0.3s ease;
+`;
+
+const StatPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const StatPill = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: ${props => props.colors.textPrimary};
+  background-color: ${props => props.colors.surfaceHover};
+  padding: 4px 12px;
+  border-radius: 12px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.borderLight};
+  transition: all 0.3s ease;
+  
+  &.active {
+    background-color: ${props => props.colors.successBg};
+    color: ${props => props.colors.success};
+    border-color: ${props => props.colors.success}40;
+  }
+  
+  &.archived {
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
+    border-color: ${props => props.colors.borderLight};
+  }
 `;
 
 const FiltersContainer = styled.div`
@@ -230,6 +302,12 @@ const FiltersContainer = styled.div`
   gap: 16px;
   margin-bottom: 24px;
   align-items: center;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const FiltersGroup = styled.div`
@@ -242,24 +320,61 @@ const FiltersGroup = styled.div`
 const FilterLabel = styled.div`
   display: flex;
   align-items: center;
-  color: #757575;
+  color: ${props => props.colors.textSecondary};
   font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
   
   svg {
-    margin-right: 4px;
+    margin-right: 6px;
+    color: ${props => props.colors.primary};
   }
 `;
 
 const Select = styled.select`
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => props.colors.border};
   border-radius: 4px;
   font-size: 14px;
   outline: none;
-  min-width: 200px;
+  min-width: 150px;
+  background-color: ${props => props.colors.surface};
+  color: ${props => props.colors.textPrimary};
+  transition: all 0.3s ease;
   
   &:focus {
-    border-color: #3f51b5;
+    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+  }
+  
+  &:hover {
+    border-color: ${props => props.colors.primary}80;
+  }
+  
+  option {
+    background-color: ${props => props.colors.surface};
+    color: ${props => props.colors.textPrimary};
+  }
+`;
+
+const ResetButton = styled.button`
+  background-color: ${props => props.colors.error};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: ${props => props.colors.shadow};
+  
+  &:hover {
+    background-color: ${props => props.colors.error}dd;
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors.shadowHover};
   }
 `;
 
@@ -269,13 +384,16 @@ const StatusTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'deces' ? `
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: ${props.colors.errorBg};
+    color: ${props.colors.error};
+    border: 1px solid ${props.colors.error}40;
   ` : props.status === 'blesse' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props.colors.successBg};
+    color: ${props.colors.success};
+    border: 1px solid ${props.colors.success}40;
   ` : ''}
 `;
 
@@ -285,101 +403,39 @@ const ArchiveTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s ease;
   
   ${props => props.status === 'archived' ? `
-    background-color: #f5f5f5;
-    color: #757575;
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textMuted};
+    border: 1px solid ${props => props.colors.borderLight};
   ` : props.status === 'active' ? `
-    background-color: #e8f5e9;
-    color: #388e3c;
+    background-color: ${props => props.colors.successBg};
+    color: ${props => props.colors.success};
+    border: 1px solid ${props => props.colors.success}40;
   ` : ''}
 `;
 
 const Loading = styled.div`
   padding: 40px;
   text-align: center;
-  color: #757575;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: ${props => props.colors.textSecondary};
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
 `;
 
 const Error = styled.div`
   padding: 20px;
   text-align: center;
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const ResetButton = styled.button`
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: #d32f2f;
-  }
-`;
-
-const HeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-`;
-
-const TitleArea = styled.div`
-  flex: 1;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0;
-  color: #212121;
-`;
-
-const Subtitle = styled.p`
-  font-size: 14px;
-  color: #757575;
-  margin: 4px 0 0;
-`;
-
-const StatPills = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const StatPill = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  color: #424242;
-  background-color: #e0e0e0;
-  padding: 3px 10px;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-  &.active {
-    background-color: #c8e6c9;
-    color: #2e7d32;
-  }
-  
-  &.archived {
-    background-color: #e0e0e0;
-    color: #616161;
-    border: 1px solid #bdbdbd;
-  }
+  color: ${props => props.colors.error};
+  background-color: ${props => props.colors.errorBg};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.error}40;
+  transition: all 0.3s ease;
 `;
 
 export default Militaires;

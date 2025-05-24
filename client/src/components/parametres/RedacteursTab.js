@@ -148,8 +148,8 @@ const RedacteursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
   if (historiqueModeOpen) {
     return (
       <Container>
-        <HistoriqueHeader>
-          <h2>Historique des transferts de portefeuille (30 derniers jours)</h2>
+        <HistoriqueHeader colors={colors}>
+          <HistoriqueTitle colors={colors}>Historique des transferts de portefeuille (30 derniers jours)</HistoriqueTitle>
           <BackButton onClick={() => setHistoriqueModeOpen(false)} colors={colors}>
             <FaArrowLeft style={{ marginRight: '8px' }} />
             Retour aux rédacteurs
@@ -523,13 +523,14 @@ const HistoriqueHeader = styled.div`
   margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
-  
-  h2 {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0;
-    color: ${props => props.colors?.textPrimary || '#333'};
-  }
+`;
+
+const HistoriqueTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+  color: ${props => props.colors.textPrimary};
+  transition: color 0.3s ease;
 `;
 
 const BackButton = styled.button`

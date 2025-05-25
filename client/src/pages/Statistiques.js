@@ -1635,4 +1635,34 @@ const PercentageBadge = styled.span`
   white-space: nowrap;
 `;
 
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 200px;
+`;
+
+const EmptyStateIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+`;
+
+const EmptyStateText = styled.h4`
+  color: ${props => props.colors.textPrimary};
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const EmptyStateSubtext = styled.p`
+  color: ${props => props.colors.textSecondary};
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.7;
+`;
+
 export default Statistiques;

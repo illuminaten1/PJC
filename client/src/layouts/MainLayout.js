@@ -160,7 +160,7 @@ const MainLayout = () => {
           </DesktopNav>
 
           {/* Navigation Mobile (Horizontal Scroll) */}
-          <MobileNav>
+          <MobileNav colors={colors}>
             <MobileNavList>
               <MobileNavItem active={activeTab === 'dashboard'} colors={colors}>
                 <MobileStyledLink to="/" colors={colors} onClick={closeMobileMenu}>
@@ -581,11 +581,11 @@ const MobileNav = styled.div`
     }
     
     &::-webkit-scrollbar-track {
-      background: ${props => props.colors.background};
+      background: ${props => props.colors?.background || '#f5f5f5'};
     }
     
     &::-webkit-scrollbar-thumb {
-      background: ${props => props.colors.border};
+      background: ${props => props.colors?.border || '#dee2e6'};
       border-radius: 2px;
     }
   }

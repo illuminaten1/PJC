@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import SimpleMDE from 'react-simplemde-editor';
 import 'easymde/dist/easymde.min.css';
 import ReactMarkdown from 'react-markdown';
@@ -19,18 +19,41 @@ export const MarkdownEditor = ({ value, onChange, name = 'notes', placeholder = 
     });
   }, [onChange, name]);
   
+  // Calculer la hauteur dynamique basée sur le contenu
+  const dynamicHeight = useMemo(() => {
+    if (!value) return 200; // Hauteur minimale
+    
+    // Compter le nombre de lignes dans le contenu
+    const lines = value.split('\n').length;
+    // Hauteur par ligne (approximative) + padding
+    const lineHeight = 20;
+    const padding = 40;
+    
+    // Hauteur calculée avec un minimum de 200px et un maximum de 600px
+    const calculatedHeight = Math.max(200, Math.min(600, lines * lineHeight + padding));
+    
+    return calculatedHeight;
+  }, [value]);
+  
+  const editorOptions = useMemo(() => ({
+    spellChecker: false,
+    toolbar: ["bold", "italic", "heading", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview"],
+    placeholder,
+    status: false,
+    autofocus: true,
+    minHeight: `${dynamicHeight}px`,
+    // Forcer la hauteur de CodeMirror
+    codeMirrorOptions: {
+      viewportMargin: Infinity, // Affiche tout le contenu sans scroll interne
+    }
+  }), [placeholder, dynamicHeight]);
+  
   return (
-    <EditorContainer colors={colors} darkMode={darkMode}>
+    <EditorContainer colors={colors} darkMode={darkMode} dynamicHeight={dynamicHeight}>
       <SimpleMDE
         value={value}
         onChange={handleChange}
-        options={{
-          spellChecker: false,
-          toolbar: ["bold", "italic", "heading", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview"],
-          placeholder,
-          status: false,
-          autofocus: true,
-        }}
+        options={editorOptions}
       />
     </EditorContainer>
   );
@@ -54,10 +77,16 @@ const EditorContainer = styled.div`
   .CodeMirror {
     border: 1px solid ${props => props.colors.border};
     border-radius: 4px;
-    min-height: 200px;
+    min-height: ${props => props.dynamicHeight}px !important;
+    height: ${props => props.dynamicHeight}px !important;
     background-color: ${props => props.colors.surface};
     color: ${props => props.colors.textPrimary};
     transition: all 0.3s ease;
+  }
+  
+  .CodeMirror-scroll {
+    min-height: ${props => props.dynamicHeight}px !important;
+    height: auto !important;
   }
   
   .CodeMirror-focused {

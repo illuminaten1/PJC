@@ -16,7 +16,7 @@ const validateObjectId = (req, res, next) => {
 // GET - Récupérer tous les militaires avec filtres
 router.get('/', async (req, res) => {
   try {
-    const { search, affaire, redacteur, archive } = req.query;
+    const { search, affaire, redacteur, region, departement, archive } = req.query;
     let query = {};
     
     if (search) {
@@ -25,6 +25,16 @@ router.get('/', async (req, res) => {
     
     if (affaire) {
       query.affaire = affaire;
+    }
+    
+    // Gestion du filtre par région
+    if (region) {
+      query.region = region;
+    }
+    
+    // Gestion du filtre par département
+    if (departement) {
+      query.departement = departement;
     }
     
     // Gestion du filtre par rédacteur

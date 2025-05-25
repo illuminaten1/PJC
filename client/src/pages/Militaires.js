@@ -11,11 +11,15 @@ const Militaires = () => {
   const [militaires, setMilitaires] = useState([]);
   const [affaires, setAffaires] = useState([]);
   const [redacteurs, setRedacteurs] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [departements, setDepartements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAffaire, setFilterAffaire] = useState('');
   const [filterRedacteur, setFilterRedacteur] = useState('');
+  const [filterRegion, setFilterRegion] = useState('');
+  const [filterDepartement, setFilterDepartement] = useState('');
   const [filterArchive, setFilterArchive] = useState('false');
   const [totalMilitaires, setTotalMilitaires] = useState(0);
   const [activesMilitaires, setActivesMilitaires] = useState(0);
@@ -28,7 +32,8 @@ const Militaires = () => {
     fetchMilitaires();
     fetchAffaires();
     fetchRedacteurs();
-  }, [searchTerm, filterAffaire, filterRedacteur, filterArchive]);
+    fetchRegionsAndDepartements();
+  }, [searchTerm, filterAffaire, filterRedacteur, filterRegion, filterDepartement, filterArchive]);
   
   const fetchMilitaires = async () => {
     setLoading(true);
@@ -38,13 +43,15 @@ const Militaires = () => {
       if (searchTerm) params.search = searchTerm;
       if (filterAffaire) params.affaire = filterAffaire;
       if (filterRedacteur) params.redacteur = filterRedacteur;
+      if (filterRegion) params.region = filterRegion;
+      if (filterDepartement) params.departement = filterDepartement;
       if (filterArchive !== '') params.archive = filterArchive;
       
       const response = await militairesAPI.getAll(params);
       setMilitaires(response.data);
       
       // Si aucun filtre n'est appliqué, utilisez directement cette réponse pour les compteurs
-      if (!searchTerm && !filterAffaire && !filterRedacteur && filterArchive === '') {
+      if (!searchTerm && !filterAffaire && !filterRedacteur && !filterRegion && !filterDepartement && filterArchive === '') {
         const allMilitaires = response.data;
         setTotalMilitaires(allMilitaires.length);
         setActivesMilitaires(allMilitaires.filter(m => !m.archive).length);
@@ -85,9 +92,38 @@ const Militaires = () => {
     }
   };
 
+  const fetchRegionsAndDepartements = async () => {
+    try {
+      // Récupérer tous les militaires pour extraire les régions et départements uniques
+      const response = await militairesAPI.getAll({});
+      const allMilitaires = response.data;
+      
+      // Extraire les régions uniques (non nulles/vides)
+      const uniqueRegions = [...new Set(
+        allMilitaires
+          .map(m => m.region)
+          .filter(region => region && region.trim() !== '')
+      )].sort();
+      
+      // Extraire les départements uniques (non nulles/vides)
+      const uniqueDepartements = [...new Set(
+        allMilitaires
+          .map(m => m.departement)
+          .filter(dept => dept && dept.trim() !== '')
+      )].sort();
+      
+      setRegions(uniqueRegions);
+      setDepartements(uniqueDepartements);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des régions et départements", err);
+    }
+  };
+
   const resetFilters = () => {
     setFilterAffaire('');
     setFilterRedacteur('');
+    setFilterRegion('');
+    setFilterDepartement('');
     setFilterArchive('false');
     setSearchTerm('');
   };
@@ -189,6 +225,28 @@ const Militaires = () => {
             <option value="">Tous les rédacteurs</option>
             {redacteurs.map((redacteur, index) => (
               <option key={index} value={redacteur}>{redacteur}</option>
+            ))}
+          </Select>
+          
+          <Select
+            value={filterRegion}
+            onChange={(e) => setFilterRegion(e.target.value)}
+            colors={colors}
+          >
+            <option value="">Toutes les régions</option>
+            {regions.map((region, index) => (
+              <option key={index} value={region}>{region}</option>
+            ))}
+          </Select>
+          
+          <Select
+            value={filterDepartement}
+            onChange={(e) => setFilterDepartement(e.target.value)}
+            colors={colors}
+          >
+            <option value="">Tous les départements</option>
+            {departements.map((departement, index) => (
+              <option key={index} value={departement}>{departement}</option>
             ))}
           </Select>
           
@@ -434,7 +492,7 @@ const Error = styled.div`
   background-color: ${props => props.colors.errorBg};
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props => props.colors.error}40;
+  border: 1px solid ${props.colors.error}40;
   transition: all 0.3s ease;
 `;
 

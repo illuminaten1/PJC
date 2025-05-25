@@ -423,7 +423,7 @@ const Statistiques = () => {
               <TableTitle colors={colors}>Bénéficiaires - Conventions</TableTitle>
               <CompactTable colors={colors}>
                 <thead>
-                  <tr className="bg-header">
+                  <tr>
                     <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
                     <SummaryTableHeader colors={colors}>
                       <span className="full-text">Nombre de bénéficiaires</span>
@@ -439,7 +439,7 @@ const Statistiques = () => {
                   {dataWithVariations.map(({ year, data, variations }) => (
                     <Tr key={`conventions-${year}`} colors={colors}>
                       <YearCell colors={colors}>{year}</YearCell>
-                      <Td colors={colors}>
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbBeneficiaires || 0}</span>
                           {variations.nbBeneficiaires && (
@@ -453,7 +453,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td colors={colors}>
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbConventions || 0}</span>
                           {variations.nbConventions && (
@@ -469,11 +469,19 @@ const Statistiques = () => {
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow colors={colors}>
-                    <TotalCell colors={colors}>TOTAL</TotalCell>
-                    <TotalCell colors={colors}>{totals.nbBeneficiaires}</TotalCell>
-                    <TotalCell colors={colors}>{totals.nbConventions}</TotalCell>
-                  </TotalRow>
+                  <Tr colors={colors}>
+                    <YearCell colors={colors}>TOTAL</YearCell>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.nbBeneficiaires}</span>
+                      </div>
+                    </Td>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.nbConventions}</span>
+                      </div>
+                    </Td>
+                  </Tr>
                 </tbody>
               </CompactTable>
             </TableCard>
@@ -483,7 +491,7 @@ const Statistiques = () => {
               <TableTitle colors={colors}>Montant Total Gagé</TableTitle>
               <CompactTable colors={colors}>
                 <thead>
-                  <tr className="bg-header">
+                  <tr>
                     <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
                     <SummaryTableHeader colors={colors}>
                       <span className="full-text">Montant total gagé HT</span>
@@ -503,7 +511,7 @@ const Statistiques = () => {
                     return (
                       <Tr key={`montants-${year}`} colors={colors}>
                         <YearCell colors={colors}>{year}</YearCell>
-                        <Td colors={colors}>
+                        <Td colors={colors} className="text-center">
                           <div className="value-container">
                             <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -517,7 +525,7 @@ const Statistiques = () => {
                             )}
                           </div>
                         </Td>
-                        <Td colors={colors}>
+                        <Td colors={colors} className="text-center">
                           <div className="value-container">
                             <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -534,11 +542,19 @@ const Statistiques = () => {
                       </Tr>
                     );
                   })}
-                  <TotalRow colors={colors}>
-                    <TotalCell colors={colors}>TOTAL</TotalCell>
-                    <TotalCell colors={colors}>{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                    <TotalCell colors={colors}>{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                  </TotalRow>
+                  <Tr colors={colors}>
+                    <YearCell colors={colors}>TOTAL</YearCell>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                      </div>
+                    </Td>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</span>
+                      </div>
+                    </Td>
+                  </Tr>
                 </tbody>
               </CompactTable>
             </TableCard>
@@ -548,7 +564,7 @@ const Statistiques = () => {
               <TableTitle colors={colors}>Dépenses Ordonnées</TableTitle>
               <CompactTable colors={colors}>
                 <thead>
-                  <tr className="bg-header">
+                  <tr>
                     <SummaryTableHeader colors={colors}>Année</SummaryTableHeader>
                     <SummaryTableHeader colors={colors}>
                       <span className="full-text">Nombre de règlements</span>
@@ -564,7 +580,7 @@ const Statistiques = () => {
                   {dataWithVariations.map(({ year, data, variations }) => (
                     <Tr key={`ordonnes-${year}`} colors={colors}>
                       <YearCell colors={colors}>{year}</YearCell>
-                      <Td colors={colors}>
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbReglements || 0}</span>
                           {variations.nbReglements && (
@@ -578,7 +594,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td colors={colors}>
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">
                             {(data.montantPaye || 0) > 0 
@@ -598,11 +614,19 @@ const Statistiques = () => {
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow colors={colors}>
-                    <TotalCell colors={colors}>TOTAL</TotalCell>
-                    <TotalCell colors={colors}>{totals.nbReglements}</TotalCell>
-                    <TotalCell colors={colors}>{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</TotalCell>
-                  </TotalRow>
+                  <Tr colors={colors}>
+                    <YearCell colors={colors}>TOTAL</YearCell>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.nbReglements}</span>
+                      </div>
+                    </Td>
+                    <Td colors={colors} className="text-center">
+                      <div className="value-container">
+                        <span className="value">{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</span>
+                      </div>
+                    </Td>
+                  </Tr>
                 </tbody>
               </CompactTable>
             </TableCard>
@@ -1075,12 +1099,16 @@ const BlockTitle = styled.h3`
 
 // Styles mis à jour pour le design avec contours accentués
 const TableTitle = styled.div`
-  padding: 16px;
+  background: linear-gradient(135deg, ${props => props.colors.primary}, ${props => props.colors.primary}dd);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid ${props => props.colors.primary};
+  font-size: 16px;
   font-weight: 600;
-  color: ${props => props.colors.textPrimary};
-  background-color: ${props => props.colors.surfaceHover};
-  border-bottom: 2px solid ${props => props.colors.primary};
-  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  margin: 0;
 `;
 
 const PercentageBadge = styled.span`
@@ -1119,43 +1147,102 @@ const TablesRow = styled.div`
 
 const TableCard = styled.div`
   background: ${props => props.colors.surface};
-  border-radius: 4px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: ${props => props.colors.shadow};
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border: 2px solid ${props => props.colors.border};
-  transition: all 0.3s ease;
   
   &:hover {
+    transform: translateY(-4px);
     box-shadow: ${props => props.colors.shadowHover};
   }
   
   @media (max-width: 768px) {
     overflow-x: auto;
-    
-    table {
-      min-width: 450px; /* Garantir une largeur minimale en mobile */
-    }
   }
 `;
 
 const CompactTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
-  table-layout: fixed;
+  font-size: 14px;
   background-color: ${props => props.colors.surface};
-  transition: background-color 0.3s ease;
+  flex: 1;
   
-  .bg-header {
+  thead {
     background-color: ${props => props.colors.surfaceHover};
+    
+    th {
+      padding: 16px 12px;
+      font-weight: 600;
+      color: ${props => props.colors.textPrimary};
+      text-align: left;
+      border-bottom: 2px solid ${props => props.colors.borderLight};
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &:nth-child(2), 
+      &:nth-child(3) {
+        text-align: center;
+      }
+    }
   }
   
-  @media (max-width: 1400px) {
-    font-size: 12px;
+  tbody tr {
+    transition: all 0.2s ease;
+    position: relative;
+    
+    &:nth-child(even):not(:last-child) {
+      background-color: ${props => props.colors.surfaceHover}40;
+    }
+    
+    &:not(:last-child):hover {
+      background-color: ${props => props.colors.primary}10;
+      transform: scale(1.01);
+    }
+    
+    // Style spécial pour la ligne TOTAL
+    &:last-child {
+      background-color: ${props => props.colors.surfaceHover} !important;
+      font-weight: 600;
+      
+      &:hover {
+        background-color: ${props => props.colors.surfaceHover} !important;
+        transform: none;
+      }
+    }
+    
+    // Effet de ligne animée au survol (sauf pour TOTAL)
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, ${props => props.colors.primary}, transparent);
+      transition: width 0.3s ease;
+    }
+    
+    &:not(:last-child):hover::after {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    min-width: 450px;
+    font-size: 13px;
+    
+    thead th {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
   }
 `;
 
@@ -1168,7 +1255,7 @@ const Tr = styled.tr`
 `;
 
 const YearCell = styled.td`
-  padding: 12px 8px;
+  padding: 16px 12px;
   font-weight: 600;
   font-size: 16px;
   color: ${props => props.colors.primary};
@@ -1176,14 +1263,21 @@ const YearCell = styled.td`
   text-align: left;
   transition: all 0.3s ease;
   
-  @media (max-width: 1400px) {
-    padding: 10px 6px;
+  // Style spécial pour la cellule TOTAL
+  tr:last-child & {
+    border-top: 2px solid ${props => props.colors.border};
+    font-weight: 600;
+    color: ${props => props.colors.textPrimary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px 8px;
     font-size: 14px;
   }
 `;
 
 const Td = styled.td`
-  padding: 12px 8px;
+  padding: 16px 12px;
   color: ${props => props.colors.textPrimary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
@@ -1192,42 +1286,36 @@ const Td = styled.td`
   text-overflow: ellipsis;
   transition: all 0.3s ease;
   
+  &.text-center {
+    text-align: center;
+  }
+  
   /* Container pour les valeurs et variations */
   .value-container {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+    justify-content: flex-start;
   }
   
-  /* Valeur numérique avec largeur adaptative */
+  /* Valeur numérique */
   .value {
-    min-width: unset;
+    font-weight: 500;
     margin-right: 4px;
   }
   
-  @media (max-width: 1400px) {
-    padding: 10px 6px;
+  // Style spécial pour les cellules TOTAL
+  tr:last-child & {
+    border-top: 2px solid ${props => props.colors.border};
+    font-weight: 600;
+    
+    .value {
+      font-weight: 600;
+    }
   }
-`;
-
-const TotalRow = styled.tr`
-  background-color: ${props => props.colors.surfaceHover} !important;
-  font-weight: 600;
-`;
-
-const TotalCell = styled.td`
-  padding: 14px 8px;
-  color: ${props => props.colors.textPrimary};
-  border-top: 2px solid ${props => props.colors.border};
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: all 0.3s ease;
   
-  @media (max-width: 1400px) {
-    padding: 12px 6px;
+  @media (max-width: 768px) {
+    padding: 12px 8px;
   }
 `;
 
@@ -1483,16 +1571,23 @@ const InfoMessage = styled.div`
 `;
 
 const SummaryTableHeader = styled.th`
-  padding: 12px 8px;
+  padding: 16px 12px;
   color: ${props => props.colors.textPrimary};
   font-weight: 600;
-  font-size: 12px;
-  border-bottom: 2px solid ${props => props.colors.border};
+  font-size: 13px;
+  border-bottom: 2px solid ${props => props.colors.borderLight};
   text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: all 0.3s ease;
+  
+  &:nth-child(2), 
+  &:nth-child(3) {
+    text-align: center;
+  }
   
   .full-text {
     display: inline;
@@ -1503,8 +1598,8 @@ const SummaryTableHeader = styled.th`
   }
   
   @media (max-width: 1400px) {
-    padding: 10px 6px;
-    font-size: 11px;
+    padding: 12px 8px;
+    font-size: 12px;
     
     .full-text {
       display: none;
@@ -1515,9 +1610,9 @@ const SummaryTableHeader = styled.th`
     }
   }
   
-  @media (max-width: 1200px) {
-    padding: 8px 4px;
-    font-size: 10px;
+  @media (max-width: 768px) {
+    padding: 12px 8px;
+    font-size: 12px;
   }
 `;
 

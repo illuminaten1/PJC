@@ -409,10 +409,9 @@ const DetailMilitaire = () => {
           </>
         }
       >
-        <DeleteConfirmContent>
+        <DeleteConfirmContent colors={colors}> {/* Ajout de la prop colors */}
           <p>Êtes-vous sûr de vouloir supprimer définitivement ce militaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également tous les bénéficiaires associés à ce militaire.</p>
-          
           {deleteError && <ErrorMessage colors={colors}>{deleteError}</ErrorMessage>}
         </DeleteConfirmContent>
       </Modal>
@@ -748,10 +747,11 @@ const ButtonText = styled.span`
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
-    color: ${props => props.colors ? props.colors.textPrimary : '#333'};
+    color: ${props => props.colors.textPrimary}; // Suppression de la couleur par défaut '#333'
+    transition: color 0.3s ease;
     
     strong {
-      color: ${props => props.colors ? props.colors.error : '#f44336'};
+      color: ${props => props.colors.error};
     }
   }
 `;

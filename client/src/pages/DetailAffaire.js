@@ -426,7 +426,7 @@ const DetailAffaire = () => {
           </>
         }
       >
-        <DeleteConfirmContent>
+        <DeleteConfirmContent colors={colors}> {/* Ajout de la prop colors */}
           <p>Êtes-vous sûr de vouloir supprimer définitivement cette affaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également tous les militaires et bénéficiaires associés à cette affaire.</p>
           
@@ -715,10 +715,11 @@ const StatDetailValue = styled.span`
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
-    color: ${props => props.colors ? props.colors.textPrimary : '#333'};
+    color: ${props => props.colors.textPrimary}; // Suppression de la couleur par défaut
+    transition: color 0.3s ease;
     
     strong {
-      color: ${props => props.colors ? props.colors.error : '#f44336'};
+      color: ${props => props.colors.error};
     }
   }
 `;

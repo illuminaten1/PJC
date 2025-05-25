@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt, FaFileExport } from 'react-icons/fa';
+import { FaChartBar, FaEuroSign, FaUsers, FaFolder, FaCalendarAlt, FaFileExport, FaMapMarkerAlt, FaMapMarked, FaExclamationTriangle } from 'react-icons/fa';
 import { statistiquesAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
@@ -690,87 +690,161 @@ const Statistiques = () => {
         
         <ChartsSection>
         <ChartCard className="redacteur-table" colors={colors}>
-          <BlockTitle colors={colors}>Répartition par rédacteur</BlockTitle>
-          <ResponsiveTable colors={colors}>
-            <thead>
-              <tr>
-                <TableHeader colors={colors}>Rédacteur</TableHeader>
-                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
-                <TableHeader colors={colors}>Pourcentage</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(statistiques?.parRedacteur || {}).sort((a, b) => b[1] - a[1]).map(([redacteur, count]) => {
-                const total = Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                
-                return (
-                  <TableRow key={`redacteur-${redacteur}`} colors={colors}>
-                    <TableDataCell colors={colors}>{redacteur}</TableDataCell>
-                    <TableDataCell colors={colors}>{count}</TableDataCell>
-                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
-                  </TableRow>
-                );
-              })}
-            </tbody>
-          </ResponsiveTable>
+          <TableHeader colors={colors}>
+            <TableHeaderIcon><FaUsers /></TableHeaderIcon>
+            <TableHeaderTitle>Répartition par rédacteur</TableHeaderTitle>
+          </TableHeader>
+          <TableBody colors={colors}>
+            <ResponsiveTable colors={colors}>
+              <thead>
+                <tr>
+                  <th>Rédacteur</th>
+                  <th>Bénéficiaires</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(statistiques?.parRedacteur || {})
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([redacteur, count]) => {
+                    const total = Object.values(statistiques?.parRedacteur || {})
+                      .reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                    
+                    return (
+                      <TableRow key={`redacteur-${redacteur}`} colors={colors}>
+                        <TableDataCell colors={colors}>{redacteur}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
+                        </TableDataCell>
+                      </TableRow>
+                    );
+                  })}
+              </tbody>
+            </ResponsiveTable>
+          </TableBody>
         </ChartCard>
           
         <ChartCard className="circonstance-table" colors={colors}>
-          <BlockTitle colors={colors}>Répartition par circonstance</BlockTitle>
-          <ResponsiveTable colors={colors}>
-            <thead>
-              <tr>
-                <TableHeader colors={colors}>Circonstance</TableHeader>
-                <TableHeader colors={colors}>Militaires</TableHeader>
-                <TableHeader colors={colors}>Pourcentage</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(statistiques?.parCirconstance || {}).sort((a, b) => b[1] - a[1]).map(([circonstance, count]) => {
-                const total = Object.values(statistiques?.parCirconstance || {}).reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                
-                return (
-                  <TableRow key={`circonstance-${circonstance}`} colors={colors}>
-                    <TableDataCell colors={colors}>{circonstance}</TableDataCell>
-                    <TableDataCell colors={colors}>{count}</TableDataCell>
-                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
-                  </TableRow>
-                );
-              })}
-            </tbody>
-          </ResponsiveTable>
+          <TableHeader colors={colors}>
+            <TableHeaderIcon><FaExclamationTriangle /></TableHeaderIcon>
+            <TableHeaderTitle>Répartition par circonstance</TableHeaderTitle>
+          </TableHeader>
+          <TableBody colors={colors}>
+            <ResponsiveTable colors={colors}>
+              <thead>
+                <tr>
+                  <th>Circonstance</th>
+                  <th>Militaires</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(statistiques?.parCirconstance || {})
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([circonstance, count]) => {
+                    const total = Object.values(statistiques?.parCirconstance || {})
+                      .reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                    
+                    return (
+                      <TableRow key={`circonstance-${circonstance}`} colors={colors}>
+                        <TableDataCell colors={colors}>{circonstance}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
+                        </TableDataCell>
+                      </TableRow>
+                    );
+                  })}
+              </tbody>
+            </ResponsiveTable>
+          </TableBody>
         </ChartCard>
 
         <ChartCard className="region-table" colors={colors}>
-          <BlockTitle colors={colors}>Répartition par région</BlockTitle>
-          <ResponsiveTable colors={colors}>
-            <thead>
-              <tr>
-                <TableHeader colors={colors}>Région</TableHeader>
-                <TableHeader colors={colors}>Militaires</TableHeader>
-                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
-                <TableHeader colors={colors}>Pourcentage</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(statistiques?.parRegion || {}).sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires).map(([region, data]) => {
-                const totalMilitaires = Object.values(statistiques?.parRegion || {}).reduce((a, b) => a + b.nbMilitaires, 0);
-                const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
-                
-                return (
-                  <TableRow key={`region-${region}`} colors={colors}>
-                    <TableDataCell colors={colors}>{region}</TableDataCell>
-                    <TableDataCell colors={colors}>{data.nbMilitaires}</TableDataCell>
-                    <TableDataCell colors={colors}>{data.nbBeneficiaires}</TableDataCell>
-                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
-                  </TableRow>
-                );
-              })}
-            </tbody>
-          </ResponsiveTable>
+          <TableHeader colors={colors}>
+            <TableHeaderIcon><FaMapMarked /></TableHeaderIcon>
+            <TableHeaderTitle>Répartition par région</TableHeaderTitle>
+          </TableHeader>
+          <TableBody colors={colors}>
+            <ResponsiveTable colors={colors}>
+              <thead>
+                <tr>
+                  <th>Région</th>
+                  <th>Militaires</th>
+                  <th>Bénéficiaires</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(statistiques?.parRegion || {})
+                  .sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires)
+                  .map(([region, data]) => {
+                    const totalMilitaires = Object.values(statistiques?.parRegion || {})
+                      .reduce((a, b) => a + b.nbMilitaires, 0);
+                    const percentage = totalMilitaires > 0 
+                      ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) 
+                      : 0;
+                    
+                    return (
+                      <TableRow key={`region-${region}`} colors={colors}>
+                        <TableDataCell colors={colors}>{region}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{data.nbMilitaires}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{data.nbBeneficiaires}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
+                        </TableDataCell>
+                      </TableRow>
+                    );
+                  })}
+              </tbody>
+            </ResponsiveTable>
+          </TableBody>
         </ChartCard>
+
+        <ChartCard className="departement-table" colors={colors}>
+          <TableHeader colors={colors}>
+            <TableHeaderIcon><FaMapMarkerAlt /></TableHeaderIcon>
+            <TableHeaderTitle>Répartition par département</TableHeaderTitle>
+          </TableHeader>
+          <TableBody colors={colors}>
+            <ResponsiveTable colors={colors}>
+              <thead>
+                <tr>
+                  <th>Département</th>
+                  <th>Militaires</th>
+                  <th>Bénéficiaires</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(statistiques?.parDepartement || {})
+                  .sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires)
+                  .map(([departement, data]) => {
+                    const totalMilitaires = Object.values(statistiques?.parDepartement || {})
+                      .reduce((a, b) => a + b.nbMilitaires, 0);
+                    const percentage = totalMilitaires > 0 
+                      ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) 
+                      : 0;
+                    
+                    return (
+                      <TableRow key={`departement-${departement}`} colors={colors}>
+                        <TableDataCell colors={colors}>{departement}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{data.nbMilitaires}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">{data.nbBeneficiaires}</TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
+                        </TableDataCell>
+                      </TableRow>
+                    );
+                  })}
+              </tbody>
+            </ResponsiveTable>
+          </TableBody>
+        </ChartCard>
+
         </ChartsSection>
       </div> {/* Fermeture de la div ref={statsRef} */}
       
@@ -986,18 +1060,6 @@ const BlockTitle = styled.h3`
   transition: background-color 0.3s ease;
 `;
 
-const TableRow = styled.tr`
-  transition: background-color 0.3s ease;
-  
-  &:nth-child(even) {
-    background-color: ${props => props.colors.surfaceHover};
-  }
-  
-  &:hover {
-    background-color: ${props => props.colors.navActive};
-  }
-`;
-
 // Styles mis à jour pour le design avec contours accentués
 const TableTitle = styled.div`
   padding: 16px;
@@ -1007,6 +1069,17 @@ const TableTitle = styled.div`
   border-bottom: 2px solid ${props => props.colors.primary};
   transition: all 0.3s ease;
 `;
+
+const PercentageBadge = styled.span`
+  background: linear-gradient(135deg, ${props => props.colors.primary}20, ${props => props.colors.primary}10);
+  color: ${props => props.colors.primary};
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid ${props => props.colors.primary}30;
+`;
+
 
 const TablesRow = styled.div`
   display: grid;
@@ -1148,24 +1221,60 @@ const TotalCell = styled.td`
 // Styles pour les tableaux des répartitions
 const ChartsSection = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 `;
 
 const ChartCard = styled.div`
-  background-color: ${props => props.colors.surface};
-  border-radius: 4px;
-  box-shadow: ${props => props.colors.shadow};
-  padding: 20px;
-  height: auto;
-  min-height: 400px;
+  background: ${props => props.colors.surface};
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
   
   &:hover {
+    transform: translateY(-4px);
     box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
+const TableHeader = styled.div`
+  background: linear-gradient(135deg, ${props => props.colors.primary}, ${props => props.colors.primary}dd);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid ${props => props.colors.primary};
+`;
+
+const TableHeaderIcon = styled.div`
+  font-size: 20px;
+  margin-right: 12px;
+  opacity: 0.9;
+`;
+
+const TableHeaderTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+`;
+
+const TableBody = styled.div`
+  flex: 1;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    overflow-x: auto;
   }
 `;
 
@@ -1173,39 +1282,96 @@ const ResponsiveTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  table-layout: auto;
   background-color: ${props => props.colors.surface};
-  transition: background-color 0.3s ease;
-`;
-
-const TableHeader = styled.th`
-  background-color: ${props => props.colors.surfaceHover};
-  color: ${props => props.colors.textPrimary};
-  padding: 8px 12px;
-  font-weight: 500;
-  border-bottom: 2px solid ${props => props.colors.border};
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: all 0.3s ease;
   
-  &:nth-child(2), &:nth-child(3) {
-    text-align: center;
+  thead {
+    background-color: ${props => props.colors.surfaceHover};
+    
+    th {
+      padding: 16px 12px;
+      font-weight: 600;
+      color: ${props => props.colors.textPrimary};
+      text-align: left;
+      border-bottom: 2px solid ${props => props.colors.borderLight};
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &:nth-child(2), 
+      &:nth-child(3), 
+      &:nth-child(4) {
+        text-align: center;
+      }
+    }
+  }
+  
+  tbody tr {
+    transition: all 0.2s ease;
+    
+    &:nth-child(even) {
+      background-color: ${props => props.colors.surfaceHover}40;
+    }
+    
+    &:hover {
+      background-color: ${props => props.colors.primary}10;
+      transform: scale(1.01);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    min-width: 400px;
+    font-size: 13px;
+    
+    thead th {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
   }
 `;
 
 const TableDataCell = styled.td`
-  padding: 8px 12px;
+  padding: 16px 12px;
   color: ${props => props.colors.textPrimary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
-  text-align: left;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: all 0.3s ease;
   
-  &:nth-child(2), &:nth-child(3) {
+  &.text-center {
     text-align: center;
+  }
+  
+  &:first-child {
+    font-weight: 500;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px 8px;
+    
+    &:first-child {
+      max-width: 120px;
+    }
+  }
+`;
+
+const TableRow = styled.tr`
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, ${props => props.colors.primary}, transparent);
+    transition: width 0.3s ease;
+  }
+  
+  &:hover::after {
+    width: 100%;
   }
 `;
 

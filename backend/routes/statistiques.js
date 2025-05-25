@@ -284,6 +284,38 @@ const statsByRedacteur = await Beneficiaire.aggregate([
       { $sort: { nbMilitaires: -1 } }
     ]);
     
+    const statsByDepartement = await Militaire.aggregate([
+      // Joindre l'affaire
+      { $lookup: {
+        from: 'affaires',
+        localField: 'affaire',
+        foreignField: '_id',
+        as: 'affaireInfo'
+      } },
+      { $unwind: { path: "$affaireInfo", preserveNullAndEmptyArrays: false } },
+      // Filtrer par année
+      { $match: { 'affaireInfo.dateFaits': { $gte: debutAnnee, $lt: finAnnee } }},
+      // Joindre les bénéficiaires pour chaque militaire
+      { $lookup: {
+        from: 'beneficiaires',
+        localField: '_id',
+        foreignField: 'militaire',
+        as: 'beneficiairesInfo'
+      } },
+      // Grouper par département
+      { $group: { 
+        _id: "$departement", 
+        nbMilitaires: { $sum: 1 },
+        nbBeneficiaires: { $sum: { $size: "$beneficiairesInfo" } }
+      } },
+      // Gérer les départements non définis
+      { $addFields: {
+        departement: { $ifNull: ["$_id", "Non spécifié"] }
+      } },
+      // Trier par nombre de militaires décroissant
+      { $sort: { nbMilitaires: -1 } }
+    ]);
+
     res.json({
       annee: anneeInt,
       affaires: {
@@ -307,6 +339,14 @@ const statsByRedacteur = await Beneficiaire.aggregate([
         // Utiliser "Non spécifiée" si la région est null ou undefined
         const regionKey = stat._id || "Non spécifiée";
         acc[regionKey] = {
+          nbMilitaires: stat.nbMilitaires,
+          nbBeneficiaires: stat.nbBeneficiaires
+        };
+        return acc;
+      }, {}),
+      parDepartement: statsByDepartement.reduce((acc, stat) => {
+        const departementKey = stat._id || "Non spécifié";
+        acc[departementKey] = {
           nbMilitaires: stat.nbMilitaires,
           nbBeneficiaires: stat.nbBeneficiaires
         };

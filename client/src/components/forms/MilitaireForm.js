@@ -5,29 +5,6 @@ import FormField from '../common/FormField';
 import { parametresAPI } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const grades = [
-  'Général',
-  'Colonel',
-  'Lieutenant-colonel',
-  'Chef d\'escadron',
-  'Commandant',
-  'Capitaine',
-  'Lieutenant',
-  'Sous-lieutenant',
-  'Aspirant',
-  'Major',
-  'Adjudant-chef',
-  'Adjudant',
-  'Maréchal des logis-chef',
-  'Gendarme',
-  'Elève-Gendarme',
-  'Maréchal des logis',
-  'Brigadier-chef',
-  'Brigadier',
-  'Gendarme adjoint volontaire',
-  'Autre'
-];
-
 const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireId = null, affairesList = [], affaireNom = '' }) => {
   const { colors } = useTheme();
   
@@ -50,6 +27,7 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
   });
   
   const [errors, setErrors] = useState({});
+  const [grades, setGrades] = useState([]);
   const [circonstances, setCirconstances] = useState([]);
   const [redacteurs, setRedacteurs] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -58,20 +36,76 @@ const MilitaireForm = ({ onSubmit, initialData = {}, isEditing = false, affaireI
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Récupération des grades depuis l'API
+        const responseGrades = await parametresAPI.getByType('grades');
+        if (responseGrades.data && responseGrades.data.length > 0) {
+          setGrades(responseGrades.data);
+        } else {
+          // Fallback vers les grades hardcodés si aucun n'est configuré
+          setGrades([
+            'Général',
+            'Colonel',
+            'Lieutenant-colonel',
+            'Chef d\'escadron',
+            'Commandant',
+            'Capitaine',
+            'Lieutenant',
+            'Sous-lieutenant',
+            'Aspirant',
+            'Major',
+            'Adjudant-chef',
+            'Adjudant',
+            'Maréchal des logis-chef',
+            'Gendarme',
+            'Elève-Gendarme',
+            'Maréchal des logis',
+            'Brigadier-chef',
+            'Brigadier',
+            'Gendarme adjoint volontaire',
+            'Autre'
+          ]);
+        }
+        
+        // Récupération des circonstances
         const responseCirconstances = await parametresAPI.getByType('circonstances');
         setCirconstances(responseCirconstances.data);
         
+        // Récupération des régions
         const responseRegions = await parametresAPI.getByType('regions');
         if (responseRegions.data && responseRegions.data.length > 0) {
           setRegions(responseRegions.data);
         }
         
+        // Récupération des départements
         const responseDepartements = await parametresAPI.getByType('departements');
         if (responseDepartements.data && responseDepartements.data.length > 0) {
           setDepartements(responseDepartements.data);
         }
       } catch (error) {
         console.error("Erreur lors de la récupération des données", error);
+        // En cas d'erreur, utilisez les grades hardcodés
+        setGrades([
+          'Général',
+          'Colonel',
+          'Lieutenant-colonel',
+          'Chef d\'escadron',
+          'Commandant',
+          'Capitaine',
+          'Lieutenant',
+          'Sous-lieutenant',
+          'Aspirant',
+          'Major',
+          'Adjudant-chef',
+          'Adjudant',
+          'Maréchal des logis-chef',
+          'Gendarme',
+          'Elève-Gendarme',
+          'Maréchal des logis',
+          'Brigadier-chef',
+          'Brigadier',
+          'Gendarme adjoint volontaire',
+          'Autre'
+        ]);
       }
     };
     

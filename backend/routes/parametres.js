@@ -125,7 +125,7 @@ router.get('/:type', async (req, res) => {
     const { type } = req.params;
     
     // Vérifier que le type est valide
-    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'].includes(type)) {
+    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention', 'grades'].includes(type)) {
       return res.status(400).json({ message: 'Type de paramètre invalide' });
     }
     
@@ -151,7 +151,7 @@ router.post('/:type', async (req, res) => {
     console.log('Route POST /:type appelée avec:', { type, valeur });
     
     // Vérifier que le type est valide
-    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'].includes(type)) {
+    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention', 'grades'].includes(type)) {
       return res.status(400).json({ message: 'Type de paramètre invalide' });
     }
     
@@ -196,7 +196,7 @@ router.delete('/:type/:index', async (req, res) => {
     const idx = parseInt(index);
     
     // Vérifier que le type est valide
-    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'].includes(type)) {
+    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention', 'grades'].includes(type)) {
       return res.status(400).json({ message: 'Type de paramètre invalide' });
     }
     
@@ -236,7 +236,7 @@ router.patch('/:type/reorder', async (req, res) => {
     const { valeurs } = req.body;
     
     // Vérifier que le type est valide
-    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'].includes(type)) {
+    if (!['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention', 'grades'].includes(type)) {
       return res.status(400).json({ message: 'Type de paramètre invalide' });
     }
     

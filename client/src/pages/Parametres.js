@@ -16,7 +16,8 @@ import {
   FaGavel, 
   FaMapMarkerAlt, 
   FaMap, 
-  FaUserEdit 
+  FaUserEdit ,
+  FaMedal
 } from 'react-icons/fa';
 
 const ParametresContent = () => {
@@ -42,6 +43,7 @@ const ParametresContent = () => {
     ] : [
       { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit },
     ]),
+      { id: 'grades', label: 'Grades', icon: FaMedal },
     { id: 'circonstances', label: 'Circonstances', icon: FaGavel },
     { id: 'regions', label: 'Régions', icon: FaMapMarkerAlt },
     { id: 'departements', label: 'Départements', icon: FaMap },
@@ -66,6 +68,8 @@ const ParametresContent = () => {
         return isAdmin() ? <UtilisateursTab {...commonProps} /> : null;
       case 'redacteurs':
         return <RedacteursTab {...commonProps} />;
+        case 'grades':
+      return <GradesTab {...commonProps} />; 
       case 'circonstances':
         return <CirconstancesTab {...commonProps} />;
       case 'regions':

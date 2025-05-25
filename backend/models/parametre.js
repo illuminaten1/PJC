@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const ParametreSchema = new Schema({
   type: { 
     type: String, 
-    enum: ['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention'], 
+    enum: ['circonstances', 'redacteurs', 'regions', 'departements', 'templateConvention', 'grades'], 
     required: true, 
     unique: true 
   },

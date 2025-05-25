@@ -10,6 +10,7 @@ import CirconstancesTab from '../components/parametres/CirconstancesTab';
 import RegionsTab from '../components/parametres/RegionsTab';
 import DepartementsTab from '../components/parametres/DepartementsTab';
 import RedacteursTab from '../components/parametres/RedacteursTab';
+import GradesTab from '../components/parametres/GradesTab';
 import { 
   FaFileAlt, 
   FaUsers, 

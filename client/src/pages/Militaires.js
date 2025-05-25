@@ -359,16 +359,22 @@ const StatPill = styled.span`
 
 const FiltersContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
   padding: 16px;
   background-color: ${props => props.colors.surface};
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  flex-wrap: wrap; // AJOUTÉ : pour permettre le passage à la ligne sur mobile
+  gap: 10px; // AJOUTÉ : espacement entre les éléments
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const FiltersGroup = styled.div`
@@ -376,6 +382,11 @@ const FiltersGroup = styled.div`
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  flex-grow: 1; // AJOUTÉ : pour que les filtres prennent l'espace disponible
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const FilterLabel = styled.div`

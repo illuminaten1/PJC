@@ -439,7 +439,7 @@ const Statistiques = () => {
                   {dataWithVariations.map(({ year, data, variations }) => (
                     <Tr key={`conventions-${year}`} colors={colors}>
                       <YearCell colors={colors}>{year}</YearCell>
-                      <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbBeneficiaires || 0}</span>
                           {variations.nbBeneficiaires && (
@@ -453,7 +453,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbConventions || 0}</span>
                           {variations.nbConventions && (
@@ -471,12 +471,12 @@ const Statistiques = () => {
                   ))}
                   <Tr colors={colors}>
                     <YearCell colors={colors}>TOTAL</YearCell>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.nbBeneficiaires}</span>
                       </div>
                     </Td>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.nbConventions}</span>
                       </div>
@@ -511,7 +511,7 @@ const Statistiques = () => {
                     return (
                       <Tr key={`montants-${year}`} colors={colors}>
                         <YearCell colors={colors}>{year}</YearCell>
-                        <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                        <Td colors={colors} className="text-center">
                           <div className="value-container">
                             <span className="value">{montantHT > 0 ? `${montantHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -525,7 +525,7 @@ const Statistiques = () => {
                             )}
                           </div>
                         </Td>
-                        <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                        <Td colors={colors} className="text-center">
                           <div className="value-container">
                             <span className="value">{montantTTC > 0 ? `${montantTTC.toLocaleString('fr-FR')} €` : '0 €'}</span>
                             {variations.montantGageHT && (
@@ -544,12 +544,12 @@ const Statistiques = () => {
                   })}
                   <Tr colors={colors}>
                     <YearCell colors={colors}>TOTAL</YearCell>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.montantGageHT > 0 ? `${totals.montantGageHT.toLocaleString('fr-FR')} €` : '0 €'}</span>
                       </div>
                     </Td>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.montantGageHT > 0 ? `${(totals.montantGageHT * 1.2).toLocaleString('fr-FR')} €` : '0 €'}</span>
                       </div>
@@ -580,7 +580,7 @@ const Statistiques = () => {
                   {dataWithVariations.map(({ year, data, variations }) => (
                     <Tr key={`ordonnes-${year}`} colors={colors}>
                       <YearCell colors={colors}>{year}</YearCell>
-                      <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">{data.nbReglements || 0}</span>
                           {variations.nbReglements && (
@@ -594,7 +594,7 @@ const Statistiques = () => {
                           )}
                         </div>
                       </Td>
-                      <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                      <Td colors={colors} className="text-center">
                         <div className="value-container">
                           <span className="value">
                             {(data.montantPaye || 0) > 0 
@@ -616,12 +616,12 @@ const Statistiques = () => {
                   ))}
                   <Tr colors={colors}>
                     <YearCell colors={colors}>TOTAL</YearCell>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.nbReglements}</span>
                       </div>
                     </Td>
-                    <Td colors={colors} className="text-center"> {/* AJOUTEZ className="text-center" */}
+                    <Td colors={colors} className="text-center">
                       <div className="value-container">
                         <span className="value">{totals.montantPaye > 0 ? `${totals.montantPaye.toLocaleString('fr-FR')} €` : '0 €'}</span>
                       </div>
@@ -1288,22 +1288,9 @@ const Td = styled.td`
   
   &.text-center {
     text-align: center;
-    
-    /* OPTION 1 : Empilement vertical - valeur centrée au-dessus, variation en-dessous */
-    .value-container {
-      display: flex;
-      flex-direction: column; /* Empiler verticalement */
-      align-items: center;     /* Centrer horizontalement */
-      gap: 2px;               /* Petit espace entre valeur et variation */
-    }
-    
-    .value {
-      font-weight: 500;
-      margin-right: 0; /* Supprimer la marge droite pour le centrage parfait */
-    }
   }
   
-  /* Container pour les valeurs et variations - comportement par défaut (colonnes non centrées) */
+  /* Container pour les valeurs et variations */
   .value-container {
     display: flex;
     align-items: center;

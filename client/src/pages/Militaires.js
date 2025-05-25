@@ -94,26 +94,12 @@ const Militaires = () => {
 
   const fetchRegionsAndDepartements = async () => {
     try {
-      // Récupérer tous les militaires pour extraire les régions et départements uniques
-      const response = await militairesAPI.getAll({});
-      const allMilitaires = response.data;
+      // Récupérer l'ordre depuis les paramètres
+      const regionsResponse = await parametresAPI.getByType('regions');
+      const departementsResponse = await parametresAPI.getByType('departements');
       
-      // Extraire les régions uniques (non nulles/vides)
-      const uniqueRegions = [...new Set(
-        allMilitaires
-          .map(m => m.region)
-          .filter(region => region && region.trim() !== '')
-      )].sort();
-      
-      // Extraire les départements uniques (non nulles/vides)
-      const uniqueDepartements = [...new Set(
-        allMilitaires
-          .map(m => m.departement)
-          .filter(dept => dept && dept.trim() !== '')
-      )].sort();
-      
-      setRegions(uniqueRegions);
-      setDepartements(uniqueDepartements);
+      setRegions(regionsResponse.data);
+      setDepartements(departementsResponse.data);
     } catch (err) {
       console.error("Erreur lors de la récupération des régions et départements", err);
     }

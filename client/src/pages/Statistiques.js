@@ -1398,8 +1398,8 @@ const ResponsiveTable = styled.table`
       text-transform: uppercase;
       letter-spacing: 0.5px;
       
-      &:nth-child(2), 
-      &:nth-child(3), 
+      &:nth-child(2),
+      &:nth-child(3),
       &:nth-child(4) {
         text-align: center;
       }
@@ -1428,7 +1428,7 @@ const ResponsiveTable = styled.table`
       font-size: 12px;
     }
   }
-`;
+  `;
 
 const TableDataCell = styled.td`
   padding: 16px 12px;
@@ -1454,25 +1454,6 @@ const TableDataCell = styled.td`
     &:first-child {
       max-width: 120px;
     }
-  }
-`;
-
-const TableRow = styled.tr`
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, ${props => props.colors.primary}, transparent);
-    transition: width 0.3s ease;
-  }
-  
-  &:hover::after {
-    width: 100%;
   }
 `;
 

@@ -344,7 +344,7 @@ const StatPill = styled.span`
   &.active {
     background-color: ${props => props.colors.successBg};
     color: ${props => props.colors.success};
-    border-color: ${props => props.colors.success}40;
+    border-color: ${props => props.colors.success + '40'};
   }
   
   &.archived {
@@ -402,11 +402,11 @@ const Select = styled.select`
   
   &:focus {
     border-color: ${props => props.colors.primary};
-    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
+    box-shadow: 0 0 0 2px ${props => props.colors.primary + '20'};
   }
   
   &:hover {
-    border-color: ${props => props.colors.primary}80;
+    border-color: ${props => props.colors.primary + '80'};
   }
   
   option {
@@ -430,7 +430,7 @@ const ResetButton = styled.button`
   box-shadow: ${props => props.colors.shadow};
   
   &:hover {
-    background-color: ${props => props.colors.error}dd;
+    background-color: ${props => props.colors.error + 'dd'};
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
   }
@@ -447,11 +447,11 @@ const StatusTag = styled.span`
   ${props => props.status === 'deces' ? `
     background-color: ${props.colors.errorBg};
     color: ${props.colors.error};
-    border: 1px solid ${props.colors.error}40;
+    border: 1px solid ${props.colors.error + '40'};
   ` : props.status === 'blesse' ? `
     background-color: ${props.colors.successBg};
     color: ${props.colors.success};
-    border: 1px solid ${props.colors.success}40;
+    border: 1px solid ${props.colors.success + '40'};
   ` : ''}
 `;
 
@@ -470,7 +470,7 @@ const ArchiveTag = styled.span`
   ` : props.status === 'active' ? `
     background-color: ${props.colors.successBg};
     color: ${props.colors.success};
-    border: 1px solid ${props.colors.success}40;
+    border: 1px solid ${props.colors.success + '40'};
   ` : ''}
 `;
 
@@ -492,7 +492,7 @@ const Error = styled.div`
   background-color: ${props => props.colors.errorBg};
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props.colors.error}40;
+  border: 1px solid ${props => props.colors.error + '40'};
   transition: all 0.3s ease;
 `;
 

@@ -1181,16 +1181,12 @@ const CompactTable = styled.table`
       padding: 16px 12px;
       font-weight: 600;
       color: ${props => props.colors.textPrimary};
-      text-align: left;
+      text-align: left; // ← Garder seulement celui-ci
       border-bottom: 2px solid ${props => props.colors.borderLight};
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      
-      &:nth-child(2), 
-      &:nth-child(3) {
-        text-align: center;
-      }
+      // text-align: center; ← SUPPRIMER cette ligne
     }
   }
   
@@ -1557,18 +1553,14 @@ const SummaryTableHeader = styled.th`
   font-weight: 600;
   font-size: 13px;
   border-bottom: 2px solid ${props => props.colors.borderLight};
-  text-align: left;
+  text-align: left; // ← Garder seulement celui-ci
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: all 0.3s ease;
-  
-  &:nth-child(2), 
-  &:nth-child(3) {
-    text-align: center;
-  }
+  // text-align: center; ← SUPPRIMER cette ligne
   
   .full-text {
     display: inline;

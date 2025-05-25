@@ -6,7 +6,7 @@ import PageHeader from '../components/common/PageHeader';
 import StatistiquesBudget from '../components/specific/StatistiquesBudget';
 import { exportToExcel, exportToPDF } from '../utils/exportUtils';
 import ExportModal from '../components/specific/ExportModal';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext'; // Ajout du hook de thème
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -103,13 +103,11 @@ const Statistiques = () => {
             // Agréger les statistiques par circonstance de toutes les années
             parCirconstance: {},
             // Agréger les statistiques par région de toutes les années
-            parRegion: {},
-            // Agréger les statistiques par département de toutes les années
-            parDepartement: {}
+            parRegion: {}
           };
           
           // Récupérer les données détaillées pour chaque année pour construire 
-          // les agrégations par rédacteur, circonstance, région et département
+          // les agrégations par rédacteur, circonstance et région
           for (const year of years.filter(y => y !== -1)) {
             try {
               const yearStats = await statistiquesAPI.getByAnnee(year);
@@ -142,17 +140,6 @@ const Statistiques = () => {
                     }
                     allYearsData.parRegion[region].nbMilitaires += data.nbMilitaires || 0;
                     allYearsData.parRegion[region].nbBeneficiaires += data.nbBeneficiaires || 0;
-                  });
-                }
-
-                // Agréger les départements
-                if (yearStats.data.parDepartement) {
-                  Object.entries(yearStats.data.parDepartement).forEach(([departement, data]) => {
-                    if (!allYearsData.parDepartement[departement]) {
-                      allYearsData.parDepartement[departement] = { nbMilitaires: 0, nbBeneficiaires: 0 };
-                    }
-                    allYearsData.parDepartement[departement].nbMilitaires += data.nbMilitaires || 0;
-                    allYearsData.parDepartement[departement].nbBeneficiaires += data.nbBeneficiaires || 0;
                   });
                 }
               }
@@ -349,7 +336,6 @@ const Statistiques = () => {
         parRedacteur: options.includeRedacteurTable ? statistiques?.parRedacteur || {} : {},
         parCirconstance: options.includeCirconstanceTable ? statistiques?.parCirconstance || {} : {},
         parRegion: options.includeRegionTable ? statistiques?.parRegion || {} : {},
-        parDepartement: options.includeDepartementTable ? statistiques?.parDepartement || {} : {},
         budget: null // Initialisé à null
       } : null,
       annee: options.isAllYears ? "Toutes" : options.annee,
@@ -702,193 +688,90 @@ const Statistiques = () => {
           )}
         </Section>
         
-        {/* Section des tableaux de répartition avec design amélioré */}
-        <DistributionSection colors={colors}>
-          <SectionHeader colors={colors}>
-            <SectionTitle colors={colors}>
-              <FaUsers />
-              <span>Répartitions détaillées {annee === -1 ? "toutes années" : annee}</span>
-            </SectionTitle>
-          </SectionHeader>
+        <ChartsSection>
+        <ChartCard className="redacteur-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par rédacteur</BlockTitle>
+          <ResponsiveTable colors={colors}>
+            <thead>
+              <tr>
+                <TableHeader colors={colors}>Rédacteur</TableHeader>
+                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parRedacteur || {}).sort((a, b) => b[1] - a[1]).map(([redacteur, count]) => {
+                const total = Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`redacteur-${redacteur}`} colors={colors}>
+                    <TableDataCell colors={colors}>{redacteur}</TableDataCell>
+                    <TableDataCell colors={colors}>{count}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
           
-          <DistributionGrid>
-            {/* Tableau Rédacteurs */}
-            <DistributionCard colors={colors}>
-              <DistributionHeader colors={colors}>
-                <DistributionTitle>Répartition par rédacteur</DistributionTitle>
-                <DistributionBadge colors={colors}>
-                  {Object.keys(statistiques?.parRedacteur || {}).length} rédacteurs
-                </DistributionBadge>
-              </DistributionHeader>
-              
-              <DistributionTableWrapper>
-                <DistributionTable colors={colors}>
-                  <thead>
-                    <tr>
-                      <DistributionTh colors={colors}>Rédacteur</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Bénéficiaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">%</DistributionTh>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(statistiques?.parRedacteur || {}).sort((a, b) => b[1] - a[1]).map(([redacteur, count], index) => {
-                      const total = Object.values(statistiques?.parRedacteur || {}).reduce((a, b) => a + b, 0);
-                      const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                      
-                      return (
-                        <DistributionTr key={`redacteur-${redacteur}`} colors={colors} isEven={index % 2 === 0}>
-                          <DistributionTd colors={colors}>
-                            <DistributionName>{redacteur}</DistributionName>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{count}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionPercentage colors={colors}>{percentage}%</DistributionPercentage>
-                          </DistributionTd>
-                        </DistributionTr>
-                      );
-                    })}
-                  </tbody>
-                </DistributionTable>
-              </DistributionTableWrapper>
-            </DistributionCard>
+        <ChartCard className="circonstance-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par circonstance</BlockTitle>
+          <ResponsiveTable colors={colors}>
+            <thead>
+              <tr>
+                <TableHeader colors={colors}>Circonstance</TableHeader>
+                <TableHeader colors={colors}>Militaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parCirconstance || {}).sort((a, b) => b[1] - a[1]).map(([circonstance, count]) => {
+                const total = Object.values(statistiques?.parCirconstance || {}).reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`circonstance-${circonstance}`} colors={colors}>
+                    <TableDataCell colors={colors}>{circonstance}</TableDataCell>
+                    <TableDataCell colors={colors}>{count}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
 
-            {/* Tableau Circonstances */}
-            <DistributionCard colors={colors}>
-              <DistributionHeader colors={colors}>
-                <DistributionTitle>Répartition par circonstance</DistributionTitle>
-                <DistributionBadge colors={colors}>
-                  {Object.keys(statistiques?.parCirconstance || {}).length} circonstances
-                </DistributionBadge>
-              </DistributionHeader>
-              
-              <DistributionTableWrapper>
-                <DistributionTable colors={colors}>
-                  <thead>
-                    <tr>
-                      <DistributionTh colors={colors}>Circonstance</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Militaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">%</DistributionTh>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(statistiques?.parCirconstance || {}).sort((a, b) => b[1] - a[1]).map(([circonstance, count], index) => {
-                      const total = Object.values(statistiques?.parCirconstance || {}).reduce((a, b) => a + b, 0);
-                      const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                      
-                      return (
-                        <DistributionTr key={`circonstance-${circonstance}`} colors={colors} isEven={index % 2 === 0}>
-                          <DistributionTd colors={colors}>
-                            <DistributionName>{circonstance}</DistributionName>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{count}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionPercentage colors={colors}>{percentage}%</DistributionPercentage>
-                          </DistributionTd>
-                        </DistributionTr>
-                      );
-                    })}
-                  </tbody>
-                </DistributionTable>
-              </DistributionTableWrapper>
-            </DistributionCard>
-
-            {/* Tableau Régions */}
-            <DistributionCard colors={colors}>
-              <DistributionHeader colors={colors}>
-                <DistributionTitle>Répartition par région</DistributionTitle>
-                <DistributionBadge colors={colors}>
-                  {Object.keys(statistiques?.parRegion || {}).length} régions
-                </DistributionBadge>
-              </DistributionHeader>
-              
-              <DistributionTableWrapper>
-                <DistributionTable colors={colors}>
-                  <thead>
-                    <tr>
-                      <DistributionTh colors={colors}>Région</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Militaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Bénéficiaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">%</DistributionTh>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(statistiques?.parRegion || {}).sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires).map(([region, data], index) => {
-                      const totalMilitaires = Object.values(statistiques?.parRegion || {}).reduce((a, b) => a + b.nbMilitaires, 0);
-                      const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
-                      
-                      return (
-                        <DistributionTr key={`region-${region}`} colors={colors} isEven={index % 2 === 0}>
-                          <DistributionTd colors={colors}>
-                            <DistributionName>{region}</DistributionName>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{data.nbMilitaires}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{data.nbBeneficiaires}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionPercentage colors={colors}>{percentage}%</DistributionPercentage>
-                          </DistributionTd>
-                        </DistributionTr>
-                      );
-                    })}
-                  </tbody>
-                </DistributionTable>
-              </DistributionTableWrapper>
-            </DistributionCard>
-
-            {/* Nouveau tableau Départements */}
-            <DistributionCard colors={colors}>
-              <DistributionHeader colors={colors}>
-                <DistributionTitle>Répartition par département</DistributionTitle>
-                <DistributionBadge colors={colors}>
-                  {Object.keys(statistiques?.parDepartement || {}).length} départements
-                </DistributionBadge>
-              </DistributionHeader>
-              
-              <DistributionTableWrapper>
-                <DistributionTable colors={colors}>
-                  <thead>
-                    <tr>
-                      <DistributionTh colors={colors}>Département</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Militaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">Bénéficiaires</DistributionTh>
-                      <DistributionTh colors={colors} className="center">%</DistributionTh>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(statistiques?.parDepartement || {}).sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires).map(([departement, data], index) => {
-                      const totalMilitaires = Object.values(statistiques?.parDepartement || {}).reduce((a, b) => a + b.nbMilitaires, 0);
-                      const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
-                      
-                      return (
-                        <DistributionTr key={`departement-${departement}`} colors={colors} isEven={index % 2 === 0}>
-                          <DistributionTd colors={colors}>
-                            <DistributionName>{departement}</DistributionName>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{data.nbMilitaires}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionValue colors={colors}>{data.nbBeneficiaires}</DistributionValue>
-                          </DistributionTd>
-                          <DistributionTd colors={colors} className="center">
-                            <DistributionPercentage colors={colors}>{percentage}%</DistributionPercentage>
-                          </DistributionTd>
-                        </DistributionTr>
-                      );
-                    })}
-                  </tbody>
-                </DistributionTable>
-              </DistributionTableWrapper>
-            </DistributionCard>
-          </DistributionGrid>
-        </DistributionSection>
+        <ChartCard className="region-table" colors={colors}>
+          <BlockTitle colors={colors}>Répartition par région</BlockTitle>
+          <ResponsiveTable colors={colors}>
+            <thead>
+              <tr>
+                <TableHeader colors={colors}>Région</TableHeader>
+                <TableHeader colors={colors}>Militaires</TableHeader>
+                <TableHeader colors={colors}>Bénéficiaires</TableHeader>
+                <TableHeader colors={colors}>Pourcentage</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(statistiques?.parRegion || {}).sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires).map(([region, data]) => {
+                const totalMilitaires = Object.values(statistiques?.parRegion || {}).reduce((a, b) => a + b.nbMilitaires, 0);
+                const percentage = totalMilitaires > 0 ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) : 0;
+                
+                return (
+                  <TableRow key={`region-${region}`} colors={colors}>
+                    <TableDataCell colors={colors}>{region}</TableDataCell>
+                    <TableDataCell colors={colors}>{data.nbMilitaires}</TableDataCell>
+                    <TableDataCell colors={colors}>{data.nbBeneficiaires}</TableDataCell>
+                    <TableDataCell colors={colors}>{percentage}%</TableDataCell>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </ResponsiveTable>
+        </ChartCard>
+        </ChartsSection>
       </div> {/* Fermeture de la div ref={statsRef} */}
       
       {/* Modal d'export avec mise à jour pour supporter l'option "Toutes les années" */}
@@ -916,9 +799,9 @@ const Container = styled.div`
 const Section = styled.section`
   margin-bottom: 30px;
   background-color: ${props => props.colors.surface};
-  border-radius: 12px;
+  border-radius: 4px;
   box-shadow: ${props => props.colors.shadow};
-  padding: 24px;
+  padding: 20px;
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
 `;
@@ -927,12 +810,12 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   color: ${props => props.colors.textPrimary};
   display: flex;
   align-items: center;
@@ -940,127 +823,104 @@ const SectionTitle = styled.h2`
   transition: color 0.3s ease;
   
   svg {
-    margin-right: 12px;
+    margin-right: 8px;
     color: ${props => props.colors.primary};
-    font-size: 18px;
   }
 `;
 
 const YearSelector = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
 `;
 
 const YearLabel = styled.span`
   font-size: 16px;
   font-weight: 500;
+  margin-right: 12px;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
 `;
 
 const Select = styled.select`
-  padding: 10px 16px;
-  border: 2px solid ${props => props.colors.border};
-  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 4px;
   font-size: 14px;
   outline: none;
-  min-width: 160px;
+  min-width: 120px;
   background-color: ${props => props.colors.surface};
   color: ${props => props.colors.textPrimary};
   transition: all 0.3s ease;
-  cursor: pointer;
   
   &:focus {
     border-color: ${props => props.colors.primary};
-    box-shadow: 0 0 0 3px ${props => props.colors.primary}20;
-  }
-  
-  &:hover {
-    border-color: ${props => props.colors.primary};
+    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
   }
   
   option {
     background-color: ${props => props.colors.surface};
     color: ${props => props.colors.textPrimary};
-    padding: 8px;
   }
 `;
 
 const SummaryCards = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
 `;
 
 const StatCard = styled.div`
-  background: linear-gradient(135deg, ${props => props.colors.surface} 0%, ${props => props.colors.surfaceHover} 100%);
-  border-radius: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
   box-shadow: ${props => props.colors.shadow};
-  padding: 24px;
+  padding: 20px;
   display: flex;
   align-items: center;
   border: 1px solid ${props => props.colors.border};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, 
-      ${props => props.colors.primary} 0%, 
-      ${props => props.colors.success} 50%, 
-      ${props => props.colors.error} 100%
-    );
+  &.finances {
+    border-left: 4px solid ${props => props.colors.primary};
   }
   
-  &.finances::before {
-    background: ${props => props.colors.primary};
+  &.affaires {
+    border-left: 4px solid ${props => props.colors.success};
   }
   
-  &.affaires::before {
-    background: ${props => props.colors.success};
-  }
-  
-  &.redacteurs::before {
-    background: ${props => props.colors.error};
+  &.redacteurs {
+    border-left: 4px solid ${props => props.colors.error};
   }
   
   &:hover {
     box-shadow: ${props => props.colors.shadowHover};
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-2px);
   }
 `;
 
 const StatIconContainer = styled.div`
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20px;
-  font-size: 28px;
+  margin-right: 16px;
+  font-size: 24px;
   transition: all 0.3s ease;
   
   .finances & {
-    background: linear-gradient(135deg, ${props => props.colors?.cardIcon?.finances?.bg || '#e3f2fd'} 0%, ${props => props.colors?.cardIcon?.finances?.bg || '#e3f2fd'}80 100%);
+    background-color: ${props => props.colors?.cardIcon?.finances?.bg || '#e3f2fd'};
     color: ${props => props.colors?.cardIcon?.finances?.color || '#1976d2'};
   }
   
   .affaires & {
-    background: linear-gradient(135deg, ${props => props.colors?.cardIcon?.militaires?.bg || '#e8f5e9'} 0%, ${props => props.colors?.cardIcon?.militaires?.bg || '#e8f5e9'}80 100%);
+    background-color: ${props => props.colors?.cardIcon?.militaires?.bg || '#e8f5e9'};
     color: ${props => props.colors?.cardIcon?.militaires?.color || '#388e3c'};
   }
   
   .redacteurs & {
-    background: linear-gradient(135deg, ${props => props.colors?.cardIcon?.beneficiaires?.bg || '#fff8e1'} 0%, ${props => props.colors?.cardIcon?.beneficiaires?.bg || '#fff8e1'}80 100%);
+    background-color: ${props => props.colors?.cardIcon?.beneficiaires?.bg || '#fff8e1'};
     color: ${props => props.colors?.cardIcon?.beneficiaires?.color || '#f57f17'};
   }
 `;
@@ -1070,99 +930,110 @@ const StatContent = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 500;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
-  margin-bottom: 4px;
 `;
 
 const StatLabel = styled.div`
-  font-size: 16px;
+  font-size: 14px;
   color: ${props => props.colors.textSecondary};
-  font-weight: 500;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   transition: color 0.3s ease;
 `;
 
 const StatDetail = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
   font-size: 14px;
   color: ${props => props.colors.textSecondary};
-  padding: 8px 0;
-  border-top: 1px solid ${props => props.colors.borderLight};
   transition: color 0.3s ease;
-  
-  span:last-child {
-    font-weight: 600;
-    color: ${props => props.colors.textPrimary};
-  }
 `;
 
 const Loading = styled.div`
-  padding: 60px;
+  padding: 40px;
   text-align: center;
   color: ${props => props.colors.textMuted};
   background-color: ${props => props.colors.surface};
-  border-radius: 12px;
+  border-radius: 4px;
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
-  font-size: 18px;
 `;
 
 const Error = styled.div`
-  padding: 32px;
+  padding: 20px;
   text-align: center;
   color: ${props => props.colors.error};
   background-color: ${props => props.colors.errorBg};
-  border-radius: 12px;
+  border-radius: 4px;
   box-shadow: ${props => props.colors.shadow};
-  border: 2px solid ${props => props.colors.error}40;
+  border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
-  font-size: 16px;
+`;
+
+const BlockTitle = styled.h3`
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background-color: ${props => props.colors.primary};
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease;
+`;
+
+const TableRow = styled.tr`
+  transition: background-color 0.3s ease;
+  
+  &:nth-child(even) {
+    background-color: ${props => props.colors.surfaceHover};
+  }
+  
+  &:hover {
+    background-color: ${props => props.colors.navActive};
+  }
 `;
 
 // Styles mis à jour pour le design avec contours accentués
 const TableTitle = styled.div`
-  padding: 20px 24px;
+  padding: 16px;
   font-weight: 600;
-  font-size: 16px;
   color: ${props => props.colors.textPrimary};
-  background: linear-gradient(135deg, ${props => props.colors.surfaceHover} 0%, ${props => props.colors.surface} 100%);
-  border-bottom: 3px solid ${props => props.colors.primary};
+  background-color: ${props => props.colors.surfaceHover};
+  border-bottom: 2px solid ${props => props.colors.primary};
   transition: all 0.3s ease;
 `;
 
 const TablesRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
   
   @media (max-width: 1400px) {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  }
-  
-  @media (max-width: 1200px) {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   }
   
-  @media (max-width: 992px) {
+  @media (max-width: 1200px) {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 16px;
   }
 `;
 
 const TableCard = styled.div`
   background: ${props => props.colors.surface};
-  border-radius: 16px;
+  border-radius: 4px;
   overflow: hidden;
   box-shadow: ${props => props.colors.shadow};
   display: flex;
@@ -1170,52 +1041,49 @@ const TableCard = styled.div`
   width: 100%;
   height: 100%;
   border: 2px solid ${props => props.colors.border};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   
   &:hover {
     box-shadow: ${props => props.colors.shadowHover};
-    transform: translateY(-2px);
-    border-color: ${props => props.colors.primary}40;
   }
   
   @media (max-width: 768px) {
-    border-radius: 12px;
+    overflow-x: auto;
+    
+    table {
+      min-width: 450px; /* Garantir une largeur minimale en mobile */
+    }
   }
 `;
 
 const CompactTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
   table-layout: fixed;
   background-color: ${props => props.colors.surface};
   transition: background-color 0.3s ease;
   
   .bg-header {
-    background: linear-gradient(135deg, ${props => props.colors.surfaceHover} 0%, ${props => props.colors.surface} 100%);
+    background-color: ${props => props.colors.surfaceHover};
   }
   
   @media (max-width: 1400px) {
-    font-size: 13px;
-  }
-  
-  @media (max-width: 768px) {
     font-size: 12px;
   }
 `;
 
 const Tr = styled.tr`
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
   
   &:hover {
     background-color: ${props => props.colors.navActive};
-    transform: scale(1.01);
   }
 `;
 
 const YearCell = styled.td`
-  padding: 16px 12px;
-  font-weight: 700;
+  padding: 12px 8px;
+  font-weight: 600;
   font-size: 16px;
   color: ${props => props.colors.primary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
@@ -1223,18 +1091,13 @@ const YearCell = styled.td`
   transition: all 0.3s ease;
   
   @media (max-width: 1400px) {
-    padding: 14px 10px;
+    padding: 10px 6px;
     font-size: 14px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 12px 8px;
-    font-size: 13px;
   }
 `;
 
 const Td = styled.td`
-  padding: 16px 12px;
+  padding: 12px 8px;
   color: ${props => props.colors.textPrimary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
@@ -1243,172 +1106,214 @@ const Td = styled.td`
   text-overflow: ellipsis;
   transition: all 0.3s ease;
   
+  /* Container pour les valeurs et variations */
   .value-container {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    gap: 6px;
   }
   
+  /* Valeur numérique avec largeur adaptative */
   .value {
-    font-weight: 500;
+    min-width: unset;
+    margin-right: 4px;
   }
   
   @media (max-width: 1400px) {
-    padding: 14px 10px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 12px 8px;
+    padding: 10px 6px;
   }
 `;
 
 const TotalRow = styled.tr`
-  background: linear-gradient(135deg, ${props => props.colors.surfaceHover} 0%, ${props => props.colors.surface} 100%) !important;
-  font-weight: 700;
+  background-color: ${props => props.colors.surfaceHover} !important;
+  font-weight: 600;
 `;
 
 const TotalCell = styled.td`
-  padding: 18px 12px;
+  padding: 14px 8px;
   color: ${props => props.colors.textPrimary};
-  border-top: 3px solid ${props => props.colors.primary};
+  border-top: 2px solid ${props => props.colors.border};
   text-align: left;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: all 0.3s ease;
   
   @media (max-width: 1400px) {
-    padding: 16px 10px;
-    font-size: 14px;
+    padding: 12px 6px;
   }
+`;
+
+// Styles pour les tableaux des répartitions
+const ChartsSection = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+`;
+
+const ChartCard = styled.div`
+  background-color: ${props => props.colors.surface};
+  border-radius: 4px;
+  box-shadow: ${props => props.colors.shadow};
+  padding: 20px;
+  height: auto;
+  min-height: 400px;
+  overflow: hidden;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   
-  @media (max-width: 768px) {
-    padding: 14px 8px;
-    font-size: 13px;
+  &:hover {
+    box-shadow: ${props => props.colors.shadowHover};
+  }
+`;
+
+const ResponsiveTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: auto;
+  background-color: ${props => props.colors.surface};
+  transition: background-color 0.3s ease;
+`;
+
+const TableHeader = styled.th`
+  background-color: ${props => props.colors.surfaceHover};
+  color: ${props => props.colors.textPrimary};
+  padding: 8px 12px;
+  font-weight: 500;
+  border-bottom: 2px solid ${props => props.colors.border};
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center;
+  }
+`;
+
+const TableDataCell = styled.td`
+  padding: 8px 12px;
+  color: ${props => props.colors.textPrimary};
+  border-bottom: 1px solid ${props => props.colors.borderLight};
+  text-align: left;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  
+  &:nth-child(2), &:nth-child(3) {
+    text-align: center;
   }
 `;
 
 const VariationUp = styled.span`
   color: ${props => props.colors?.success || '#4caf50'};
   font-size: 11px;
-  font-weight: 600;
-  background-color: ${props => props.colors?.success ? `${props.colors.success}20` : '#4caf5020'};
-  padding: 2px 6px;
-  border-radius: 12px;
+  font-weight: 500;
+  margin-left: 4px;
   display: inline-flex;
   align-items: center;
+  min-width: unset;
   
   &.significant {
-    font-weight: 700;
-    background-color: ${props => props.colors?.success ? `${props.colors.success}30` : '#4caf5030'};
+    font-weight: 600;
   }
   
   @media (max-width: 1400px) {
     font-size: 10px;
-    padding: 1px 4px;
   }
 `;
 
 const VariationDown = styled.span`
   color: ${props => props.colors?.error || '#f44336'};
   font-size: 11px;
-  font-weight: 600;
-  background-color: ${props => props.colors?.error ? `${props.colors.error}20` : '#f4433620'};
-  padding: 2px 6px;
-  border-radius: 12px;
+  font-weight: 500;
+  margin-left: 4px;
   display: inline-flex;
   align-items: center;
+  min-width: unset;
   
   &.significant {
-    font-weight: 700;
-    background-color: ${props => props.colors?.error ? `${props.colors.error}30` : '#f4433630'};
+    font-weight: 600;
   }
   
   @media (max-width: 1400px) {
     font-size: 10px;
-    padding: 1px 4px;
   }
 `;
 
+// Nouveaux styles pour l'export
 const HeaderActions = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, ${props => props.colors.surface} 0%, ${props => props.colors.surfaceHover} 100%);
-  border-radius: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: ${props => props.colors.surface};
+  border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
-  border: 2px solid ${props => props.colors.border};
+  border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-  }
 `;
 
 const ExportButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, ${props => props.colors?.success || '#4caf50'} 0%, ${props => props.colors?.success ? `${props.colors.success}dd` : '#388e3c'} 100%);
+  background-color: ${props => props.colors?.success || '#4caf50'};
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 8px 16px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.colors?.shadow || '0 4px 12px rgba(0, 0, 0, 0.15)'};
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.colors?.shadow || '0 2px 4px rgba(0, 0, 0, 0.1)'};
   
   svg {
-    font-size: 16px;
+    margin-right: 8px;
   }
   
   &:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: ${props => props.colors?.shadowHover || '0 8px 25px rgba(0, 0, 0, 0.2)'};
+    background-color: ${props => props.colors?.success ? `${props.colors.success}dd` : '#388e3c'};
+    transform: translateY(-1px);
+    box-shadow: ${props => props.colors?.shadowHover || '0 4px 8px rgba(0, 0, 0, 0.15)'};
   }
   
   &:active {
-    transform: translateY(0) scale(1.02);
+    transform: translateY(0);
   }
 `;
 
 const InfoMessage = styled.div`
-  padding: 24px;
-  background: linear-gradient(135deg, ${props => props.colors?.successBg || '#e8f5e9'} 0%, ${props => props.colors?.successBg || '#e8f5e9'}80 100%);
-  border-radius: 12px;
+  padding: 20px;
+  background-color: ${props => props.colors?.successBg || '#e8f5e9'};
+  border-radius: 4px;
   color: ${props => props.colors?.success || '#2e7d32'};
   text-align: center;
   font-size: 16px;
-  border: 2px solid ${props => props.colors?.success ? `${props.colors.success}40` : '#4caf5040'};
+  border: 1px solid ${props => props.colors?.success ? `${props.colors.success}40` : '#4caf5040'};
   transition: all 0.3s ease;
   
   p {
     margin: 8px 0;
-    font-weight: 500;
   }
 `;
 
 const SummaryTableHeader = styled.th`
-  padding: 16px 12px;
+  padding: 12px 8px;
   color: ${props => props.colors.textPrimary};
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12px;
   border-bottom: 2px solid ${props => props.colors.border};
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, ${props => props.colors.surfaceHover} 0%, ${props => props.colors.surface} 100%);
   
   .full-text {
     display: inline;
@@ -1419,8 +1324,8 @@ const SummaryTableHeader = styled.th`
   }
   
   @media (max-width: 1400px) {
-    padding: 14px 10px;
-    font-size: 12px;
+    padding: 10px 6px;
+    font-size: 11px;
     
     .full-text {
       display: none;
@@ -1431,208 +1336,9 @@ const SummaryTableHeader = styled.th`
     }
   }
   
-  @media (max-width: 768px) {
-    padding: 12px 8px;
-    font-size: 11px;
-  }
-`;
-
-/* Nouveaux styles pour les tableaux de répartition améliorés */
-const DistributionSection = styled.section`
-  margin-bottom: 30px;
-  background-color: ${props => props.colors.surface};
-  border-radius: 16px;
-  box-shadow: ${props => props.colors.shadow};
-  padding: 24px;
-  border: 2px solid ${props => props.colors.border};
-  transition: all 0.3s ease;
-`;
-
-const DistributionGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
-  
-  @media (max-width: 1400px) {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  }
-  
   @media (max-width: 1200px) {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-`;
-
-const DistributionCard = styled.div`
-  background: linear-gradient(135deg, ${props => props.colors.surface} 0%, ${props => props.colors.surfaceHover} 100%);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: ${props => props.colors.shadow};
-  border: 2px solid ${props => props.colors.border};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: fit-content;
-  
-  &:hover {
-    box-shadow: ${props => props.colors.shadowHover};
-    transform: translateY(-4px);
-    border-color: ${props => props.colors.primary}60;
-  }
-`;
-
-const DistributionHeader = styled.div`
-  padding: 20px 24px;
-  background: linear-gradient(135deg, ${props => props.colors.primary} 0%, ${props => props.colors.primary}dd 100%);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 3px solid ${props => props.colors.primary};
-`;
-
-const DistributionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const DistributionBadge = styled.span`
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-`;
-
-const DistributionTableWrapper = styled.div`
-  max-height: 400px;
-  overflow-y: auto;
-  
-  /* Scrollbar personnalisée */
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: ${props => props.colors?.borderLight || '#f1f1f1'};
-    border-radius: 4px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.colors?.primary || '#1976d2'};
-    border-radius: 4px;
-    
-    &:hover {
-      background: ${props => props.colors?.primary ? `${props.colors.primary}dd` : '#1565c0'};
-    }
-  }
-`;
-
-const DistributionTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  background-color: ${props => props.colors.surface};
-  transition: background-color 0.3s ease;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-`;
-
-const DistributionTh = styled.th`
-  padding: 16px 20px;
-  background: linear-gradient(135deg, ${props => props.colors.surfaceHover} 0%, ${props => props.colors.surface} 100%);
-  color: ${props => props.colors.textPrimary};
-  font-weight: 600;
-  font-size: 13px;
-  text-align: left;
-  border-bottom: 2px solid ${props => props.colors.borderLight};
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  transition: all 0.3s ease;
-  
-  &.center {
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 12px 16px;
-    font-size: 12px;
-  }
-`;
-
-const DistributionTr = styled.tr`
-  background-color: ${props => props.isEven ? props.colors.surface : props.colors.surfaceHover};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:hover {
-    background-color: ${props => props.colors.navActive};
-    transform: scale(1.01);
-    box-shadow: 0 2px 8px ${props => props.colors.primary}20;
-  }
-`;
-
-const DistributionTd = styled.td`
-  padding: 14px 20px;
-  color: ${props => props.colors.textPrimary};
-  border-bottom: 1px solid ${props => props.colors.borderLight};
-  text-align: left;
-  transition: all 0.3s ease;
-  
-  &.center {
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 12px 16px;
-  }
-`;
-
-const DistributionName = styled.div`
-  font-weight: 500;
-  color: ${props => props.colors.textPrimary};
-  font-size: 14px;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-`;
-
-const DistributionValue = styled.div`
-  font-weight: 600;
-  color: ${props => props.colors.primary};
-  font-size: 15px;
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
-const DistributionPercentage = styled.div`
-  background: linear-gradient(135deg, ${props => props.colors.primary}20 0%, ${props => props.colors.primary}10 100%);
-  color: ${props => props.colors.primary};
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 12px;
-  display: inline-block;
-  min-width: 40px;
-  text-align: center;
-  border: 1px solid ${props => props.colors.primary}30;
-  
-  @media (max-width: 768px) {
-    font-size: 11px;
-    padding: 3px 6px;
+    padding: 8px 4px;
+    font-size: 10px;
   }
 `;
 

@@ -103,7 +103,10 @@ const Statistiques = () => {
             // Agréger les statistiques par circonstance de toutes les années
             parCirconstance: {},
             // Agréger les statistiques par région de toutes les années
-            parRegion: {}
+            parRegion: {},
+            // Agréger les statistiques par département de toutes les années
+            parDepartement: {} // AJOUT: Initialiser parDepartement
+
           };
           
           // Récupérer les données détaillées pour chaque année pour construire 
@@ -140,6 +143,16 @@ const Statistiques = () => {
                     }
                     allYearsData.parRegion[region].nbMilitaires += data.nbMilitaires || 0;
                     allYearsData.parRegion[region].nbBeneficiaires += data.nbBeneficiaires || 0;
+                  });
+                }
+
+                if (yearStats.data.parDepartement) {
+                  Object.entries(yearStats.data.parDepartement).forEach(([departement, data]) => {
+                    if (!allYearsData.parDepartement[departement]) {
+                      allYearsData.parDepartement[departement] = { nbMilitaires: 0, nbBeneficiaires: 0 };
+                    }
+                    allYearsData.parDepartement[departement].nbMilitaires += data.nbMilitaires || 0;
+                    allYearsData.parDepartement[departement].nbBeneficiaires += data.nbBeneficiaires || 0;
                   });
                 }
               }

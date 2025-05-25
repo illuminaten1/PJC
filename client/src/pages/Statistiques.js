@@ -1289,16 +1289,21 @@ const Td = styled.td`
   &.text-center {
     text-align: center;
     
-    /* CORRECTION: S'assurer que le contenu est bien centré */
+    /* OPTION 1 : Empilement vertical - valeur centrée au-dessus, variation en-dessous */
     .value-container {
       display: flex;
-      align-items: center;
-      flex-wrap: nowrap;
-      justify-content: center; /* CHANGÉ DE flex-start À center */
+      flex-direction: column; /* Empiler verticalement */
+      align-items: center;     /* Centrer horizontalement */
+      gap: 2px;               /* Petit espace entre valeur et variation */
+    }
+    
+    .value {
+      font-weight: 500;
+      margin-right: 0; /* Supprimer la marge droite pour le centrage parfait */
     }
   }
   
-  /* Container pour les valeurs et variations */
+  /* Container pour les valeurs et variations - comportement par défaut (colonnes non centrées) */
   .value-container {
     display: flex;
     align-items: center;

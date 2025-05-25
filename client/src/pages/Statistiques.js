@@ -94,10 +94,9 @@ const Statistiques = () => {
                 .reduce((sum, year) => sum + (year.montantGage || 0), 0),
               montantPaye: Object.values(response.data.finances || {})
                 .reduce((sum, year) => sum + (year.montantPaye || 0), 0),
-              nbConventions: Object.values(response.data.finances || {})
-                .reduce((sum, year) => sum + (year.nbConventions || 0), 0),
-              nbPaiements: Object.values(response.data.finances || {})
-                .reduce((sum, year) => sum + (year.nbPaiements || 0), 0)
+              // CORRECTION: Calculer correctement le nombre de conventions
+              nbConventions: 0, // Initialiser à 0
+              nbPaiements: 0    // Initialiser à 0
             },
             // Agréger les statistiques par rédacteur de toutes les années
             parRedacteur: {},
@@ -113,6 +112,12 @@ const Statistiques = () => {
             try {
               const yearStats = await statistiquesAPI.getByAnnee(year);
               if (yearStats.data) {
+                // CORRECTION: Agréger les données financières
+                if (yearStats.data.finances) {
+                  allYearsData.finances.nbConventions += yearStats.data.finances.nbConventions || 0;
+                  allYearsData.finances.nbPaiements += yearStats.data.finances.nbPaiements || 0;
+                }
+                
                 // Agréger les rédacteurs
                 if (yearStats.data.parRedacteur) {
                   Object.entries(yearStats.data.parRedacteur).forEach(([redacteur, count]) => {

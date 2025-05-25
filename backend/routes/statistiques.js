@@ -32,7 +32,12 @@ router.get('/', async (req, res) => {
           $lt: new Date(parseInt(annee) + 1, 0, 1) 
         } 
       } : {} },
-      { $group: { _id: null, total: { $sum: 1 } } }
+      { $group: { 
+        _id: null, 
+        total: { $sum: 1 },
+        enCours: { $sum: { $cond: [{ $ne: ["$archive", true] }, 1, 0] } },
+        archivees: { $sum: { $cond: [{ $eq: ["$archive", true] }, 1, 0] } }
+      } }
     ]);
     
     // Statistiques des militaires
@@ -138,6 +143,8 @@ router.get('/', async (req, res) => {
     
     res.json({
       affaires: statsAffaires.length > 0 ? statsAffaires[0].total : 0,
+      affairesEnCours: statsAffaires.length > 0 ? statsAffaires[0].enCours : 0,
+      affairesArchivees: statsAffaires.length > 0 ? statsAffaires[0].archivees : 0,
       militaires: statsMilitaires.length > 0 ? {
         total: statsMilitaires[0].total,
         blesses: statsMilitaires[0].blesses,

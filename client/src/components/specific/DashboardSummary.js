@@ -43,6 +43,16 @@ const DashboardSummary = ({ statistiques = {} }) => {
           <StatContent>
             <StatValue colors={colors}>{statistiques.affaires || 0}</StatValue>
             <StatLabel colors={colors}>Affaires</StatLabel>
+            <StatDetail>
+              <DetailItem>
+                <DetailLabel colors={colors}>En cours :</DetailLabel>
+                <DetailValue colors={colors}>{statistiques.affairesEnCours || 0}</DetailValue>
+              </DetailItem>
+              <DetailItem>
+                <DetailLabel colors={colors}>Archivées :</DetailLabel>
+                <DetailValue colors={colors}>{statistiques.affairesArchivees || 0}</DetailValue>
+              </DetailItem>
+            </StatDetail>
           </StatContent>
         </StatCard>
         

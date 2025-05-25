@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
 import { AuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ToastProvider, useToast } from '../components/common/Toast';
 import PageHeader from '../components/common/PageHeader';
 import TemplatesTab from '../components/parametres/TemplatesTab';
 import UtilisateursTab from '../components/parametres/UtilisateursTab';
@@ -18,26 +19,19 @@ import {
   FaUserEdit 
 } from 'react-icons/fa';
 
-const Parametres = () => {
+const ParametresContent = () => {
   const [activeTab, setActiveTab] = useState('templates');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [error, setError] = useState('');
   
   const { isAdmin } = useContext(AuthContext);
   const { colors } = useTheme();
+  const { showSuccessToast, showErrorToast } = useToast();
 
   const showSuccessMessage = (message) => {
-    setSuccessMessage(message);
-    setTimeout(() => {
-      setSuccessMessage('');
-    }, 5000);
+    showSuccessToast(message);
   };
 
   const setErrorMessage = (message) => {
-    setError(message);
-    setTimeout(() => {
-      setError('');
-    }, 5000);
+    showErrorToast(message);
   };
 
   const tabs = [
@@ -90,9 +84,6 @@ const Parametres = () => {
         subtitle="Configuration de l'application"
       />
       
-      {error && <ErrorMessage colors={colors}>{error}</ErrorMessage>}
-      {successMessage && <SuccessMessage colors={colors}>{successMessage}</SuccessMessage>}
-      
       <TabContainer colors={colors}>
         <TabList colors={colors}>
           {tabs.map(tab => {
@@ -122,31 +113,21 @@ const Parametres = () => {
   );
 };
 
+const Parametres = () => {
+  const { colors } = useTheme();
+  
+  return (
+    <ToastProvider colors={colors}>
+      <ParametresContent />
+    </ToastProvider>
+  );
+};
+
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
   min-height: 100vh;
   transition: background-color 0.3s ease;
-`;
-
-const ErrorMessage = styled.div`
-  background-color: ${props => props.colors.errorBg};
-  color: ${props => props.colors.error};
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  border: 1px solid ${props => props.colors.error}40;
-  transition: all 0.3s ease;
-`;
-
-const SuccessMessage = styled.div`
-  background-color: ${props => props.colors.successBg};
-  color: ${props => props.colors.success};
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  border: 1px solid ${props => props.colors.success}40;
-  transition: all 0.3s ease;
 `;
 
 const TabContainer = styled.div`

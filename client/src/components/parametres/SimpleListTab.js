@@ -51,7 +51,7 @@ const SimpleListTab = ({
       fetchItems();
     } catch (err) {
       console.error(`Erreur lors de l'ajout`, err);
-      setErrorMessage(`Impossible d'ajouter ${title.slice(0, -1).toLowerCase()}`);
+      setErrorMessage(`Impossible d'ajouter l'élément : ${title.slice(0, -1).toLowerCase()}`);
     }
   };
 

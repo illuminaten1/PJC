@@ -439,6 +439,10 @@ const Beneficiaires = () => {
             Réinitialiser
           </ResetButton>
         </FiltersGroup>
+
+        <ResultCount colors={colors}>
+          {beneficiaires.length} bénéficiaire{beneficiaires.length !== 1 ? 's' : ''} trouvé{beneficiaires.length !== 1 ? 's' : ''}
+        </ResultCount>
       </FiltersContainer>
       
       {loading ? (
@@ -957,6 +961,13 @@ const Error = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
+`;
+
+const ResultCount = styled.div`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  font-weight: 500;
+  transition: color 0.3s ease;
 `;
 
 export default Beneficiaires;

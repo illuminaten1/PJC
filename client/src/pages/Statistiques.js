@@ -253,6 +253,37 @@ const Statistiques = () => {
   };
 
   const totals = calculateTotals();
+
+  const processDepartementData = (parDepartement) => {
+    if (!parDepartement) return [];
+    
+    // Convertir en array et trier par nombre de militaires
+    const departements = Object.entries(parDepartement)
+      .map(([dept, data]) => ({
+        nom: dept,
+        ...data
+      }))
+      .sort((a, b) => b.nbMilitaires - a.nbMilitaires);
+    
+    // Prendre les 15 premiers départements
+    const topDepartements = departements.slice(0, 15);
+    
+    // Regrouper le reste dans "Autres"
+    const autres = departements.slice(15);
+    if (autres.length > 0) {
+      const autresData = autres.reduce((acc, dept) => ({
+        nbMilitaires: acc.nbMilitaires + dept.nbMilitaires,
+        nbBeneficiaires: acc.nbBeneficiaires + dept.nbBeneficiaires
+      }), { nbMilitaires: 0, nbBeneficiaires: 0 });
+      
+      topDepartements.push({
+        nom: `Autres (${autres.length} départements)`,
+        ...autresData
+      });
+    }
+    
+    return topDepartements;
+  };
   
   const calculateVariation = (currentValue, previousValue) => {
     if (previousValue === 0) {
@@ -713,7 +744,11 @@ const Statistiques = () => {
                     
                     return (
                       <TableRow key={`redacteur-${redacteur}`} colors={colors}>
-                        <TableDataCell colors={colors}>{redacteur}</TableDataCell>
+                        <TableDataCell colors={colors}>
+                          <TooltipText title={redacteur}>
+                            {redacteur}
+                          </TooltipText>
+                        </TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
@@ -750,7 +785,11 @@ const Statistiques = () => {
                     
                     return (
                       <TableRow key={`circonstance-${circonstance}`} colors={colors}>
-                        <TableDataCell colors={colors}>{circonstance}</TableDataCell>
+                        <TableDataCell colors={colors}>
+                          <TooltipText title={circonstance}>
+                            {circonstance}
+                          </TooltipText>
+                        </TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
@@ -807,41 +846,61 @@ const Statistiques = () => {
         <ChartCard className="departement-table" colors={colors}>
           <TableHeader colors={colors}>
             <TableHeaderIcon><FaMapMarkerAlt /></TableHeaderIcon>
-            <TableHeaderTitle>Répartition par département</TableHeaderTitle>
+            <TableHeaderTitle>Top 15 - Répartition par département</TableHeaderTitle>
           </TableHeader>
           <TableBody colors={colors}>
-            <ResponsiveTable colors={colors}>
-              <thead>
-                <tr>
-                  <th>Département</th>
-                  <th>Militaires</th>
-                  <th>Bénéficiaires</th>
-                  <th>%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(statistiques?.parDepartement || {})
-                  .sort((a, b) => b[1].nbMilitaires - a[1].nbMilitaires)
-                  .map(([departement, data]) => {
-                    const totalMilitaires = Object.values(statistiques?.parDepartement || {})
+            {!statistiques?.parDepartement || Object.keys(statistiques.parDepartement).length === 0 ? (
+              <EmptyState colors={colors}>
+                <EmptyStateIcon>🏛️</EmptyStateIcon>
+                <EmptyStateText>
+                  Données par département non disponibles
+                </EmptyStateText>
+                <EmptyStateSubtext>
+                  Cette fonctionnalité nécessite une mise à jour de l'API
+                </EmptyStateSubtext>
+              </EmptyState>
+            ) : (
+              <ResponsiveTable colors={colors}>
+                <thead>
+                  <tr>
+                    <th>Département</th>
+                    <th>Militaires</th>
+                    <th>Bénéficiaires</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {processDepartementData(statistiques.parDepartement).map((item, index) => {
+                    const totalMilitaires = Object.values(statistiques.parDepartement)
                       .reduce((a, b) => a + b.nbMilitaires, 0);
                     const percentage = totalMilitaires > 0 
-                      ? ((data.nbMilitaires / totalMilitaires) * 100).toFixed(1) 
+                      ? ((item.nbMilitaires / totalMilitaires) * 100).toFixed(1) 
                       : 0;
                     
                     return (
-                      <TableRow key={`departement-${departement}`} colors={colors}>
-                        <TableDataCell colors={colors}>{departement}</TableDataCell>
-                        <TableDataCell colors={colors} className="text-center">{data.nbMilitaires}</TableDataCell>
-                        <TableDataCell colors={colors} className="text-center">{data.nbBeneficiaires}</TableDataCell>
+                      <TableRow key={`departement-${index}`} colors={colors}>
+                        <TableDataCell colors={colors}>
+                          <DepartementName isAutres={item.nom.includes('Autres')}>
+                            {item.nom}
+                          </DepartementName>
+                        </TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
-                          <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
+                          {item.nbMilitaires}
+                        </TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          {item.nbBeneficiaires}
+                        </TableDataCell>
+                        <TableDataCell colors={colors} className="text-center">
+                          <PercentageBadge colors={colors} isAutres={item.nom.includes('Autres')}>
+                            {percentage}%
+                          </PercentageBadge>
                         </TableDataCell>
                       </TableRow>
                     );
                   })}
-              </tbody>
-            </ResponsiveTable>
+                </tbody>
+              </ResponsiveTable>
+            )}
           </TableBody>
         </ChartCard>
 
@@ -1070,17 +1129,6 @@ const TableTitle = styled.div`
   transition: all 0.3s ease;
 `;
 
-const PercentageBadge = styled.span`
-  background: linear-gradient(135deg, ${props => props.colors.primary}20, ${props => props.colors.primary}10);
-  color: ${props => props.colors.primary};
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid ${props => props.colors.primary}30;
-`;
-
-
 const TablesRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -1221,12 +1269,19 @@ const TotalCell = styled.td`
 // Styles pour les tableaux des répartitions
 const ChartsSection = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
+  height: 1200px; /* Hauteur fixe pour garder l'alignement */
+  
+  @media (max-width: 1400px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    height: auto;
+  }
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
     gap: 16px;
   }
 `;
@@ -1240,12 +1295,14 @@ const ChartCard = styled.div`
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  max-height: 600px; /* Limiter la hauteur */
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: ${props => props.colors.shadowHover};
   }
 `;
+
 
 const TableHeader = styled.div`
   background: linear-gradient(135deg, ${props => props.colors.primary}, ${props => props.colors.primary}dd);
@@ -1272,6 +1329,8 @@ const TableHeaderTitle = styled.h3`
 const TableBody = styled.div`
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   
   @media (max-width: 768px) {
     overflow-x: auto;
@@ -1283,12 +1342,13 @@ const ResponsiveTable = styled.table`
   border-collapse: collapse;
   font-size: 14px;
   background-color: ${props => props.colors.surface};
+  table-layout: fixed; /* Important pour contrôler les largeurs */
   
   thead {
     background-color: ${props => props.colors.surfaceHover};
     
     th {
-      padding: 16px 12px;
+      padding: 16px 8px;
       font-weight: 600;
       color: ${props => props.colors.textPrimary};
       text-align: left;
@@ -1297,24 +1357,48 @@ const ResponsiveTable = styled.table`
       text-transform: uppercase;
       letter-spacing: 0.5px;
       
-      &:nth-child(2), 
-      &:nth-child(3), 
+      /* Largeurs spécifiques selon le type de tableau */
+      &:first-child {
+        width: 60%; /* Nom/libellé prend plus de place */
+      }
+      
+      &:nth-child(2) {
+        width: 25%; /* Nombre */
+        text-align: center;
+      }
+      
+      &:nth-child(3) {
+        width: 25%; /* Pourcentage ou autre nombre */
+        text-align: center;
+      }
+      
       &:nth-child(4) {
+        width: 15%; /* Pourcentage final */
         text-align: center;
       }
     }
   }
   
-  tbody tr {
-    transition: all 0.2s ease;
+  tbody {
+    display: block;
+    max-height: 400px; /* Hauteur fixe avec scroll */
+    overflow-y: auto;
+    width: 100%;
     
-    &:nth-child(even) {
-      background-color: ${props => props.colors.surfaceHover}40;
-    }
-    
-    &:hover {
-      background-color: ${props => props.colors.primary}10;
-      transform: scale(1.01);
+    tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      transition: all 0.2s ease;
+      
+      &:nth-child(even) {
+        background-color: ${props => props.colors.surfaceHover}40;
+      }
+      
+      &:hover {
+        background-color: ${props => props.colors.primary}10;
+        transform: scale(1.01);
+      }
     }
   }
   
@@ -1323,17 +1407,24 @@ const ResponsiveTable = styled.table`
     font-size: 13px;
     
     thead th {
-      padding: 12px 8px;
+      padding: 12px 6px;
       font-size: 12px;
+    }
+    
+    tbody {
+      max-height: 300px;
     }
   }
 `;
 
 const TableDataCell = styled.td`
-  padding: 16px 12px;
+  padding: 12px 8px;
   color: ${props => props.colors.textPrimary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
   transition: all 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   
   &.text-center {
     text-align: center;
@@ -1341,20 +1432,15 @@ const TableDataCell = styled.td`
   
   &:first-child {
     font-weight: 500;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
   
   @media (max-width: 768px) {
-    padding: 12px 8px;
-    
-    &:first-child {
-      max-width: 120px;
-    }
+    padding: 10px 6px;
+    font-size: 12px;
   }
 `;
+
 
 const TableRow = styled.tr`
   position: relative;
@@ -1506,6 +1592,47 @@ const SummaryTableHeader = styled.th`
     padding: 8px 4px;
     font-size: 10px;
   }
+`;
+
+const DepartementName = styled.span`
+  ${props => props.isAutres && `
+    font-style: italic;
+    color: ${props.colors?.textSecondary || '#666'};
+    font-weight: 400;
+  `}
+`;
+
+const TooltipText = styled.span`
+  cursor: help;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const PercentageBadge = styled.span`
+  background: linear-gradient(135deg, 
+    ${props => props.isAutres ? 
+      `${props.colors.textSecondary}15` : 
+      `${props.colors.primary}20`
+    }, 
+    ${props => props.isAutres ? 
+      `${props.colors.textSecondary}10` : 
+      `${props.colors.primary}10`
+    });
+  color: ${props => props.isAutres ? 
+    props.colors.textSecondary : 
+    props.colors.primary
+  };
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid ${props => props.isAutres ? 
+    `${props.colors.textSecondary}30` : 
+    `${props.colors.primary}30`
+  };
+  white-space: nowrap;
 `;
 
 export default Statistiques;

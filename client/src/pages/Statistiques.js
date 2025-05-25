@@ -749,13 +749,13 @@ const Statistiques = () => {
                     const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
                     
                     return (
-                      <TableRow key={`redacteur-${redacteur}`} colors={colors}>
+                      <tr key={`redacteur-${redacteur}`}>
                         <TableDataCell colors={colors}>{redacteur}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
                         </TableDataCell>
-                      </TableRow>
+                      </tr>
                     );
                   })}
               </tbody>
@@ -786,13 +786,13 @@ const Statistiques = () => {
                     const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
                     
                     return (
-                      <TableRow key={`circonstance-${circonstance}`} colors={colors}>
+                      <tr key={`circonstance-${circonstance}`}>
                         <TableDataCell colors={colors}>{circonstance}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{count}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
                         </TableDataCell>
-                      </TableRow>
+                      </tr>
                     );
                   })}
               </tbody>
@@ -826,14 +826,14 @@ const Statistiques = () => {
                       : 0;
                     
                     return (
-                      <TableRow key={`region-${region}`} colors={colors}>
+                      <tr key={`region-${region}`}>
                         <TableDataCell colors={colors}>{region}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{data.nbMilitaires}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{data.nbBeneficiaires}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
                         </TableDataCell>
-                      </TableRow>
+                      </tr>
                     );
                   })}
               </tbody>
@@ -867,14 +867,14 @@ const Statistiques = () => {
                       : 0;
                     
                     return (
-                      <TableRow key={`departement-${departement}`} colors={colors}>
+                      <tr key={`departement-${departement}`}>
                         <TableDataCell colors={colors}>{departement}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{data.nbMilitaires}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">{data.nbBeneficiaires}</TableDataCell>
                         <TableDataCell colors={colors} className="text-center">
                           <PercentageBadge colors={colors}>{percentage}%</PercentageBadge>
                         </TableDataCell>
-                      </TableRow>
+                      </tr>
                     );
                   })}
               </tbody>

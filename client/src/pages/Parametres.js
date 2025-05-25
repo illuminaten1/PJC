@@ -44,16 +44,18 @@ const Parametres = () => {
     ...(isAdmin() ? [
       { id: 'templates', label: 'Templates', icon: FaFileAlt },
       { id: 'utilisateurs', label: 'Utilisateurs', icon: FaUsers },
-    ] : []),
+      { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit },
+    ] : [
+      { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit },
+    ]),
     { id: 'circonstances', label: 'Circonstances', icon: FaGavel },
     { id: 'regions', label: 'Régions', icon: FaMapMarkerAlt },
     { id: 'departements', label: 'Départements', icon: FaMap },
-    { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit },
   ];
 
   // Si l'utilisateur n'est pas admin et qu'aucun onglet par défaut n'est disponible
   if (!isAdmin() && activeTab === 'templates') {
-    setActiveTab('circonstances');
+    setActiveTab('redacteurs');
   }
 
   const renderTabContent = () => {
@@ -68,14 +70,14 @@ const Parametres = () => {
         return isAdmin() ? <TemplatesTab {...commonProps} /> : null;
       case 'utilisateurs':
         return isAdmin() ? <UtilisateursTab {...commonProps} /> : null;
+      case 'redacteurs':
+        return <RedacteursTab {...commonProps} />;
       case 'circonstances':
         return <CirconstancesTab {...commonProps} />;
       case 'regions':
         return <RegionsTab {...commonProps} />;
       case 'departements':
         return <DepartementsTab {...commonProps} />;
-      case 'redacteurs':
-        return <RedacteursTab {...commonProps} />;
       default:
         return null;
     }

@@ -29,7 +29,7 @@ const MainLayout = () => {
     if (path.startsWith('/avocats')) return 'avocats';
     if (path.startsWith('/statistiques')) return 'statistiques';
     if (path.startsWith('/parametres')) return 'parametres';
-    if (path.startsWith('/documentation')) return 'documentation'; // Nouvelle condition
+    if (path.startsWith('/documentation')) return 'documentation';
     return '';
   };
   

@@ -21,16 +21,17 @@ export const MarkdownEditor = ({ value, onChange, name = 'notes', placeholder = 
   
   // Calculer la hauteur dynamique basée sur le contenu
   const dynamicHeight = useMemo(() => {
-    if (!value) return 200; // Hauteur minimale
+    if (!value) return 250; // Hauteur minimale
     
     // Compter le nombre de lignes dans le contenu
     const lines = value.split('\n').length;
     // Hauteur par ligne (approximative) + padding
     const lineHeight = 20;
-    const padding = 40;
+    const padding = 60;
     
-    // Hauteur calculée avec un minimum de 200px et un maximum de 600px
-    const calculatedHeight = Math.max(200, Math.min(600, lines * lineHeight + padding));
+    // Hauteur calculée avec un minimum de 250px et un maximum de 500px
+    // Au-delà de 500px, on garde le scroll pour éviter des éditeurs trop grands
+    const calculatedHeight = Math.max(250, Math.min(500, lines * lineHeight + padding));
     
     return calculatedHeight;
   }, [value]);
@@ -42,10 +43,6 @@ export const MarkdownEditor = ({ value, onChange, name = 'notes', placeholder = 
     status: false,
     autofocus: true,
     minHeight: `${dynamicHeight}px`,
-    // Forcer la hauteur de CodeMirror
-    codeMirrorOptions: {
-      viewportMargin: Infinity, // Affiche tout le contenu sans scroll interne
-    }
   }), [placeholder, dynamicHeight]);
   
   return (
@@ -78,7 +75,7 @@ const EditorContainer = styled.div`
     border: 1px solid ${props => props.colors.border};
     border-radius: 4px;
     min-height: ${props => props.dynamicHeight}px !important;
-    height: ${props => props.dynamicHeight}px !important;
+    max-height: 500px !important; /* Hauteur max avec scroll au-delà */
     background-color: ${props => props.colors.surface};
     color: ${props => props.colors.textPrimary};
     transition: all 0.3s ease;
@@ -86,7 +83,7 @@ const EditorContainer = styled.div`
   
   .CodeMirror-scroll {
     min-height: ${props => props.dynamicHeight}px !important;
-    height: auto !important;
+    max-height: 500px !important; /* Permet le scroll si le contenu dépasse */
   }
   
   .CodeMirror-focused {

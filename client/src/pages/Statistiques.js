@@ -1288,6 +1288,14 @@ const Td = styled.td`
   
   &.text-center {
     text-align: center;
+    
+    /* CORRECTION: S'assurer que le contenu est bien centré */
+    .value-container {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      justify-content: center; /* CHANGÉ DE flex-start À center */
+    }
   }
   
   /* Container pour les valeurs et variations */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaBook, FaSearch } from 'react-icons/fa';
+import { FaBook, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 import { useTheme } from '../contexts/ThemeContext';
 import PageHeader from '../components/common/PageHeader';
 
@@ -9,6 +9,7 @@ const Documentation = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSection, setActiveSection] = useState('introduction');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   // Gestion du scroll pour le bouton "retour en haut"
   useEffect(() => {
@@ -42,12 +43,18 @@ const Documentation = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveSection(sectionId);
+      setShowMobileSidebar(false); // Fermer la sidebar mobile après navigation
     }
   };
 
   // Retour en haut
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Toggle sidebar mobile
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
   };
 
   // Filtrage du contenu
@@ -86,6 +93,37 @@ const Documentation = () => {
     element.innerHTML = highlightedText;
   };
 
+  const tableOfContentsItems = [
+    { id: 'introduction', label: 'Introduction' },
+    { 
+      id: 'structure', 
+      label: 'Structure des données',
+      children: [
+        { id: 'affaires', label: 'Affaires' },
+        { id: 'militaires', label: 'Militaires' },
+        { id: 'beneficiaires', label: 'Bénéficiaires' }
+      ]
+    },
+    { id: 'fonctionnalites', label: 'Fonctionnalités' },
+    { 
+      id: 'gestion-parametres', 
+      label: 'Gestion des paramètres',
+      children: [
+        { id: 'circonstances', label: 'Circonstances' },
+        { id: 'redacteurs', label: 'Rédacteurs' }
+      ]
+    },
+    { 
+      id: 'templates', 
+      label: 'Templates de documents',
+      children: [
+        { id: 'personnalisation', label: 'Personnalisation' },
+        { id: 'variables-convention', label: 'Variables convention' },
+        { id: 'variables-reglement', label: 'Variables règlement' }
+      ]
+    }
+  ];
+
   return (
     <Container colors={colors}>
       <PageHeader 
@@ -95,162 +133,81 @@ const Documentation = () => {
       />
 
       <DocumentationLayout>
-        <Sidebar colors={colors}>
-          <SidebarTitle colors={colors}>
-            <FaBook style={{ marginRight: '8px' }} />
-            Sommaire
-          </SidebarTitle>
-          
-          <SearchBox>
-            <SearchIcon colors={colors}>
-              <FaSearch />
-            </SearchIcon>
-            <SearchInput
-              type="text"
-              placeholder="Rechercher dans la documentation..."
-              value={searchTerm}
-              onChange={(e) => filterContent(e.target.value)}
-              colors={colors}
-            />
-          </SearchBox>
-          
-          <TableOfContents>
-            <TocItem>
-              <TocLink 
-                active={activeSection === 'introduction'}
-                onClick={() => scrollToSection('introduction')}
+        {/* Mobile Sidebar Toggle */}
+        <MobileSidebarToggle 
+          onClick={toggleMobileSidebar}
+          colors={colors}
+        >
+          {showMobileSidebar ? <FaTimes /> : <FaBars />}
+          <span>Sommaire</span>
+        </MobileSidebarToggle>
+
+        {/* Sidebar avec overlay mobile */}
+        <SidebarOverlay 
+          isOpen={showMobileSidebar} 
+          onClick={() => setShowMobileSidebar(false)}
+          colors={colors}
+        />
+        
+        <Sidebar colors={colors} isOpen={showMobileSidebar}>
+          <SidebarContent>
+            <SidebarHeader>
+              <SidebarTitle colors={colors}>
+                <FaBook style={{ marginRight: '8px' }} />
+                Sommaire
+              </SidebarTitle>
+              
+              <MobileCloseButton 
+                onClick={() => setShowMobileSidebar(false)}
                 colors={colors}
               >
-                Introduction
-              </TocLink>
-            </TocItem>
+                <FaTimes />
+              </MobileCloseButton>
+            </SidebarHeader>
             
-            <TocItem>
-              <TocLink 
-                active={activeSection === 'structure'}
-                onClick={() => scrollToSection('structure')}
+            <SearchBox>
+              <SearchIcon colors={colors}>
+                <FaSearch />
+              </SearchIcon>
+              <SearchInput
+                type="text"
+                placeholder="Rechercher dans la documentation..."
+                value={searchTerm}
+                onChange={(e) => filterContent(e.target.value)}
                 colors={colors}
-              >
-                Structure des données
-              </TocLink>
-              <SubMenu>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'affaires'}
-                    onClick={() => scrollToSection('affaires')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Affaires
-                  </TocLink>
-                </TocItem>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'militaires'}
-                    onClick={() => scrollToSection('militaires')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Militaires
-                  </TocLink>
-                </TocItem>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'beneficiaires'}
-                    onClick={() => scrollToSection('beneficiaires')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Bénéficiaires
-                  </TocLink>
-                </TocItem>
-              </SubMenu>
-            </TocItem>
+              />
+            </SearchBox>
             
-            <TocItem>
-              <TocLink 
-                active={activeSection === 'fonctionnalites'}
-                onClick={() => scrollToSection('fonctionnalites')}
-                colors={colors}
-              >
-                Fonctionnalités
-              </TocLink>
-            </TocItem>
-            
-            <TocItem>
-              <TocLink 
-                active={activeSection === 'gestion-parametres'}
-                onClick={() => scrollToSection('gestion-parametres')}
-                colors={colors}
-              >
-                Gestion des paramètres
-              </TocLink>
-              <SubMenu>
-                <TocItem>
+            <TableOfContents>
+              {tableOfContentsItems.map(item => (
+                <TocItem key={item.id}>
                   <TocLink 
-                    active={activeSection === 'circonstances'}
-                    onClick={() => scrollToSection('circonstances')}
+                    active={activeSection === item.id}
+                    onClick={() => scrollToSection(item.id)}
                     colors={colors}
-                    submenu={true}
                   >
-                    Circonstances
+                    {item.label}
                   </TocLink>
+                  {item.children && (
+                    <SubMenu>
+                      {item.children.map(child => (
+                        <TocItem key={child.id}>
+                          <TocLink 
+                            active={activeSection === child.id}
+                            onClick={() => scrollToSection(child.id)}
+                            colors={colors}
+                            submenu={true}
+                          >
+                            {child.label}
+                          </TocLink>
+                        </TocItem>
+                      ))}
+                    </SubMenu>
+                  )}
                 </TocItem>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'redacteurs'}
-                    onClick={() => scrollToSection('redacteurs')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Rédacteurs
-                  </TocLink>
-                </TocItem>
-              </SubMenu>
-            </TocItem>
-            
-            <TocItem>
-              <TocLink 
-                active={activeSection === 'templates'}
-                onClick={() => scrollToSection('templates')}
-                colors={colors}
-              >
-                Templates de documents
-              </TocLink>
-              <SubMenu>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'personnalisation'}
-                    onClick={() => scrollToSection('personnalisation')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Personnalisation
-                  </TocLink>
-                </TocItem>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'variables-convention'}
-                    onClick={() => scrollToSection('variables-convention')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Variables convention
-                  </TocLink>
-                </TocItem>
-                <TocItem>
-                  <TocLink 
-                    active={activeSection === 'variables-reglement'}
-                    onClick={() => scrollToSection('variables-reglement')}
-                    colors={colors}
-                    submenu={true}
-                  >
-                    Variables règlement
-                  </TocLink>
-                </TocItem>
-              </SubMenu>
-            </TocItem>
-          </TableOfContents>
+              ))}
+            </TableOfContents>
+          </SidebarContent>
         </Sidebar>
 
         <Content colors={colors}>
@@ -491,12 +448,17 @@ const Documentation = () => {
   );
 };
 
-// Styled Components avec support complet du thème sombre
+// Styled Components avec responsive design complet
+
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
   min-height: 100vh;
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const DocumentationLayout = styled.div`
@@ -504,9 +466,54 @@ const DocumentationLayout = styled.div`
   grid-template-columns: 280px 1fr;
   gap: 24px;
   align-items: start;
+  position: relative;
   
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+`;
+
+// Toggle button pour mobile
+const MobileSidebarToggle = styled.button`
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background-color: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${props => props.colors.textPrimary};
+  box-shadow: ${props => props.colors.shadow};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.surfaceHover};
+    border-color: ${props => props.colors.primary};
+  }
+  
+  @media (max-width: 968px) {
+    display: flex;
+  }
+`;
+
+// Overlay pour fermer la sidebar mobile
+const SidebarOverlay = styled.div`
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  
+  @media (max-width: 968px) {
+    display: ${props => props.isOpen ? 'block' : 'none'};
   }
 `;
 
@@ -514,30 +521,90 @@ const Sidebar = styled.nav`
   background-color: ${props => props.colors.surface};
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
-  padding: 20px;
+  border: 1px solid ${props => props.colors.border};
+  transition: all 0.3s ease;
   position: sticky;
   top: 20px;
   max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  border: 1px solid ${props => props.colors.border};
-  transition: all 0.3s ease;
+  overflow: hidden;
   
   @media (max-width: 968px) {
-    position: static;
-    max-height: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%) scale(${props => props.isOpen ? '1' : '0.8'});
+    max-height: 80vh;
+    width: 90%;
+    max-width: 400px;
+    z-index: 999;
+    opacity: ${props => props.isOpen ? '1' : '0'};
+    visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+    pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
+  }
+`;
+
+const SidebarContent = styled.div`
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  
+  @media (max-width: 968px) {
+    padding: 16px;
+  }
+`;
+
+const SidebarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  
+  @media (min-width: 969px) {
+    justify-content: flex-start;
   }
 `;
 
 const SidebarTitle = styled.h3`
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin: 0;
   color: ${props => props.colors.textPrimary};
   border-bottom: 2px solid ${props => props.colors.primary};
   padding-bottom: 8px;
   display: flex;
   align-items: center;
   transition: color 0.3s ease;
+  flex: 1;
+  
+  @media (max-width: 968px) {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+`;
+
+const MobileCloseButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: ${props => props.colors.textSecondary};
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textPrimary};
+  }
+  
+  @media (max-width: 968px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
 const SearchBox = styled.div`
@@ -620,6 +687,14 @@ const Content = styled.main`
   padding: 32px;
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
 `;
 
 const Section = styled.section`
@@ -646,6 +721,14 @@ const Section = styled.section`
       color: ${props => props.colors.textPrimary};
       transition: color 0.3s ease;
     }
+    
+    @media (max-width: 480px) {
+      padding-left: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 32px;
   }
 `;
 
@@ -657,6 +740,15 @@ const SectionTitle = styled.h2`
   border-bottom: 3px solid ${props => props.colors.primary};
   padding-bottom: 8px;
   transition: color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 20px;
+    border-bottom-width: 2px;
+  }
 `;
 
 const SubsectionTitle = styled.h3`
@@ -677,6 +769,21 @@ const SubsectionTitle = styled.h3`
     height: 20px;
     background-color: ${props => props.colors.primary};
     border-radius: 2px;
+    
+    @media (max-width: 480px) {
+      left: -12px;
+      width: 3px;
+      height: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    margin: 24px 0 12px 0;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
   }
 `;
 
@@ -696,6 +803,11 @@ const HighlightBox = styled.div`
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px 16px;
+    margin: 16px 0;
   }
 `;
 
@@ -728,6 +840,16 @@ const WarningBox = styled.div`
     font-family: 'Courier New', monospace;
     font-size: 13px;
     color: ${props => props.colors.textPrimary};
+    word-break: break-all;
+    
+    @media (max-width: 480px) {
+      font-size: 11px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px 16px;
+    margin: 16px 0;
   }
 `;
 
@@ -744,6 +866,11 @@ const StructureCard = styled.div`
     margin: 0;
     color: ${props => props.colors.textPrimary};
   }
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+    margin: 16px 0;
+  }
 `;
 
 const FeatureGrid = styled.div`
@@ -751,6 +878,17 @@ const FeatureGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
   margin: 24px 0;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 8px;
+    margin: 16px 0;
+  }
 `;
 
 const FeatureCard = styled.div`
@@ -771,16 +909,33 @@ const FeatureCard = styled.div`
     color: ${props => props.colors.primary};
     margin-bottom: 12px;
     font-size: 18px;
+    
+    @media (max-width: 480px) {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
   }
   
   p {
     color: ${props => props.colors.textPrimary};
     margin-bottom: 8px;
+    
+    @media (max-width: 480px) {
+      font-size: 14px;
+    }
   }
   
   em {
     color: ${props => props.colors.textSecondary};
     font-size: 14px;
+    
+    @media (max-width: 480px) {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px;
   }
 `;
 
@@ -789,6 +944,17 @@ const VariablesGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
   margin: 20px 0;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 16px 0;
+  }
 `;
 
 const VariableGroup = styled.div`
@@ -797,6 +963,10 @@ const VariableGroup = styled.div`
   padding: 16px;
   border: 1px solid ${props => props.colors.borderLight};
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `;
 
 const VariableGroupTitle = styled.h5`
@@ -807,6 +977,11 @@ const VariableGroupTitle = styled.h5`
   border-bottom: 1px solid ${props => props.colors.borderLight};
   padding-bottom: 4px;
   transition: color 0.3s ease;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
 `;
 
 const VariableList = styled.ul`
@@ -825,11 +1000,17 @@ const VariableItem = styled.li`
   font-size: 13px;
   color: ${props => props.colors.primaryDark};
   transition: all 0.3s ease;
+  word-break: break-all;
   
   &:hover {
     background-color: ${props => props.colors.primary};
     color: white;
     transform: translateX(4px);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 11px;
+    padding: 6px 8px;
   }
 `;
 
@@ -848,10 +1029,27 @@ const ScrollToTopButton = styled.button`
   transition: all 0.3s ease;
   font-size: 18px;
   font-weight: bold;
+  z-index: 100;
   
   &:hover {
     transform: scale(1.1);
     background: ${props => props.colors.primaryDark};
+  }
+  
+  @media (max-width: 768px) {
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    bottom: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
 `;
 

@@ -220,7 +220,9 @@ const Beneficiaires = () => {
     >
       {exportLoading ? 'Export en cours...' : (
         <>
-          <FaFileExcel /> Exporter Excel
+          <FaFileExcel />
+          <span className="export-text-long">Exporter Excel</span>
+          <span className="export-text-short">Exporter</span>
         </>
       )}
     </ExportButton>
@@ -489,6 +491,18 @@ const HeaderContainer = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  // Responsive design pour mobile
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+    gap: 12px;
+  }
 `;
 
 const TitleArea = styled.div`
@@ -544,6 +558,11 @@ const StatPill = styled.span`
 const ExportButtonContainer = styled.div`
   display: flex;
   align-items: flex-start;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    align-items: stretch;
+  }
 `;
 
 const FiltersContainer = styled.div`
@@ -750,6 +769,7 @@ const ExportButton = styled.button`
   gap: 8px;
   transition: all 0.3s ease;
   box-shadow: ${props => props.colors.shadow};
+  white-space: nowrap;
   
   &:hover {
     background-color: ${props => props.colors.success}dd;
@@ -767,6 +787,43 @@ const ExportButton = styled.button`
   
   svg {
     font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  // Styles responsive pour mobile
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 6px;
+    
+    // Masquer le texte "Excel" sur très petits écrans
+    .export-text-long {
+      display: none;
+    }
+    
+    .export-text-short {
+      display: inline;
+    }
+    
+    svg {
+      font-size: 14px;
+    }
+  }
+  
+  @media (min-width: 481px) {
+    .export-text-long {
+      display: inline;
+    }
+    
+    .export-text-short {
+      display: none;
+    }
   }
 `;
 

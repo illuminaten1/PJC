@@ -197,7 +197,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
           {showTable ? 'Masquer le détail' : 'Afficher le détail'}
         </TableToggle>
         
-        {showTable && (
+        {(showTable || window.innerWidth >= 768) && (
           <>
             <TableContainer>
               <DetailTable className="budget-detail-table" colors={colors}>
@@ -392,7 +392,6 @@ const TableToggle = styled.button`
   }
   
   @media (min-width: 768px) {
-    width: auto;
     display: none;
   }
 `;

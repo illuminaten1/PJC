@@ -101,7 +101,7 @@ const DataTable = ({
                     className="clickable-row"
                   >
                     {row.cells.map(cell => (
-                      <td {...cell.getCellProps()}>
+                      <td {...cell.getCellProps()} data-label={cell.column.Header}>
                         {cell.render('Cell')}
                       </td>
                     ))}
@@ -176,6 +176,7 @@ const SearchInput = styled.input`
 const TableWrapper = styled.div`
   overflow-x: auto;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 `;
 
 const StyledTable = styled.table`
@@ -212,6 +213,75 @@ const StyledTable = styled.table`
       cursor: pointer;
     }
   }
+
+  /* Responsive: Mobile Card Layout */
+  @media (max-width: 768px) {
+    display: block;
+    
+    thead {
+      display: none;
+    }
+    
+    tbody {
+      display: block;
+    }
+    
+    tr {
+      display: block;
+      margin-bottom: 16px;
+      background: ${props => props.colors.surface};
+      border: 1px solid ${props => props.colors.border};
+      border-radius: 8px;
+      padding: 16px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: ${props => props.colors.surfaceHover};
+        transform: translateY(-2px);
+        box-shadow: ${props => props.colors.shadow};
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      border: none;
+      padding: 8px 0;
+      border-bottom: 1px solid ${props => props.colors.borderLight};
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: ${props => props.colors.textSecondary};
+        flex: 0 0 40%;
+        margin-right: 16px;
+      }
+      
+      /* Contenu de la cellule */
+      > * {
+        flex: 1;
+        text-align: right;
+      }
+    }
+  }
+
+  /* Responsive: Tablet */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    th, td {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+  }
 `;
 
 const EmptyMessage = styled.td`
@@ -219,6 +289,12 @@ const EmptyMessage = styled.td`
   padding: 40px !important;
   color: ${props => props.colors.textMuted};
   transition: color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    &:before {
+      display: none;
+    }
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -245,6 +321,11 @@ const ResultCount = styled.div`
   font-size: 14px;
   color: ${props => props.colors.textSecondary};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    padding: 16px;
+  }
 `;
 
 export default DataTable;

@@ -27,6 +27,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
   const [statistiques, setStatistiques] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showTable, setShowTable] = useState(false);
   const { darkMode, colors } = useTheme();
   
   useEffect(() => {
@@ -93,8 +94,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
             size: window.innerWidth < 768 ? 12 : 14
           },
           padding: window.innerWidth < 768 ? 10 : 20,
-          usePointStyle: true,
-          pointStyle: 'circle'
+          boxWidth: window.innerWidth < 768 ? 15 : 20
         }
       },
       title: {
@@ -115,11 +115,10 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
             size: window.innerWidth < 768 ? 10 : 12
           },
           maxRotation: window.innerWidth < 768 ? 45 : 0,
-          minRotation: 0
+          minRotation: window.innerWidth < 768 ? 45 : 0
         },
         grid: {
-          color: darkMode ? '#495057' : colors.border,
-          display: window.innerWidth >= 768
+          color: darkMode ? '#495057' : colors.border
         }
       },
       y: {
@@ -131,11 +130,7 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
           },
           callback: function(value) {
             if (window.innerWidth < 768) {
-              return value >= 1000000 
-                ? (value / 1000000).toFixed(1) + 'M€'
-                : value >= 1000 
-                  ? (value / 1000).toFixed(0) + 'k€'
-                  : value.toLocaleString('fr-FR') + '€';
+              return value > 1000 ? (value / 1000) + 'k€' : value + '€';
             }
             return value.toLocaleString('fr-FR') + ' €';
           }
@@ -143,15 +138,6 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
         grid: {
           color: darkMode ? '#495057' : colors.border
         }
-      }
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index'
-    },
-    elements: {
-      bar: {
-        borderRadius: window.innerWidth < 768 ? 2 : 4
       }
     }
   };
@@ -169,104 +155,88 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
           <SummaryCard colors={colors}>
             <SummaryLabel colors={colors}>Total engagé</SummaryLabel>
             <SummaryValue colors={colors}>
-              <ValueMain>{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</ValueMain>
-              <ValueSub>HT</ValueSub>
+              <MobileValue>
+                {statistiques.totaux.montantGage > 1000000 
+                  ? `${(statistiques.totaux.montantGage / 1000000).toFixed(1)} M€`
+                  : `${(statistiques.totaux.montantGage / 1000).toFixed(0)} k€`
+                }
+              </MobileValue>
+              <DesktopValue>
+                {statistiques.totaux.montantGage.toLocaleString('fr-FR')} € HT
+              </DesktopValue>
             </SummaryValue>
           </SummaryCard>
           
           <SummaryCard colors={colors}>
             <SummaryLabel colors={colors}>Total payé</SummaryLabel>
             <SummaryValue colors={colors}>
-              <ValueMain>{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</ValueMain>
-              <ValueSub>TTC</ValueSub>
+              <MobileValue>
+                {statistiques.totaux.montantPaye > 1000000 
+                  ? `${(statistiques.totaux.montantPaye / 1000000).toFixed(1)} M€`
+                  : `${(statistiques.totaux.montantPaye / 1000).toFixed(0)} k€`
+                }
+              </MobileValue>
+              <DesktopValue>
+                {statistiques.totaux.montantPaye.toLocaleString('fr-FR')} € TTC
+              </DesktopValue>
             </SummaryValue>
           </SummaryCard>
           
           <SummaryCard colors={colors}>
             <SummaryLabel colors={colors}>Ratio payé/engagé</SummaryLabel>
-            <SummaryValue colors={colors}>
-              <ValueMain>{statistiques.totaux.ratio.toFixed(2)}</ValueMain>
-              <ValueSub>%</ValueSub>
-            </SummaryValue>
+            <SummaryValue colors={colors}>{statistiques.totaux.ratio.toFixed(2)} %</SummaryValue>
           </SummaryCard>
         </SummaryGrid>
       </SummaryContainer>
       
-      <TableContainer>
-        <TableWrapper>
-          <DetailTable className="budget-detail-table" colors={colors}>
-            <thead>
-              <tr>
-                <TableHeader colors={colors}>Mois</TableHeader>
-                <TableHeader colors={colors}>
-                  <span className="full-text">Montant engagé HT</span>
-                  <span className="short-text">Engagé HT</span>
-                </TableHeader>
-                <TableHeader colors={colors}>
-                  <span className="full-text">Nombre de conventions</span>
-                  <span className="short-text">Conv.</span>
-                </TableHeader>
-                <TableHeader colors={colors}>
-                  <span className="full-text">Montant payé TTC</span>
-                  <span className="short-text">Payé TTC</span>
-                </TableHeader>
-                <TableHeader colors={colors}>
-                  <span className="full-text">Nombre de paiements</span>
-                  <span className="short-text">Paiem.</span>
-                </TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {statistiques.parMois.map((mois, index) => (
-                <TableRow key={index} colors={colors}>
-                  <TableCell colors={colors} className="month-cell">
-                    <span className="full-month">{mois.nomMois}</span>
-                    <span className="short-month">{mois.nomMois.substring(0, 3)}</span>
-                  </TableCell>
-                  <TableCell colors={colors} className="amount-cell">
-                    <AmountWrapper>
-                      <span className="amount">{mois.gage.montant.toLocaleString('fr-FR')} €</span>
-                      <span className="currency">HT</span>
-                    </AmountWrapper>
-                  </TableCell>
-                  <TableCell colors={colors} className="number-cell">{mois.gage.nombre}</TableCell>
-                  <TableCell colors={colors} className="amount-cell">
-                    <AmountWrapper>
-                      <span className="amount">{mois.paye.montant.toLocaleString('fr-FR')} €</span>
-                      <span className="currency">TTC</span>
-                    </AmountWrapper>
-                  </TableCell>
-                  <TableCell colors={colors} className="number-cell">{mois.paye.nombre}</TableCell>
-                </TableRow>
-              ))}
-              <TableRow className="total-row" colors={colors}>
-                <TableCell colors={colors} className="month-cell total-cell">Total</TableCell>
-                <TableCell colors={colors} className="amount-cell total-cell">
-                  <AmountWrapper>
-                    <span className="amount">{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</span>
-                  </AmountWrapper>
-                </TableCell>
-                <TableCell colors={colors} className="number-cell total-cell">
-                  {statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}
-                </TableCell>
-                <TableCell colors={colors} className="amount-cell total-cell">
-                  <AmountWrapper>
-                    <span className="amount">{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</span>
-                  </AmountWrapper>
-                </TableCell>
-                <TableCell colors={colors} className="number-cell total-cell">
-                  {statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}
-                </TableCell>
-              </TableRow>
-            </tbody>
-          </DetailTable>
-        </TableWrapper>
-      </TableContainer>
+      <TableSection>
+        <TableToggle 
+          onClick={() => setShowTable(!showTable)}
+          colors={colors}
+        >
+          {showTable ? 'Masquer le détail' : 'Afficher le détail'}
+        </TableToggle>
+        
+        {showTable && (
+          <>
+            <TableContainer>
+              <DetailTable className="budget-detail-table" colors={colors}>
+                <thead>
+                  <tr>
+                    <th>Mois</th>
+                    <th>Engagé HT</th>
+                    <th>Conv.</th>
+                    <th>Payé TTC</th>
+                    <th>Paiem.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statistiques.parMois.map((mois, index) => (
+                    <tr key={index}>
+                      <td data-label="Mois">{mois.nomMois}</td>
+                      <td data-label="Engagé HT">{mois.gage.montant.toLocaleString('fr-FR')} €</td>
+                      <td data-label="Conv.">{mois.gage.nombre}</td>
+                      <td data-label="Payé TTC">{mois.paye.montant.toLocaleString('fr-FR')} €</td>
+                      <td data-label="Paiem.">{mois.paye.nombre}</td>
+                    </tr>
+                  ))}
+                  <tr className="total-row">
+                    <td data-label="Mois">Total</td>
+                    <td data-label="Engagé HT">{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</td>
+                    <td data-label="Conv.">{statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}</td>
+                    <td data-label="Payé TTC">{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</td>
+                    <td data-label="Paiem.">{statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}</td>
+                  </tr>
+                </tbody>
+              </DetailTable>
+            </TableContainer>
+          </>
+        )}
+      </TableSection>
     </Container>
   );
 };
 
-// Styled Components avec responsive design amélioré
 const Container = styled.div`
   background-color: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.border};
@@ -279,66 +249,46 @@ const Container = styled.div`
   
   @media (min-width: 768px) {
     padding: 20px;
-    border-radius: 12px;
-  }
-  
-  @media (min-width: 1200px) {
-    padding: 24px;
+    border-radius: 4px;
   }
 `;
 
 const ChartContainer = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   height: 300px;
   width: 100%;
   background-color: ${props => props.colors.surface};
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px;
   transition: background-color 0.3s ease;
   
-  @media (min-width: 576px) {
-    height: 350px;
-    padding: 12px;
-  }
-  
   @media (min-width: 768px) {
     height: 400px;
-    padding: 16px;
-    margin-bottom: 24px;
-    border-radius: 8px;
+    padding: 10px;
+    border-radius: 4px;
   }
   
   @media (min-width: 1200px) {
     height: 450px;
-    padding: 20px;
   }
 `;
 
 const SummaryContainer = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   width: 100%;
-  
-  @media (min-width: 768px) {
-    margin-bottom: 24px;
-  }
 `;
 
 const SummaryTitle = styled.h3`
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
   text-align: center;
   
-  @media (min-width: 576px) {
-    font-size: 17px;
-    text-align: left;
-  }
-  
   @media (min-width: 768px) {
     font-size: 18px;
-    margin-bottom: 16px;
+    text-align: left;
   }
 `;
 
@@ -347,9 +297,8 @@ const SummaryGrid = styled.div`
   grid-template-columns: 1fr;
   gap: 12px;
   
-  @media (min-width: 576px) {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
   }
   
   @media (min-width: 768px) {
@@ -358,300 +307,195 @@ const SummaryGrid = styled.div`
   }
   
   @media (min-width: 1200px) {
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 `;
 
 const SummaryCard = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border: 1px solid ${props => props.colors.border};
-  border-radius: 6px;
-  padding: 16px 12px;
+  border-radius: 8px;
+  padding: 12px;
   text-align: center;
   transition: all 0.3s ease;
   
-  &:hover {
-    box-shadow: ${props => props.colors.shadow};
-    transform: translateY(-2px);
-  }
-  
-  @media (min-width: 576px) {
-    padding: 16px;
-  }
-  
   @media (min-width: 768px) {
-    border-radius: 8px;
-    padding: 18px 16px;
-  }
-  
-  @media (min-width: 1200px) {
-    padding: 20px 18px;
+    padding: 16px;
+    border-radius: 4px;
+    
+    &:hover {
+      box-shadow: ${props => props.colors.shadow};
+      transform: translateY(-2px);
+    }
   }
 `;
 
 const SummaryLabel = styled.div`
-  font-size: 13px;
+  font-size: 12px;
   color: ${props => props.colors.textSecondary};
   margin-bottom: 8px;
   transition: color 0.3s ease;
-  font-weight: 500;
-  
-  @media (min-width: 576px) {
-    font-size: 14px;
-  }
   
   @media (min-width: 768px) {
-    margin-bottom: 10px;
+    font-size: 14px;
   }
 `;
 
 const SummaryValue = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px;
+  font-size: 18px;
+  font-weight: 500;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
-`;
-
-const ValueMain = styled.span`
-  font-size: 20px;
-  font-weight: 600;
-  
-  @media (min-width: 576px) {
-    font-size: 22px;
-  }
   
   @media (min-width: 768px) {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   @media (min-width: 1200px) {
-    font-size: 26px;
+    font-size: 24px;
   }
 `;
 
-const ValueSub = styled.span`
-  font-size: 12px;
-  font-weight: 500;
-  color: ${props => props.colors.textSecondary};
-  opacity: 0.8;
+const MobileValue = styled.span`
+  @media (min-width: 768px) {
+    display: none;
+  }
+`;
+
+const DesktopValue = styled.span`
+  display: none;
   
-  @media (min-width: 576px) {
-    font-size: 13px;
+  @media (min-width: 768px) {
+    display: inline;
+  }
+`;
+
+const TableSection = styled.div`
+  width: 100%;
+`;
+
+const TableToggle = styled.button`
+  background-color: ${props => props.colors.primary};
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  width: 100%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.colors.primaryDark};
+    transform: translateY(-1px);
   }
   
   @media (min-width: 768px) {
-    font-size: 14px;
+    width: auto;
+    display: none;
   }
 `;
 
 const TableContainer = styled.div`
-  width: 100%;
-  overflow: hidden;
-  border-radius: 6px;
-  border: 1px solid ${props => props.colors.border};
-  
-  @media (min-width: 768px) {
-    border-radius: 8px;
-  }
-`;
-
-const TableWrapper = styled.div`
-  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
   
-  /* Style de la scrollbar sur mobile */
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: ${props => props.colors?.surfaceHover || '#f1f1f1'};
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.colors?.textSecondary || '#888'};
-    border-radius: 2px;
-  }
-  
-  &::-webkit-scrollbar-thumb:hover {
-    background: ${props => props.colors?.textPrimary || '#555'};
+  @media (min-width: 768px) {
+    border-radius: 4px;
   }
 `;
 
 const DetailTable = styled.table`
   width: 100%;
-  min-width: 600px;
   border-collapse: collapse;
-  font-size: 13px;
-  background-color: ${props => props.colors.surface};
-  
-  @media (min-width: 576px) {
-    min-width: 650px;
-    font-size: 14px;
-  }
-  
-  @media (min-width: 768px) {
-    min-width: 100%;
-  }
-`;
-
-const TableHeader = styled.th`
-  padding: 12px 8px;
-  text-align: left;
-  border-bottom: 2px solid ${props => props.colors.border};
-  color: ${props => props.colors.textPrimary};
-  background-color: ${props => props.colors.surfaceHover};
-  font-weight: 600;
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  transition: all 0.3s ease;
-  
-  .full-text {
-    display: none;
-  }
-  
-  .short-text {
-    display: inline;
-  }
-  
-  @media (min-width: 576px) {
-    padding: 14px 10px;
-    font-size: 13px;
-  }
+  min-width: 600px;
   
   @media (min-width: 768px) {
-    padding: 16px 12px;
+    font-size: 14px;
+    min-width: auto;
+  }
+  
+  th, td {
+    padding: 8px 6px;
+    text-align: left;
+    border-bottom: 1px solid ${props => props.colors.border};
+    color: ${props => props.colors.textPrimary};
+    transition: all 0.3s ease;
     
-    .full-text {
-      display: inline;
-    }
-    
-    .short-text {
-      display: none;
+    @media (min-width: 768px) {
+      padding: 10px 12px;
     }
   }
   
-  @media (min-width: 1200px) {
-    padding: 18px 16px;
-  }
-`;
-
-const TableRow = styled.tr`
-  transition: all 0.2s ease;
-  
-  &:nth-child(even) {
-    background-color: ${props => props.colors.surfaceHover}30;
-  }
-  
-  &:hover {
+  th {
     background-color: ${props => props.colors.surfaceHover};
-  }
-  
-  &.total-row {
-    background-color: ${props => props.colors.surfaceHover} !important;
-    font-weight: 600;
-    border-top: 2px solid ${props => props.colors.border};
-    
-    &:hover {
-      background-color: ${props => props.colors.surfaceHover} !important;
-    }
-  }
-`;
-
-const TableCell = styled.td`
-  padding: 10px 8px;
-  border-bottom: 1px solid ${props => props.colors.border};
-  color: ${props => props.colors.textPrimary};
-  transition: all 0.3s ease;
-  vertical-align: middle;
-  
-  &.month-cell {
     font-weight: 500;
-    white-space: nowrap;
-    
-    .full-month {
+    color: ${props => props.colors.textPrimary};
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  
+  @media (max-width: 767px) {
+    thead {
       display: none;
     }
     
-    .short-month {
-      display: inline;
+    tbody tr {
+      display: block;
+      margin-bottom: 16px;
+      background-color: ${props => props.colors.surface};
+      border-radius: 8px;
+      border: 1px solid ${props => props.colors.border};
+      padding: 12px;
     }
-  }
-  
-  &.amount-cell {
-    text-align: right;
-    white-space: nowrap;
-  }
-  
-  &.number-cell {
-    text-align: center;
-    font-weight: 500;
-  }
-  
-  &.total-cell {
-    font-weight: 600;
-    border-top: 2px solid ${props => props.colors.border};
-  }
-  
-  @media (min-width: 576px) {
-    padding: 12px 10px;
     
-    &.month-cell {
-      .full-month {
-        display: inline;
+    tbody td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border: none;
+      border-bottom: 1px solid ${props => props.colors.borderLight};
+      
+      &:last-child {
+        border-bottom: none;
       }
       
-      .short-month {
-        display: none;
+      &:before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: ${props => props.colors.textSecondary};
+        flex: 0 0 40%;
+      }
+    }
+    
+    .total-row {
+      background-color: ${props => props.colors.surfaceHover} !important;
+      border: 2px solid ${props => props.colors.primary} !important;
+      
+      td:before {
+        color: ${props => props.colors.primary};
+        font-weight: 600;
+      }
+      
+      td {
+        font-weight: 600;
       }
     }
   }
   
   @media (min-width: 768px) {
-    padding: 14px 12px;
-  }
-  
-  @media (min-width: 1200px) {
-    padding: 16px 16px;
-  }
-`;
-
-const AmountWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  
-  .amount {
-    font-weight: 500;
-    line-height: 1.2;
-  }
-  
-  .currency {
-    font-size: 10px;
-    color: ${props => props.colors.textSecondary};
-    font-weight: 400;
-    opacity: 0.8;
-  }
-  
-  @media (min-width: 576px) {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
-    
-    .currency {
-      font-size: 11px;
+    tr:hover {
+      background-color: ${props => props.colors.surfaceHover};
     }
-  }
-  
-  @media (min-width: 768px) {
-    .currency {
-      font-size: 12px;
+    
+    .total-row {
+      font-weight: 500;
+      background-color: ${props => props.colors.surfaceHover};
     }
   }
 `;
@@ -664,11 +508,9 @@ const Loading = styled.div`
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
   transition: all 0.3s ease;
-  font-size: 14px;
   
   @media (min-width: 768px) {
-    padding: 30px;
-    font-size: 16px;
+    border-radius: 4px;
   }
 `;
 
@@ -680,11 +522,9 @@ const Error = styled.div`
   border: 1px solid ${props => props.colors.error};
   border-radius: 8px;
   transition: all 0.3s ease;
-  font-size: 14px;
   
   @media (min-width: 768px) {
-    padding: 30px;
-    font-size: 16px;
+    border-radius: 4px;
   }
 `;
 
@@ -695,11 +535,9 @@ const Empty = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border-radius: 8px;
   transition: all 0.3s ease;
-  font-size: 14px;
   
   @media (min-width: 768px) {
-    padding: 30px;
-    font-size: 16px;
+    border-radius: 4px;
   }
 `;
 

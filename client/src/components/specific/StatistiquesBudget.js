@@ -213,18 +213,18 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
                 <tbody>
                   {statistiques.parMois.map((mois, index) => (
                     <tr key={index}>
-                      <td data-label="Mois">{mois.nomMois}</td>
-                      <td data-label="Engagé HT">{mois.gage.montant.toLocaleString('fr-FR')} €</td>
+                      <td data-label="Mois">{mois.nomMois.substring(0, 3)}</td>
+                      <td data-label="Engagé">{mois.gage.montant > 1000 ? `${(mois.gage.montant/1000).toFixed(0)}k€` : `${mois.gage.montant}€`}</td>
                       <td data-label="Conv.">{mois.gage.nombre}</td>
-                      <td data-label="Payé TTC">{mois.paye.montant.toLocaleString('fr-FR')} €</td>
+                      <td data-label="Payé">{mois.paye.montant > 1000 ? `${(mois.paye.montant/1000).toFixed(0)}k€` : `${mois.paye.montant}€`}</td>
                       <td data-label="Paiem.">{mois.paye.nombre}</td>
                     </tr>
                   ))}
                   <tr className="total-row">
                     <td data-label="Mois">Total</td>
-                    <td data-label="Engagé HT">{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</td>
+                    <td data-label="Engagé">{statistiques.totaux.montantGage > 1000000 ? `${(statistiques.totaux.montantGage/1000000).toFixed(1)}M€` : `${(statistiques.totaux.montantGage/1000).toFixed(0)}k€`}</td>
                     <td data-label="Conv.">{statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}</td>
-                    <td data-label="Payé TTC">{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</td>
+                    <td data-label="Payé">{statistiques.totaux.montantPaye > 1000000 ? `${(statistiques.totaux.montantPaye/1000000).toFixed(1)}M€` : `${(statistiques.totaux.montantPaye/1000).toFixed(0)}k€`}</td>
                     <td data-label="Paiem.">{statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}</td>
                   </tr>
                 </tbody>
@@ -446,31 +446,50 @@ const DetailTable = styled.table`
     
     tbody tr {
       display: block;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       background-color: ${props => props.colors.surface};
       border-radius: 8px;
       border: 1px solid ${props => props.colors.border};
-      padding: 12px;
+      padding: 8px;
+      box-sizing: border-box;
+      width: 100%;
     }
     
     tbody td {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
+      padding: 3px 0;
       border: none;
       border-bottom: 1px solid ${props => props.colors.borderLight};
+      font-size: 12px;
+      line-height: 1.2;
+      width: 100%;
+      box-sizing: border-box;
       
       &:last-child {
         border-bottom: none;
+        padding-bottom: 0;
       }
       
       &:before {
         content: attr(data-label);
         font-weight: 500;
         color: ${props => props.colors.textSecondary};
-        flex: 0 0 40%;
+        flex: 0 0 30%;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
       }
+      
+      /* Le contenu de la cellule */
+      flex: 1;
+      text-align: right;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-left: 4px;
     }
     
     .total-row {

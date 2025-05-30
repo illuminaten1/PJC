@@ -63,6 +63,14 @@ const MainLayout = () => {
           </HeaderLeft>
           
           <UserSection>
+            <ThemeToggle 
+              onClick={toggleDarkMode}
+              colors={colors}
+              title={darkMode ? 'Mode clair' : 'Mode sombre'}
+            >
+              {darkMode ? '☀' : '●'}
+            </ThemeToggle>
+            
             <UserInfo colors={colors}>
               <UserIcon colors={colors}>
                 <FaUser />
@@ -82,14 +90,6 @@ const MainLayout = () => {
         </HeaderContent>
         
         <Nav colors={colors}>
-          <ThemeToggle 
-            onClick={toggleDarkMode}
-            colors={colors}
-            title={darkMode ? 'Mode clair' : 'Mode sombre'}
-          >
-            {darkMode ? '☀' : '●'}
-          </ThemeToggle>
-          
           {/* Navigation Desktop */}
           <DesktopNav>
             <NavList>
@@ -381,6 +381,38 @@ const UserSection = styled.div`
   }
 `;
 
+const ThemeToggle = styled.button`
+  background: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  color: ${props => props.colors.textPrimary};
+  box-shadow: ${props => props.colors.shadow};
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: ${props => props.colors.shadowHover};
+    border-color: ${props => props.colors.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+`;
+
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
@@ -465,44 +497,6 @@ const Nav = styled.nav`
   border-top: 1px solid ${props => props.colors.borderLight};
   transition: all 0.3s ease;
   position: relative;
-`;
-
-const ThemeToggle = styled.button`
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
-  background: ${props => props.colors.surface};
-  border: 1px solid ${props => props.colors.border};
-  border-radius: 4px;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  color: ${props => props.colors.textPrimary};
-  box-shadow: ${props => props.colors.shadow};
-  z-index: 100;
-
-  &:hover {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: ${props => props.colors.shadowHover};
-    border-color: ${props => props.colors.primary};
-  }
-
-  &:active {
-    transform: translateY(-50%) scale(0.95);
-  }
-
-  @media (max-width: 768px) {
-    right: 12px;
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
 `;
 
 // Navigation Desktop

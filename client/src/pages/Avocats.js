@@ -435,10 +435,16 @@ const Avocats = () => {
                     onClick={() => handleOpenDetailModal(avocat)}
                     className="clickable-row"
                   >
-                    <Td colors={colors}><HighlightedText text={avocat.nom} searchTerm={searchTerm} /></Td>
-                    <Td colors={colors}><HighlightedText text={avocat.prenom} searchTerm={searchTerm} /></Td>
-                    <Td colors={colors}><HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} /></Td>
-                    <Td colors={colors}>
+                    <Td colors={colors} data-label="Nom">
+                      <HighlightedText text={avocat.nom} searchTerm={searchTerm} />
+                    </Td>
+                    <Td colors={colors} data-label="Prénom">
+                      <HighlightedText text={avocat.prenom} searchTerm={searchTerm} />
+                    </Td>
+                    <Td colors={colors} data-label="Cabinet">
+                      <HighlightedText text={avocat.cabinet || '-'} searchTerm={searchTerm} />
+                    </Td>
+                    <Td colors={colors} data-label="Région">
                       {avocat.region ? (
                         <RegionBadge colors={colors}>
                           {avocat.region}
@@ -447,7 +453,7 @@ const Avocats = () => {
                         '-'
                       )}
                     </Td>
-                    <Td colors={colors}>
+                    <Td colors={colors} data-label="Villes d'intervention">
                       {avocat.villesIntervention && avocat.villesIntervention.length > 0 ? (
                         <VillesContainer>
                           {avocat.villesIntervention.slice(0, 2).map((ville, index) => (
@@ -475,12 +481,12 @@ const Avocats = () => {
                         </VillesContainer>
                       ) : '-'}
                     </Td>
-                    <Td colors={colors}>
+                    <Td colors={colors} data-label="Spécialisation">
                       {avocat.specialisationRPC && (
                         <RPCTag colors={colors}>RPC</RPCTag>
                       )}
                     </Td>
-                    <TdActions onClick={(e) => e.stopPropagation()} colors={colors}>
+                    <TdActions onClick={(e) => e.stopPropagation()} colors={colors} data-label="Actions">
                       <ActionButton title="Voir le détail" onClick={(e) => {
                         e.stopPropagation();
                         handleOpenDetailModal(avocat);
@@ -573,12 +579,16 @@ const Avocats = () => {
   );
 };
 
-// Styled Components avec thématisation complète
+// Styled Components avec thématisation complète et responsive
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
   min-height: 100vh;
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 
 const ControlsPanel = styled.div`
@@ -598,6 +608,8 @@ const ControlsPanel = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    padding: 12px;
+    margin-bottom: 16px;
   }
 `;
 
@@ -610,6 +622,7 @@ const SearchFilterContainer = styled.div`
   
   @media (max-width: 768px) {
     flex-direction: column;
+    max-width: 100%;
   }
 `;
 
@@ -633,6 +646,7 @@ const SearchIcon = styled.div`
   transform: translateY(-50%);
   color: ${props => props.colors.textSecondary};
   transition: color 0.3s ease;
+  z-index: 1;
 `;
 
 const SearchInput = styled.input`
@@ -663,6 +677,11 @@ const ResultCount = styled.div`
   color: ${props => props.colors.textSecondary};
   font-weight: 500;
   transition: color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    text-align: center;
+    margin-top: 8px;
+  }
 `;
 
 const FilterToggle = styled.button`
@@ -687,6 +706,11 @@ const FilterToggle = styled.button`
   svg {
     color: ${props => props.colors.primary};
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 const FiltersPanel = styled.div`
@@ -705,6 +729,9 @@ const FiltersPanel = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    padding: 16px;
+    margin-bottom: 16px;
+    gap: 12px;
   }
 `;
 
@@ -714,6 +741,7 @@ const FilterGroup = styled.div`
   
   @media (max-width: 768px) {
     width: 100%;
+    min-width: auto;
   }
 `;
 
@@ -800,6 +828,10 @@ const ResetButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadow};
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const TableContainer = styled.div`
@@ -809,6 +841,10 @@ const TableContainer = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    overflow-x: visible;
+  }
 `;
 
 const Table = styled.table`
@@ -816,6 +852,102 @@ const Table = styled.table`
   border-collapse: collapse;
   min-width: 600px;
   background-color: ${props => props.colors.surface};
+  
+  /* Responsive: Mobile Card Layout */
+  @media (max-width: 768px) {
+    display: block;
+    min-width: auto;
+    
+    thead {
+      display: none;
+    }
+    
+    tbody {
+      display: block;
+      background: ${props => props.colors.surfaceHover}20;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    
+    tr {
+      display: block;
+      margin-bottom: 20px;
+      background: ${props => props.colors.surface};
+      border: 2px solid ${props => props.colors.border};
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      
+      /* Ligne de séparation décorative en haut */
+      &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20px;
+        right: 20px;
+        height: 3px;
+        background: linear-gradient(90deg, ${props => props.colors.primary}, ${props => props.colors.primary}80);
+        border-radius: 0 0 2px 2px;
+      }
+      
+      &:hover {
+        background-color: ${props => props.colors.surfaceHover};
+        transform: translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        border-color: ${props => props.colors.primary}40;
+        cursor: pointer;
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      &.clickable-row {
+        cursor: pointer;
+      }
+    }
+    
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      text-align: left;
+      border: none;
+      padding: 8px 0;
+      border-bottom: 1px solid ${props => props.colors.borderLight};
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: ${props => props.colors.textSecondary};
+        flex: 0 0 40%;
+        margin-right: 16px;
+        font-size: 13px;
+      }
+      
+      /* Contenu de la cellule */
+      > * {
+        flex: 1;
+        text-align: right;
+      }
+    }
+  }
+
+  /* Responsive: Tablet */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    min-width: 100%;
+    
+    th, td {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+  }
 `;
 
 const TableHead = styled.thead`
@@ -836,6 +968,11 @@ const Th = styled.th`
     background-color: ${props => props.colors.primary}10;
     color: ${props => props.colors.primary};
   }
+  
+  @media (max-width: 1024px) {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
 `;
 
 const ThActions = styled.th`
@@ -845,6 +982,11 @@ const ThActions = styled.th`
   color: ${props => props.colors.textPrimary};
   width: 120px;
   transition: color 0.3s ease;
+  
+  @media (max-width: 1024px) {
+    padding: 10px 12px;
+    width: 100px;
+  }
 `;
 
 const ThContent = styled.div`
@@ -889,6 +1031,11 @@ const Td = styled.td`
     border-radius: 2px;
     font-weight: 500;
   }
+  
+  @media (max-width: 1024px) and (min-width: 769px) {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
 `;
 
 const TdActions = styled.td`
@@ -897,6 +1044,20 @@ const TdActions = styled.td`
   display: flex;
   justify-content: center;
   gap: 8px;
+  
+  @media (max-width: 768px) {
+    justify-content: flex-end;
+    gap: 12px;
+    
+    &:before {
+      flex: 0 0 40% !important;
+    }
+  }
+  
+  @media (max-width: 1024px) and (min-width: 769px) {
+    padding: 8px 12px;
+    gap: 6px;
+  }
 `;
 
 const RegionBadge = styled.span`
@@ -909,6 +1070,11 @@ const RegionBadge = styled.span`
   font-weight: 500;
   border: 1px solid #bbdefb;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
 `;
 
 const RPCTag = styled.span`
@@ -920,6 +1086,11 @@ const RPCTag = styled.span`
   font-size: 12px;
   font-weight: bold;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -947,6 +1118,16 @@ const ActionButton = styled.button`
       background-color: ${props => props.colors.errorBg};
     }
   }
+  
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 18px;
+    border-radius: 6px;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
 `;
 
 const AddButton = styled.button`
@@ -970,6 +1151,13 @@ const AddButton = styled.button`
     background-color: ${props => props.colors.primaryDark};
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    margin-top: 12px;
   }
 `;
 
@@ -1033,6 +1221,10 @@ const Loading = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+  }
 `;
 
 const Error = styled.div`
@@ -1044,6 +1236,10 @@ const Error = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 const EmptyMessage = styled.div`
@@ -1053,12 +1249,25 @@ const EmptyMessage = styled.div`
   background-color: ${props => props.colors.surface};
   font-style: italic;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+    
+    &:before {
+      display: none !important;
+    }
+  }
 `;
 
 const VillesContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  
+  @media (max-width: 768px) {
+    justify-content: flex-end;
+    gap: 3px;
+  }
 `;
 
 const VilleTag = styled.span`
@@ -1099,6 +1308,12 @@ const VilleTag = styled.span`
     padding: 0 2px;
     border-radius: 2px;
     font-weight: 500;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
   }
 `;
 

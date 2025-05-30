@@ -224,21 +224,39 @@ const StyledTable = styled.table`
     
     tbody {
       display: block;
+      background: ${props => props.colors.surfaceHover}20;
+      padding: 16px;
+      border-radius: 8px;
     }
     
     tr {
       display: block;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       background: ${props => props.colors.surface};
-      border: 1px solid ${props => props.colors.border};
-      border-radius: 8px;
-      padding: 16px;
+      border: 2px solid ${props => props.colors.border};
+      border-radius: 12px;
+      padding: 20px;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      
+      /* Ligne de séparation décorative en haut */
+      &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20px;
+        right: 20px;
+        height: 3px;
+        background: linear-gradient(90deg, ${props => props.colors.primary}, ${props => props.colors.primary}80);
+        border-radius: 0 0 2px 2px;
+      }
       
       &:hover {
         background-color: ${props => props.colors.surfaceHover};
-        transform: translateY(-2px);
-        box-shadow: ${props => props.colors.shadow};
+        transform: translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        border-color: ${props => props.colors.primary}40;
       }
       
       &:last-child {

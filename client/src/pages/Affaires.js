@@ -195,7 +195,8 @@ const Affaires = () => {
         
         <ActionButton onClick={handleOpenModal} colors={colors}>
           <FaPlus />
-          <span>Nouvelle affaire</span>
+          <span className="action-text-long">Nouvelle affaire</span>
+          <span className="action-text-short">Nouvelle</span>
         </ActionButton>
       </HeaderContainer>
       
@@ -294,7 +295,20 @@ const HeaderContainer = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  // Responsive design pour mobile
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+    gap: 12px;
+  }
 `;
+
 
 const TitleArea = styled.div`
   flex: 1;
@@ -356,17 +370,57 @@ const ActionButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
   transition: all 0.3s ease;
   box-shadow: ${props => props.colors.shadow};
+  white-space: nowrap;
   
   svg {
-    margin-right: 8px;
+    flex-shrink: 0;
+    font-size: 16px;
   }
   
   &:hover {
     background-color: ${props => props.colors.primaryDark};
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
+  }
+  
+  // Styles responsive pour mobile
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 6px;
+    
+    // Masquer le mot "affaire" sur très petits écrans
+    .action-text-long {
+      display: none;
+    }
+    
+    .action-text-short {
+      display: inline;
+    }
+    
+    svg {
+      font-size: 14px;
+    }
+  }
+  
+  @media (min-width: 481px) {
+    .action-text-long {
+      display: inline;
+    }
+    
+    .action-text-short {
+      display: none;
+    }
   }
 `;
 

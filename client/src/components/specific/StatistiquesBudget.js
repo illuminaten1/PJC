@@ -213,18 +213,18 @@ const StatistiquesBudget = ({ annee = new Date().getFullYear() }) => {
                 <tbody>
                   {statistiques.parMois.map((mois, index) => (
                     <tr key={index}>
-                      <td data-label="Mois">{mois.nomMois.substring(0, 3)}</td>
-                      <td data-label="Engagé">{mois.gage.montant > 1000 ? `${(mois.gage.montant/1000).toFixed(0)}k€` : `${mois.gage.montant}€`}</td>
+                      <td data-label="Mois">{mois.nomMois}</td>
+                      <td data-label="Engagé HT">{mois.gage.montant.toLocaleString('fr-FR')} €</td>
                       <td data-label="Conv.">{mois.gage.nombre}</td>
-                      <td data-label="Payé">{mois.paye.montant > 1000 ? `${(mois.paye.montant/1000).toFixed(0)}k€` : `${mois.paye.montant}€`}</td>
+                      <td data-label="Payé TTC">{mois.paye.montant.toLocaleString('fr-FR')} €</td>
                       <td data-label="Paiem.">{mois.paye.nombre}</td>
                     </tr>
                   ))}
                   <tr className="total-row">
                     <td data-label="Mois">Total</td>
-                    <td data-label="Engagé">{statistiques.totaux.montantGage > 1000000 ? `${(statistiques.totaux.montantGage/1000000).toFixed(1)}M€` : `${(statistiques.totaux.montantGage/1000).toFixed(0)}k€`}</td>
+                    <td data-label="Engagé HT">{statistiques.totaux.montantGage.toLocaleString('fr-FR')} €</td>
                     <td data-label="Conv.">{statistiques.parMois.reduce((sum, mois) => sum + mois.gage.nombre, 0)}</td>
-                    <td data-label="Payé">{statistiques.totaux.montantPaye > 1000000 ? `${(statistiques.totaux.montantPaye/1000000).toFixed(1)}M€` : `${(statistiques.totaux.montantPaye/1000).toFixed(0)}k€`}</td>
+                    <td data-label="Payé TTC">{statistiques.totaux.montantPaye.toLocaleString('fr-FR')} €</td>
                     <td data-label="Paiem.">{statistiques.parMois.reduce((sum, mois) => sum + mois.paye.nombre, 0)}</td>
                   </tr>
                 </tbody>
@@ -419,7 +419,7 @@ const DetailTable = styled.table`
   }
   
   th, td {
-    padding: 8px 6px;
+    padding: 8px 4px;
     text-align: left;
     border-bottom: 1px solid ${props => props.colors.border};
     color: ${props => props.colors.textPrimary};
@@ -440,6 +440,8 @@ const DetailTable = styled.table`
   }
   
   @media (max-width: 767px) {
+    min-width: auto;
+    
     thead {
       display: none;
     }
@@ -448,48 +450,43 @@ const DetailTable = styled.table`
       display: block;
       margin-bottom: 12px;
       background-color: ${props => props.colors.surface};
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid ${props => props.colors.border};
-      padding: 8px;
+      padding: 10px;
       box-sizing: border-box;
       width: 100%;
+      overflow: hidden;
     }
     
     tbody td {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 3px 0;
+      display: block;
+      width: 100%;
+      padding: 4px 0;
       border: none;
       border-bottom: 1px solid ${props => props.colors.borderLight};
-      font-size: 12px;
-      line-height: 1.2;
-      width: 100%;
+      text-align: left;
+      position: relative;
+      padding-left: 35%;
       box-sizing: border-box;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
       
       &:last-child {
         border-bottom: none;
-        padding-bottom: 0;
       }
       
       &:before {
-        content: attr(data-label);
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 0;
+        top: 4px;
         font-weight: 500;
         color: ${props => props.colors.textSecondary};
-        flex: 0 0 30%;
         font-size: 11px;
+        width: 32%;
         text-transform: uppercase;
         letter-spacing: 0.3px;
       }
-      
-      /* Le contenu de la cellule */
-      flex: 1;
-      text-align: right;
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      padding-left: 4px;
     }
     
     .total-row {

@@ -249,11 +249,11 @@ const Militaires = () => {
           <ResetButton onClick={resetFilters} title="Réinitialiser les filtres" colors={colors}>
             Réinitialiser
           </ResetButton>
-        </FiltersGroup>
 
-        <ResultCount colors={colors}>
-          {militaires.length} militaire{militaires.length !== 1 ? 's' : ''} trouvé{militaires.length !== 1 ? 's' : ''}
-        </ResultCount>
+          <ResultCount colors={colors}>
+            {militaires.length} militaire{militaires.length !== 1 ? 's' : ''} trouvé{militaires.length !== 1 ? 's' : ''}
+          </ResultCount>
+        </FiltersGroup>
       </FiltersContainer>
       
       {loading ? (
@@ -272,7 +272,7 @@ const Militaires = () => {
   );
 };
 
-// Styled Components avec thématisation complète
+// Styled Components avec thématisation complète et responsivité améliorée
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
@@ -291,6 +291,18 @@ const HeaderContainer = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  // Responsive design pour mobile
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+    gap: 12px;
+  }
 `;
 
 const TitleArea = styled.div`
@@ -345,16 +357,20 @@ const StatPill = styled.span`
 
 const FiltersContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
-  align-items: center;
   padding: 16px;
   background-color: ${props => props.colors.surface};
   border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (min-width: 769px) {
+    flex-direction: row;
+    align-items: center;
+  }
 `;
 
 const FiltersGroup = styled.div`
@@ -362,6 +378,13 @@ const FiltersGroup = styled.div`
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 `;
 
 const FilterLabel = styled.div`
@@ -375,6 +398,11 @@ const FilterLabel = styled.div`
   svg {
     margin-right: 6px;
     color: ${props => props.colors.primary};
+  }
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    margin-bottom: 8px;
   }
 `;
 
@@ -402,6 +430,11 @@ const Select = styled.select`
     background-color: ${props => props.colors.surface};
     color: ${props => props.colors.textPrimary};
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: unset;
+  }
 `;
 
 const ResetButton = styled.button`
@@ -414,14 +447,33 @@ const ResetButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
   font-weight: 500;
   box-shadow: ${props => props.colors.shadow};
+  white-space: nowrap;
   
   &:hover {
     background-color: ${props => props.colors.error + 'dd'};
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 10px 12px;
+  }
+`;
+
+const ResultCount = styled.div`
+  font-size: 14px;
+  color: ${props => props.colors.textSecondary};
+  font-weight: 500;
+  transition: color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    text-align: center;
+    margin-top: 8px;
   }
 `;
 
@@ -483,13 +535,6 @@ const Error = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.error + '40'};
   transition: all 0.3s ease;
-`;
-
-const ResultCount = styled.div`
-  font-size: 14px;
-  color: ${props => props.colors.textSecondary};
-  font-weight: 500;
-  transition: color 0.3s ease;
 `;
 
 export default Militaires;

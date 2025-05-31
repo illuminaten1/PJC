@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
@@ -15,6 +15,29 @@ const MainLayout = () => {
   const { user, logout, isAdmin } = useContext(AuthContext);
   const { darkMode, toggleDarkMode, colors } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
+  
+  // Vérifier si l'utilisateur a déjà accepté les cookies
+  useEffect(() => {
+    const cookiesAccepted = localStorage.getItem('pjc_cookies_accepted');
+    if (!cookiesAccepted) {
+      setShowCookieBanner(true);
+    }
+  }, []);
+  
+  // Fonction pour accepter les cookies
+  const acceptCookies = () => {
+    localStorage.setItem('pjc_cookies_accepted', 'true');
+    localStorage.setItem('pjc_cookies_date', new Date().toISOString());
+    setShowCookieBanner(false);
+  };
+  
+  // Fonction pour refuser les cookies (optionnel)
+  const declineCookies = () => {
+    localStorage.setItem('pjc_cookies_accepted', 'false');
+    localStorage.setItem('pjc_cookies_date', new Date().toISOString());
+    setShowCookieBanner(false);
+  };
   
   const handleLogout = () => {
     logout();
@@ -46,6 +69,31 @@ const MainLayout = () => {
   
   return (
     <Container colors={colors}>
+      {/* Cookie Banner - s'affiche en overlay */}
+      {showCookieBanner && (
+        <CookieBannerOverlay colors={colors}>
+          <CookieBanner colors={colors}>
+            <CookieContent>
+              <CookieIcon>🍪</CookieIcon>
+              <CookieText colors={colors}>
+                <CookieTitle colors={colors}>Utilisation des cookies</CookieTitle>
+                <CookieDescription colors={colors}>
+                  Cette application utilise des cookies essentiels pour son fonctionnement.
+                </CookieDescription>
+              </CookieText>
+            </CookieContent>
+            <CookieActions>
+              <AcceptButton onClick={acceptCookies} colors={colors}>
+                Accepter
+              </AcceptButton>
+              <DeclineButton onClick={declineCookies} colors={colors}>
+                Refuser
+              </DeclineButton>
+            </CookieActions>
+          </CookieBanner>
+        </CookieBannerOverlay>
+      )}
+
       <Header colors={colors}>
         <HeaderContent>
           <HeaderLeft>
@@ -692,6 +740,125 @@ const Content = styled.main`
   
   @media (max-width: 480px) {
     padding: 0.5rem;
+  }
+`;
+
+// Styled Components pour le Cookie Banner
+const CookieBannerOverlay = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+`;
+
+const CookieBanner = styled.div`
+  background: ${props => props.colors.surface};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 8px;
+  box-shadow: ${props => props.colors.shadowHover};
+  padding: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+`;
+
+const CookieContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+`;
+
+const CookieIcon = styled.div`
+  font-size: 1.5rem;
+  flex-shrink: 0;
+`;
+
+const CookieText = styled.div`
+  flex: 1;
+`;
+
+const CookieTitle = styled.h4`
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${props => props.colors.textPrimary};
+`;
+
+const CookieDescription = styled.p`
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: ${props => props.colors.textMuted};
+`;
+
+const CookieActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
+`;
+
+const AcceptButton = styled.button`
+  background: ${props => props.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.colors.primaryHover || props.colors.primary};
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const DeclineButton = styled.button`
+  background: transparent;
+  color: ${props => props.colors.textMuted};
+  border: 1px solid ${props => props.colors.border};
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.colors.surfaceHover};
+    color: ${props => props.colors.textPrimary};
   }
 `;
 

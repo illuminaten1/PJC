@@ -110,9 +110,7 @@ const PaiementsTable = ({ paiements = [], beneficiaireId, onUpdate }) => {
   return (
     <TableContainer colors={colors}>
       {downloadError && <ErrorMessage colors={colors}>{downloadError}</ErrorMessage>}
-      
-      {/* Vue Desktop */}
-      <DesktopTable colors={colors}>
+      <Table colors={colors}>
         <thead>
           <tr>
             <th>Qualité du destinataire</th>
@@ -176,88 +174,7 @@ const PaiementsTable = ({ paiements = [], beneficiaireId, onUpdate }) => {
             </tr>
           ))}
         </tbody>
-      </DesktopTable>
-      
-      {/* Vue Mobile */}
-      <MobileView>
-        {paiements.map((paiement, index) => (
-          <MobileCard key={index} colors={colors}>
-            <CardHeader colors={colors}>
-              <CardTitle colors={colors}>
-                {paiement.identiteDestinataire || 'Non défini'}
-              </CardTitle>
-              <CardSubtitle colors={colors}>
-                {paiement.qualiteDestinataire || '-'}
-              </CardSubtitle>
-            </CardHeader>
-            
-            <CardBody colors={colors}>
-              <InfoRow colors={colors}>
-                <InfoLabel>Type :</InfoLabel>
-                <InfoValue>{paiement.type || '-'}</InfoValue>
-              </InfoRow>
-              
-              <InfoRow colors={colors}>
-                <InfoLabel>Montant :</InfoLabel>
-                <InfoValue className="amount">
-                  {paiement.montant ? paiement.montant.toLocaleString('fr-FR') + ' €' : '-'}
-                </InfoValue>
-              </InfoRow>
-              
-              <InfoRow colors={colors}>
-                <InfoLabel>Date :</InfoLabel>
-                <InfoValue>{formatDate(paiement.date)}</InfoValue>
-              </InfoRow>
-              
-              <InfoRow colors={colors}>
-                <InfoLabel>Référence :</InfoLabel>
-                <InfoValue>{paiement.referencePiece || '-'}</InfoValue>
-              </InfoRow>
-            </CardBody>
-            
-            <CardActions colors={colors}>
-              <MobileActionButton 
-                onClick={() => handleEditPaiement(paiement, index)} 
-                title="Modifier"
-                colors={colors}
-              >
-                <FaEdit />
-                <span>Modifier</span>
-              </MobileActionButton>
-              
-              <MobileActionButton 
-                onClick={() => handleDownloadReglement(index, 'pdf')} 
-                title="PDF"
-                className="pdf"
-                colors={colors}
-              >
-                <FaFilePdf />
-                <span>PDF</span>
-              </MobileActionButton>
-              
-              <MobileActionButton 
-                onClick={() => handleDownloadReglement(index, 'docx')} 
-                title="DOCX"
-                className="docx"
-                colors={colors}
-              >
-                <FaFileWord />
-                <span>DOCX</span>
-              </MobileActionButton>
-              
-              <MobileActionButton 
-                onClick={() => handleDeletePaiement(paiement, index)} 
-                title="Supprimer"
-                className="delete"
-                colors={colors}
-              >
-                <FaTrash />
-                <span>Supprimer</span>
-              </MobileActionButton>
-            </CardActions>
-          </MobileCard>
-        ))}
-      </MobileView>
+      </Table>
 
       {/* Modal d'édition de paiement */}
       <Modal
@@ -303,22 +220,21 @@ const PaiementsTable = ({ paiements = [], beneficiaireId, onUpdate }) => {
   );
 };
 
-// Styled Components avec thématisation et responsive design
+// Styled Components avec thématisation
 const TableContainer = styled.div`
   margin-top: 16px;
+  overflow-x: auto;
   background-color: ${props => props.colors.surface};
   border-radius: 4px;
   transition: background-color 0.3s ease;
 `;
 
-// Table Desktop
-const DesktopTable = styled.table`
+const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
   background-color: ${props => props.colors.surface};
   transition: all 0.3s ease;
-  overflow-x: auto;
   
   th, td {
     padding: 10px 12px;
@@ -333,7 +249,6 @@ const DesktopTable = styled.table`
     font-weight: 500;
     color: ${props => props.colors.textPrimary};
     border-bottom: 1px solid ${props => props.colors.border};
-    white-space: nowrap;
   }
   
   tbody tr {
@@ -343,170 +258,11 @@ const DesktopTable = styled.table`
       background-color: ${props => props.colors.navActive};
     }
   }
-  
-  @media (max-width: 1024px) {
-    font-size: 13px;
-    
-    th, td {
-      padding: 8px 10px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    display: none;
-  }
 `;
 
-// Vue Mobile
-const MobileView = styled.div`
-  display: none;
-  
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const MobileCard = styled.div`
-  background-color: ${props => props.colors.surface};
-  border: 1px solid ${props => props.colors.borderLight};
-  border-radius: 8px;
-  margin-bottom: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-  
-  &:hover {
-    box-shadow: ${props => props.colors.shadow};
-  }
-`;
-
-const CardHeader = styled.div`
-  background-color: ${props => props.colors.surfaceHover};
-  padding: 12px 16px;
-  border-bottom: 1px solid ${props => props.colors.borderLight};
-  transition: all 0.3s ease;
-`;
-
-const CardTitle = styled.h4`
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: ${props => props.colors.textPrimary};
-  transition: color 0.3s ease;
-`;
-
-const CardSubtitle = styled.p`
-  margin: 4px 0 0;
-  font-size: 14px;
-  color: ${props => props.colors.textSecondary};
-  transition: color 0.3s ease;
-`;
-
-const CardBody = styled.div`
-  padding: 16px;
-`;
-
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const InfoLabel = styled.span`
-  font-size: 14px;
-  color: ${props => props.colors.textSecondary};
-  font-weight: 500;
-  transition: color 0.3s ease;
-`;
-
-const InfoValue = styled.span`
-  font-size: 14px;
-  color: ${props => props.colors.textPrimary};
-  text-align: right;
-  transition: color 0.3s ease;
-  
-  &.amount {
-    font-weight: 600;
-    color: ${props => props.colors.success};
-  }
-`;
-
-const CardActions = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background-color: ${props => props.colors.borderLight};
-  border-top: 1px solid ${props => props.colors.borderLight};
-`;
-
-const MobileActionButton = styled.button`
-  background-color: ${props => props.colors.surface};
-  border: none;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  color: ${props => props.colors.primary};
-  transition: all 0.3s ease;
-  font-size: 12px;
-  
-  svg {
-    font-size: 16px;
-  }
-  
-  span {
-    font-size: 11px;
-    font-weight: 500;
-  }
-  
-  &:hover {
-    background-color: ${props => props.colors.surfaceHover};
-  }
-  
-  &.delete {
-    color: ${props => props.colors.error};
-  }
-  
-  &.pdf {
-    color: ${props => props.colors.error};
-  }
-  
-  &.docx {
-    color: ${props => props.colors.cardIcon.affaires.color};
-  }
-  
-  @media (max-width: 480px) {
-    padding: 10px 4px;
-    
-    span {
-      font-size: 10px;
-    }
-    
-    svg {
-      font-size: 14px;
-    }
-  }
-`;
-
-// Boutons d'action Desktop
 const ActionButtons = styled.div`
   display: flex;
   gap: 8px;
-  
-  @media (max-width: 1024px) {
-    gap: 4px;
-  }
 `;
 
 const ActionButton = styled.button`
@@ -549,14 +305,6 @@ const ActionButton = styled.button`
       background-color: ${props => props.colors.cardIcon.affaires.color}20;
     }
   }
-  
-  @media (max-width: 1024px) {
-    padding: 4px;
-    
-    svg {
-      font-size: 14px;
-    }
-  }
 `;
 
 const EmptyMessage = styled.div`
@@ -568,11 +316,6 @@ const EmptyMessage = styled.div`
   border-radius: 4px;
   margin-top: 16px;
   transition: all 0.3s ease;
-  
-  @media (max-width: 768px) {
-    padding: 16px;
-    font-size: 14px;
-  }
 `;
 
 const ErrorMessage = styled.div`
@@ -583,11 +326,6 @@ const ErrorMessage = styled.div`
   margin-bottom: 16px;
   border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
-  
-  @media (max-width: 768px) {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
 `;
 
 const CancelButton = styled.button`
@@ -603,11 +341,6 @@ const CancelButton = styled.button`
   &:hover {
     background-color: ${props => props.colors.surfaceHover};
     border-color: ${props => props.colors.primary};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 14px;
   }
 `;
 
@@ -626,11 +359,6 @@ const DeleteButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
   }
-  
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
 `;
 
 const DeleteConfirmContent = styled.div`
@@ -642,14 +370,6 @@ const DeleteConfirmContent = styled.div`
     
     strong {
       color: ${props => props.colors.warning};
-    }
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-    
-    p {
-      margin-bottom: 12px;
     }
   }
 `;

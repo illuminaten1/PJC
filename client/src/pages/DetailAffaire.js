@@ -227,13 +227,13 @@ const DetailAffaire = () => {
         }
       />
       
-      <ThemedHeaderCard>
+      <ResponsiveHeaderCard>
         <HeaderFullWidth>
           <ThemedHeaderLabel>Description</ThemedHeaderLabel>
           <ThemedHeaderValue>{affaire.description || 'Aucune description'}</ThemedHeaderValue>
         </HeaderFullWidth>
         
-        <HeaderGrid>
+        <ResponsiveHeaderGrid>
           <HeaderItem>
             <ThemedHeaderLabel>Lieu</ThemedHeaderLabel>
             <ThemedHeaderValue>{affaire.lieu || 'Non spécifié'}</ThemedHeaderValue>
@@ -260,17 +260,17 @@ const DetailAffaire = () => {
               </ThemedArchiveNote>
             )}
           </HeaderItem>
-        </HeaderGrid>
-      </ThemedHeaderCard>
-      
+        </ResponsiveHeaderGrid>
+      </ResponsiveHeaderCard>
+
       {/* Section Notes */}
       <Section colors={colors}>
-        <SectionHeader>
+        <ResponsiveSectionHeader>
           <SectionTitle colors={colors}>
             <FaStickyNote />
             <span>Notes du dossier</span>
           </SectionTitle>
-          <SectionActions>
+          <ResponsiveSectionActions>
             {editingNotes ? (
               <>
                 <ActionButton 
@@ -304,47 +304,49 @@ const DetailAffaire = () => {
                 <ButtonText>Modifier les notes</ButtonText>
               </ActionButton>
             )}
-          </SectionActions>
-        </SectionHeader>
+          </ResponsiveSectionActions>
+        </ResponsiveSectionHeader>
         
-        <NotesContainer colors={colors}>
+        <ResponsiveNotesContainer colors={colors}>
           {editingNotes ? (
             <MarkdownEditor 
               value={notes} 
               onChange={handleNotesChange} 
               placeholder="Saisissez vos notes ici... (supporte le formatage Markdown)"
-              key="notes-editor" // Clé pour forcer la recréation de l'éditeur
+              key="notes-editor"
             />
           ) : (
             <MarkdownDisplay content={notes} />
           )}
-        </NotesContainer>
+        </ResponsiveNotesContainer>
       </Section>
       
       <Section colors={colors}>
-        <SectionHeader>
+        <ResponsiveSectionHeader>
           <SectionTitle colors={colors}>Structure de l'affaire</SectionTitle>
-        </SectionHeader>
+        </ResponsiveSectionHeader>
         
-        <AffaireTree 
-          affaireId={id} 
-          onUpdate={() => {
-            fetchAffaire();
-            fetchStatistiques();
-          }}
-        />
+        <ResponsiveTreeContainer>
+          <AffaireTree 
+            affaireId={id} 
+            onUpdate={() => {
+              fetchAffaire();
+              fetchStatistiques();
+            }}
+          />
+        </ResponsiveTreeContainer>
       </Section>
       
       {statistiques && (
         <Section colors={colors}>
-          <SectionHeader>
+          <ResponsiveSectionHeader>
             <SectionTitle colors={colors}>
               <FaChartBar />
               <span>Statistiques de l'affaire</span>
             </SectionTitle>
-          </SectionHeader>
+          </ResponsiveSectionHeader>
           
-          <StatsGrid>
+          <ResponsiveStatsGrid>
             <StatsCard colors={colors}>
               <StatsTitle colors={colors}>Militaires</StatsTitle>
               <StatsValue colors={colors}>{statistiques.militaires.total}</StatsValue>
@@ -375,15 +377,21 @@ const DetailAffaire = () => {
             
             <StatsCard colors={colors}>
               <StatsTitle colors={colors}>Finances</StatsTitle>
-              <StatsValue colors={colors}>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatsValue>
+              <ResponsiveStatsValue colors={colors}>
+                {statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT
+              </ResponsiveStatsValue>
               <StatsDetails colors={colors}>
                 <StatDetail>
                   <StatDetailLabel colors={colors}>Engagé :</StatDetailLabel>
-                  <StatDetailValue colors={colors}>{statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT</StatDetailValue>
+                  <ResponsiveStatDetailValue colors={colors}>
+                    {statistiques.finances.montantGage.toLocaleString('fr-FR')} € HT
+                  </ResponsiveStatDetailValue>
                 </StatDetail>
                 <StatDetail>
                   <StatDetailLabel colors={colors}>Payé :</StatDetailLabel>
-                  <StatDetailValue colors={colors}>{statistiques.finances.montantPaye.toLocaleString('fr-FR')} € TTC</StatDetailValue>
+                  <ResponsiveStatDetailValue colors={colors}>
+                    {statistiques.finances.montantPaye.toLocaleString('fr-FR')} € TTC
+                  </ResponsiveStatDetailValue>
                 </StatDetail>
                 <StatDetail>
                   <StatDetailLabel colors={colors}>Ratio :</StatDetailLabel>
@@ -391,7 +399,7 @@ const DetailAffaire = () => {
                 </StatDetail>
               </StatsDetails>
             </StatsCard>
-          </StatsGrid>
+          </ResponsiveStatsGrid>
         </Section>
       )}
       
@@ -426,7 +434,7 @@ const DetailAffaire = () => {
           </>
         }
       >
-        <DeleteConfirmContent colors={colors}> {/* Ajout de la prop colors */}
+        <DeleteConfirmContent colors={colors}>
           <p>Êtes-vous sûr de vouloir supprimer définitivement cette affaire ?</p>
           <p><strong>Attention :</strong> Cette action supprimera également tous les militaires et bénéficiaires associés à cette affaire.</p>
           
@@ -437,15 +445,48 @@ const DetailAffaire = () => {
   );
 };
 
-// Styled Components avec thématisation complète
+// Styled Components avec thématisation complète et responsivité
 const Container = styled.div`
   padding: 20px;
   background-color: ${props => props.colors.background};
   min-height: 100vh;
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
 `;
 
-const NotesContainer = styled.div`
+const ResponsiveHeaderCard = styled(ThemedHeaderCard)`
+  margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+`;
+
+const ResponsiveHeaderGrid = styled(HeaderGrid)`
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
+`;
+
+const ResponsiveNotesContainer = styled.div`
   background-color: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.border};
   border-radius: 8px;
@@ -454,10 +495,23 @@ const NotesContainer = styled.div`
   overflow: hidden;
   transition: all 0.3s ease;
   
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
+  
   .CodeMirror {
     height: 250px;
     background-color: ${props => props.colors.surface};
     color: ${props => props.colors.textPrimary};
+    
+    @media (max-width: 768px) {
+      height: 200px;
+    }
+    
+    @media (max-width: 480px) {
+      height: 150px;
+      font-size: 14px;
+    }
     
     .CodeMirror-cursor {
       border-left: 1px solid ${props => props.colors.primary};
@@ -481,25 +535,55 @@ const NotesContainer = styled.div`
     padding: 20px;
     color: ${props => props.colors.textPrimary};
     
+    @media (max-width: 768px) {
+      padding: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 12px;
+      font-size: 14px;
+    }
+    
     h1, h2, h3, h4, h5, h6 {
       color: ${props => props.colors.textPrimary};
       border-bottom-color: ${props => props.colors.borderLight};
+      
+      @media (max-width: 480px) {
+        font-size: 1.2em;
+      }
     }
     
     code {
       background-color: ${props => props.colors.surfaceHover};
       color: ${props => props.colors.textPrimary};
       border: 1px solid ${props => props.colors.borderLight};
+      font-size: 0.9em;
+      
+      @media (max-width: 480px) {
+        font-size: 0.8em;
+      }
     }
     
     pre {
       background-color: ${props => props.colors.surfaceHover};
       border: 1px solid ${props => props.colors.borderLight};
+      overflow-x: auto;
     }
     
     blockquote {
       border-left-color: ${props => props.colors.primary};
       background-color: ${props => props.colors.surfaceHover};
+    }
+  }
+`;
+
+const ResponsiveTreeContainer = styled.div`
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    
+    /* Styles pour améliorer l'affichage de l'arbre sur mobile */
+    .tree-container {
+      min-width: 600px;
     }
   }
 `;
@@ -511,6 +595,11 @@ const StatusTag = styled.span`
   font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
   
   ${props => props.status === 'deces' ? `
     background-color: ${props.colors.errorBg};
@@ -539,15 +628,37 @@ const Section = styled.section`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 16px;
+    padding: 12px;
+  }
 `;
 
-const SectionHeader = styled.div`
+const ResponsiveSectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid ${props => props.colors ? props.colors.borderLight : '#e0e0e0'};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    gap: 8px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -559,15 +670,37 @@ const SectionTitle = styled.h2`
   margin: 0;
   transition: color 0.3s ease;
   
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 15px;
+  }
+  
   svg {
     margin-right: 8px;
     color: ${props => props.colors.primary};
+    
+    @media (max-width: 480px) {
+      margin-right: 6px;
+      font-size: 14px;
+    }
   }
 `;
 
-const SectionActions = styled.div`
+const ResponsiveSectionActions = styled.div`
   display: flex;
   gap: 8px;
+  
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
 `;
 
 const ActionButtons = styled.div`
@@ -576,7 +709,13 @@ const ActionButtons = styled.div`
   flex-wrap: wrap;
   
   @media (max-width: 768px) {
+    gap: 6px;
+  }
+  
+  @media (max-width: 480px) {
     flex-direction: column;
+    gap: 4px;
+    width: 100%;
   }
 `;
 
@@ -593,6 +732,19 @@ const ActionButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    padding: 0 8px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 40px;
+    width: 100%;
+    font-size: 13px;
+  }
   
   &:hover:not(:disabled) {
     background-color: ${props => props.colors.primary};
@@ -640,6 +792,11 @@ const ActionButton = styled.button`
   
   svg {
     margin-right: 6px;
+    
+    @media (max-width: 480px) {
+      margin-right: 4px;
+      font-size: 12px;
+    }
   }
 `;
 
@@ -647,16 +804,36 @@ const ButtonText = styled.span`
   font-size: 14px;
   font-weight: 500;
   
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+  
   @media (max-width: 480px) {
+    font-size: 12px;
+  }
+  
+  @media (max-width: 320px) {
     display: none;
   }
 `;
 
-const StatsGrid = styled.div`
+const ResponsiveStatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
 `;
 
 const StatsCard = styled.div`
@@ -666,6 +843,14 @@ const StatsCard = styled.div`
   padding: 20px;
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
   
   &:hover {
     transform: translateY(-2px);
@@ -679,6 +864,11 @@ const StatsTitle = styled.div`
   margin-bottom: 8px;
   font-weight: 500;
   transition: color 0.3s ease;
+  
+  @media (max-width: 480px) {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
 `;
 
 const StatsValue = styled.div`
@@ -687,11 +877,36 @@ const StatsValue = styled.div`
   color: ${props => props.colors.primary};
   margin-bottom: 16px;
   transition: color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+`;
+
+const ResponsiveStatsValue = styled(StatsValue)`
+  @media (max-width: 480px) {
+    font-size: 16px;
+    word-break: break-all;
+  }
+  
+  @media (max-width: 320px) {
+    font-size: 14px;
+  }
 `;
 
 const StatsDetails = styled.div`
   border-top: 1px solid ${props => props.colors.borderLight};
   padding-top: 12px;
+  
+  @media (max-width: 480px) {
+    padding-top: 8px;
+  }
 `;
 
 const StatDetail = styled.div`
@@ -699,6 +914,17 @@ const StatDetail = styled.div`
   justify-content: space-between;
   margin-bottom: 4px;
   font-size: 14px;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 6px;
+  }
 `;
 
 const StatDetailLabel = styled.span`
@@ -712,11 +938,22 @@ const StatDetailValue = styled.span`
   transition: color 0.3s ease;
 `;
 
+const ResponsiveStatDetailValue = styled(StatDetailValue)`
+  @media (max-width: 480px) {
+    word-break: break-all;
+  }
+`;
+
 const DeleteConfirmContent = styled.div`
   p {
     margin-bottom: 16px;
-    color: ${props => props.colors.textPrimary}; // Suppression de la couleur par défaut
+    color: ${props => props.colors.textPrimary};
     transition: color 0.3s ease;
+    
+    @media (max-width: 480px) {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
     
     strong {
       color: ${props => props.colors.error};
@@ -733,6 +970,12 @@ const ErrorMessage = styled.div`
   font-size: 14px;
   border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin-top: 8px;
+  }
 `;
 
 const CancelButton = styled.button`
@@ -744,6 +987,11 @@ const CancelButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
   
   &:hover {
     background-color: ${props => props.colors.borderLight};
@@ -762,6 +1010,11 @@ const DeleteButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   
+  @media (max-width: 480px) {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
   &:hover {
     background-color: ${props => props.colors.error}dd;
     transform: translateY(-1px);
@@ -778,6 +1031,16 @@ const Loading = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.border};
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 30px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 20px;
+    font-size: 13px;
+  }
 `;
 
 const Error = styled.div`
@@ -789,6 +1052,16 @@ const Error = styled.div`
   box-shadow: ${props => props.colors.shadow};
   border: 1px solid ${props => props.colors.error}40;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+    font-size: 13px;
+  }
 `;
 
 export default DetailAffaire;

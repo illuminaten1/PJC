@@ -172,11 +172,12 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
         </Title>
         <TreeControls>
           <ToggleAllButton onClick={areAllExpanded() ? collapseAll : expandAll} colors={colors}>
-            {areAllExpanded() ? 'Tout replier' : 'Tout déplier'}
+            <span className="toggle-text-long">{areAllExpanded() ? 'Tout replier' : 'Tout déplier'}</span>
+            <span className="toggle-text-short">{areAllExpanded() ? 'Replier' : 'Déplier'}</span>
           </ToggleAllButton>
           <AddButton onClick={handleAddMilitaire} colors={colors}>
             <FaPlus />
-            <span>Ajouter un militaire</span>
+            <span className="add-text">Ajouter un militaire</span>
           </AddButton>
         </TreeControls>
       </TreeHeader>
@@ -194,7 +195,8 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
                   <MilitaireInfo onClick={() => navigateToMilitaire(militaire._id)} colors={colors}>
                     <FaUser />
                     <MilitaireName colors={colors}>
-                      {militaire.grade} {militaire.prenom} {militaire.nom}
+                      <span className="grade">{militaire.grade}</span>
+                      <span className="name">{militaire.prenom} {militaire.nom}</span>
                     </MilitaireName>
                     {militaire.decede ? (
                       <StatusTag type="deces" colors={colors}>Décédé</StatusTag>
@@ -205,7 +207,7 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
                   
                   <AddBeneficiaireButton onClick={() => handleAddBeneficiaire(militaire)} colors={colors}>
                     <FaPlus />
-                    <span>Ajouter un bénéficiaire</span>
+                    <span className="btn-text">Ajouter un bénéficiaire</span>
                   </AddBeneficiaireButton>
                 </MilitaireHeader>
                 
@@ -219,12 +221,14 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
                           colors={colors}
                         >
                           <FaUsers />
-                          <span>
-                            {beneficiaire.prenom} {beneficiaire.nom}
+                          <BeneficiaireInfo>
+                            <span className="beneficiaire-name">
+                              {beneficiaire.prenom} {beneficiaire.nom}
+                            </span>
                             <QualiteTag qualite={beneficiaire.qualite} colors={colors}>
                               {beneficiaire.qualite}
                             </QualiteTag>
-                          </span>
+                          </BeneficiaireInfo>
                         </BeneficiaireItem>
                       ))
                     ) : (
@@ -274,7 +278,7 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   );
 };
 
-// Styled Components avec thématisation
+// Styled Components avec thématisation et responsive design
 const Container = styled.div`
   background-color: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.border};
@@ -282,6 +286,10 @@ const Container = styled.div`
   box-shadow: ${props => props.colors.shadow};
   margin-bottom: 24px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const TreeHeader = styled.div`
@@ -294,6 +302,13 @@ const TreeHeader = styled.div`
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h2`
@@ -309,12 +324,21 @@ const Title = styled.h2`
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.affaires.color};
   }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
 `;
 
 const TreeControls = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 8px;
+  }
 `;
 
 const ToggleAllButton = styled.button`
@@ -332,6 +356,32 @@ const ToggleAllButton = styled.button`
     border-color: ${props => props.colors.primary};
     color: ${props => props.colors.primary};
   }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    .toggle-text-long {
+      display: none;
+    }
+    
+    .toggle-text-short {
+      display: inline;
+    }
+  }
+  
+  @media (min-width: 481px) {
+    .toggle-text-long {
+      display: inline;
+    }
+    
+    .toggle-text-short {
+      display: none;
+    }
+  }
 `;
 
 const AddButton = styled.button`
@@ -345,6 +395,7 @@ const AddButton = styled.button`
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   svg {
     margin-right: 8px;
@@ -355,12 +406,37 @@ const AddButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 14px;
+    justify-content: center;
+    
+    svg {
+      margin-right: 6px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .add-text {
+      display: none;
+    }
+    
+    svg {
+      margin-right: 0;
+    }
+  }
 `;
 
 const TreeContent = styled.div`
   padding: 16px;
   background-color: ${props => props.colors.surface};
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 
 const MilitairesList = styled.ul`
@@ -379,6 +455,10 @@ const MilitaireItem = styled.li`
   &:hover {
     box-shadow: ${props => props.colors.shadow};
   }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+  }
 `;
 
 const MilitaireHeader = styled.div`
@@ -388,6 +468,12 @@ const MilitaireHeader = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 `;
 
 const ExpandButton = styled.button`
@@ -408,6 +494,11 @@ const ExpandButton = styled.button`
     background-color: ${props => props.colors.navActive};
     transform: scale(1.1);
   }
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 2px;
+  }
 `;
 
 const MilitaireInfo = styled.div`
@@ -418,6 +509,8 @@ const MilitaireInfo = styled.div`
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.3s ease;
+  flex-wrap: wrap;
+  gap: 8px;
   
   &:hover {
     background-color: ${props => props.colors.primary}20;
@@ -426,13 +519,38 @@ const MilitaireInfo = styled.div`
   svg {
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.militaires.color};
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 4px;
+    width: 100%;
+    order: 2;
   }
 `;
 
 const MilitaireName = styled.span`
-  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
+  flex-wrap: wrap;
+  
+  .grade {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .name {
+    white-space: nowrap;
+  }
+  
+  @media (max-width: 480px) {
+    .grade, .name {
+      font-size: 14px;
+    }
+  }
 `;
 
 const StatusTag = styled.span`
@@ -444,6 +562,7 @@ const StatusTag = styled.span`
   font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   ${props => props.type === 'deces' ? `
     background-color: ${props.colors.errorBg};
@@ -452,6 +571,12 @@ const StatusTag = styled.span`
     background-color: ${props.colors.successBg};
     color: ${props.colors.success};
   ` : ''}
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 0 6px;
+    height: 20px;
+  }
 `;
 
 const AddBeneficiaireButton = styled.button`
@@ -466,6 +591,7 @@ const AddBeneficiaireButton = styled.button`
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   svg {
     margin-right: 4px;
@@ -476,6 +602,23 @@ const AddBeneficiaireButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadow};
   }
+  
+  @media (max-width: 768px) {
+    order: 3;
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+  }
+  
+  @media (max-width: 480px) {
+    .btn-text {
+      display: none;
+    }
+    
+    svg {
+      margin-right: 0;
+    }
+  }
 `;
 
 const BeneficiairesList = styled.ul`
@@ -485,6 +628,10 @@ const BeneficiairesList = styled.ul`
   padding: 8px 16px 16px 40px;
   background-color: ${props => props.colors.surface};
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 8px 12px 12px 24px;
+  }
 `;
 
 const BeneficiaireItem = styled.li`
@@ -508,6 +655,33 @@ const BeneficiaireItem = styled.li`
   svg {
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.beneficiaires.color};
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 8px 10px;
+    
+    &:hover {
+      transform: translateX(2px);
+    }
+  }
+`;
+
+const BeneficiaireInfo = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  
+  .beneficiaire-name {
+    white-space: nowrap;
+  }
+  
+  @media (max-width: 480px) {
+    .beneficiaire-name {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -517,9 +691,9 @@ const QualiteTag = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-  margin-left: 8px;
   transition: all 0.3s ease;
   border: 1px solid;
+  white-space: nowrap;
   
   ${props => {
     switch(props.qualite) {
@@ -555,6 +729,11 @@ const QualiteTag = styled.span`
         `;
     }
   }}
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
 `;
 
 const EmptyBeneficiaires = styled.div`
@@ -565,6 +744,11 @@ const EmptyBeneficiaires = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 14px;
+  }
 `;
 
 const Loading = styled.div`

@@ -166,17 +166,23 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   return (
     <Container colors={colors}>
       <TreeHeader colors={colors}>
-        <Title colors={colors}>
-          <FaFolder />
-          <span>{arborescence.nom}</span>
-        </Title>
+        <TitleContainer>
+          <Title colors={colors}>
+            <FaFolder />
+            <span>{arborescence.nom}</span>
+          </Title>
+        </TitleContainer>
+        
         <TreeControls>
           <ToggleAllButton onClick={areAllExpanded() ? collapseAll : expandAll} colors={colors}>
-            {areAllExpanded() ? 'Tout replier' : 'Tout déplier'}
+            <span className="toggle-text-long">{areAllExpanded() ? 'Tout replier' : 'Tout déplier'}</span>
+            <span className="toggle-text-short">{areAllExpanded() ? 'Replier' : 'Déplier'}</span>
           </ToggleAllButton>
+          
           <AddButton onClick={handleAddMilitaire} colors={colors}>
             <FaPlus />
-            <span>Ajouter un militaire</span>
+            <span className="add-text-long">Ajouter un militaire</span>
+            <span className="add-text-short">Militaire</span>
           </AddButton>
         </TreeControls>
       </TreeHeader>
@@ -187,25 +193,33 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
             {arborescence.militaires.map(militaire => (
               <MilitaireItem key={militaire._id} colors={colors}>
                 <MilitaireHeader colors={colors}>
-                  <ExpandButton onClick={() => toggleMilitaire(militaire._id)} colors={colors}>
-                    {expandedMilitaires[militaire._id] ? <FaChevronDown /> : <FaChevronRight />}
-                  </ExpandButton>
-                  
-                  <MilitaireInfo onClick={() => navigateToMilitaire(militaire._id)} colors={colors}>
-                    <FaUser />
-                    <MilitaireName colors={colors}>
-                      {militaire.grade} {militaire.prenom} {militaire.nom}
-                    </MilitaireName>
-                    {militaire.decede ? (
-                      <StatusTag type="deces" colors={colors}>Décédé</StatusTag>
-                    ) : (
-                      <StatusTag type="blesse" colors={colors}>Blessé</StatusTag>
-                    )}
-                  </MilitaireInfo>
+                  <MilitaireMainRow>
+                    <ExpandButton onClick={() => toggleMilitaire(militaire._id)} colors={colors}>
+                      {expandedMilitaires[militaire._id] ? <FaChevronDown /> : <FaChevronRight />}
+                    </ExpandButton>
+                    
+                    <MilitaireInfo onClick={() => navigateToMilitaire(militaire._id)} colors={colors}>
+                      <FaUser />
+                      <MilitaireDetails>
+                        <MilitaireName colors={colors}>
+                          <span className="grade-name-long">{militaire.grade} {militaire.prenom} {militaire.nom}</span>
+                          <span className="grade-name-short">{militaire.grade} {militaire.nom}</span>
+                        </MilitaireName>
+                        <StatusContainer>
+                          {militaire.decede ? (
+                            <StatusTag type="deces" colors={colors}>Décédé</StatusTag>
+                          ) : (
+                            <StatusTag type="blesse" colors={colors}>Blessé</StatusTag>
+                          )}
+                        </StatusContainer>
+                      </MilitaireDetails>
+                    </MilitaireInfo>
+                  </MilitaireMainRow>
                   
                   <AddBeneficiaireButton onClick={() => handleAddBeneficiaire(militaire)} colors={colors}>
                     <FaPlus />
-                    <span>Ajouter un bénéficiaire</span>
+                    <span className="beneficiaire-text-long">Ajouter un bénéficiaire</span>
+                    <span className="beneficiaire-text-short">Bénéficiaire</span>
                   </AddBeneficiaireButton>
                 </MilitaireHeader>
                 
@@ -218,13 +232,17 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
                           onClick={() => navigateToBeneficiaire(beneficiaire._id)}
                           colors={colors}
                         >
-                          <FaUsers />
-                          <span>
-                            {beneficiaire.prenom} {beneficiaire.nom}
-                            <QualiteTag qualite={beneficiaire.qualite} colors={colors}>
-                              {beneficiaire.qualite}
-                            </QualiteTag>
-                          </span>
+                          <BeneficiaireContent>
+                            <FaUsers />
+                            <BeneficiaireDetails>
+                              <span className="beneficiaire-name">
+                                {beneficiaire.prenom} {beneficiaire.nom}
+                              </span>
+                              <QualiteTag qualite={beneficiaire.qualite} colors={colors}>
+                                {beneficiaire.qualite}
+                              </QualiteTag>
+                            </BeneficiaireDetails>
+                          </BeneficiaireContent>
                         </BeneficiaireItem>
                       ))
                     ) : (
@@ -274,14 +292,20 @@ const AffaireTree = ({ affaireId, onUpdate }) => {
   );
 };
 
-// Styled Components avec thématisation
+// Styled Components avec design responsive amélioré
 const Container = styled.div`
   background-color: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.border};
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: ${props => props.colors.shadow};
   margin-bottom: 24px;
   transition: all 0.3s ease;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+    border-radius: 6px;
+  }
 `;
 
 const TreeHeader = styled.div`
@@ -291,9 +315,27 @@ const TreeHeader = styled.div`
   align-items: center;
   border-bottom: 1px solid ${props => props.colors.borderLight};
   background-color: ${props => props.colors.surfaceHover};
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    align-items: stretch;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px;
+    gap: 10px;
+  }
+`;
+
+const TitleContainer = styled.div`
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    flex: none;
+  }
 `;
 
 const Title = styled.h2`
@@ -308,6 +350,21 @@ const Title = styled.h2`
   svg {
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.affaires.color};
+    flex-shrink: 0;
+  }
+  
+  span {
+    word-break: break-word;
+    line-height: 1.3;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    justify-content: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 15px;
   }
 `;
 
@@ -315,6 +372,15 @@ const TreeControls = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 `;
 
 const ToggleAllButton = styled.button`
@@ -326,11 +392,40 @@ const ToggleAllButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   &:hover {
     background-color: ${props => props.colors.surfaceHover};
     border-color: ${props => props.colors.primary};
     color: ${props => props.colors.primary};
+  }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    min-width: 0;
+    
+    .toggle-text-long {
+      display: none;
+    }
+    
+    .toggle-text-short {
+      display: inline;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .toggle-text-long {
+      display: inline;
+    }
+    
+    .toggle-text-short {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 13px;
   }
 `;
 
@@ -345,9 +440,11 @@ const AddButton = styled.button`
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   svg {
     margin-right: 8px;
+    flex-shrink: 0;
   }
   
   &:hover {
@@ -355,12 +452,54 @@ const AddButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+    
+    .add-text-long {
+      display: none;
+    }
+    
+    .add-text-short {
+      display: inline;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .add-text-long {
+      display: inline;
+    }
+    
+    .add-text-short {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 13px;
+    
+    svg {
+      margin-right: 6px;
+      font-size: 12px;
+    }
+  }
 `;
 
 const TreeContent = styled.div`
   padding: 16px;
   background-color: ${props => props.colors.surface};
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
 
 const MilitairesList = styled.ul`
@@ -372,22 +511,47 @@ const MilitairesList = styled.ul`
 const MilitaireItem = styled.li`
   margin-bottom: 16px;
   border: 1px solid ${props => props.colors.borderLight};
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: ${props => props.colors.surface};
   transition: all 0.3s ease;
+  overflow: hidden;
   
   &:hover {
     box-shadow: ${props => props.colors.shadow};
   }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
 `;
 
 const MilitaireHeader = styled.div`
+  background-color: ${props => props.colors.surfaceHover};
+  transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  @media (min-width: 769px) {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+  }
+`;
+
+const MilitaireMainRow = styled.div`
   display: flex;
   align-items: center;
-  padding: 12px;
-  background-color: ${props => props.colors.surfaceHover};
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const ExpandButton = styled.button`
@@ -403,10 +567,17 @@ const ExpandButton = styled.button`
   padding: 4px;
   border-radius: 4px;
   transition: all 0.3s ease;
+  flex-shrink: 0;
   
   &:hover {
     background-color: ${props => props.colors.navActive};
     transform: scale(1.1);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    padding: 3px;
+    margin-right: 6px;
   }
 `;
 
@@ -418,6 +589,7 @@ const MilitaireInfo = styled.div`
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.3s ease;
+  min-width: 0;
   
   &:hover {
     background-color: ${props => props.colors.primary}20;
@@ -426,22 +598,69 @@ const MilitaireInfo = styled.div`
   svg {
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.militaires.color};
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2px 4px;
+    
+    svg {
+      margin-right: 6px;
+      font-size: 14px;
+    }
   }
 `;
 
-const MilitaireName = styled.span`
-  margin-right: 10px;
+const MilitaireDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  
+  @media (max-width: 768px) {
+    gap: 6px;
+  }
+`;
+
+const MilitaireName = styled.div`
   color: ${props => props.colors.textPrimary};
   transition: color 0.3s ease;
+  font-weight: 500;
+  
+  .grade-name-long {
+    display: inline;
+  }
+  
+  .grade-name-short {
+    display: none;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    
+    .grade-name-long {
+      display: none;
+    }
+    
+    .grade-name-short {
+      display: inline;
+    }
+  }
+`;
+
+const StatusContainer = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const StatusTag = styled.span`
   display: inline-flex;
   align-items: center;
-  height: 22px;
-  padding: 0 8px;
+  height: 20px;
+  padding: 0 6px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   transition: all 0.3s ease;
   
@@ -452,6 +671,12 @@ const StatusTag = styled.span`
     background-color: ${props.colors.successBg};
     color: ${props.colors.success};
   ` : ''}
+  
+  @media (max-width: 480px) {
+    height: 18px;
+    padding: 0 5px;
+    font-size: 10px;
+  }
 `;
 
 const AddBeneficiaireButton = styled.button`
@@ -465,10 +690,13 @@ const AddBeneficiaireButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   svg {
     margin-right: 4px;
+    flex-shrink: 0;
   }
   
   &:hover {
@@ -476,21 +704,66 @@ const AddBeneficiaireButton = styled.button`
     transform: translateY(-1px);
     box-shadow: ${props => props.colors.shadow};
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 8px 12px;
+    
+    .beneficiaire-text-long {
+      display: inline;
+    }
+    
+    .beneficiaire-text-short {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 11px;
+    
+    .beneficiaire-text-long {
+      display: none;
+    }
+    
+    .beneficiaire-text-short {
+      display: inline;
+    }
+    
+    svg {
+      margin-right: 3px;
+      font-size: 10px;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .beneficiaire-text-long {
+      display: inline;
+    }
+    
+    .beneficiaire-text-short {
+      display: none;
+    }
+  }
 `;
 
 const BeneficiairesList = styled.ul`
   list-style: none;
-  padding: 0;
-  margin: 0;
   padding: 8px 16px 16px 40px;
+  margin: 0;
   background-color: ${props => props.colors.surface};
   transition: background-color 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 8px 12px 12px 30px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 8px 8px 20px;
+  }
 `;
 
 const BeneficiaireItem = styled.li`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
   margin-bottom: 8px;
   background-color: ${props => props.colors.surface};
   border: 1px solid ${props => props.colors.borderLight};
@@ -498,6 +771,7 @@ const BeneficiaireItem = styled.li`
   cursor: pointer;
   color: ${props => props.colors.textPrimary};
   transition: all 0.3s ease;
+  overflow: hidden;
   
   &:hover {
     background-color: ${props => props.colors.surfaceHover};
@@ -505,9 +779,54 @@ const BeneficiaireItem = styled.li`
     transform: translateX(4px);
   }
   
+  @media (max-width: 768px) {
+    margin-bottom: 6px;
+    
+    &:hover {
+      transform: translateX(2px);
+    }
+  }
+`;
+
+const BeneficiaireContent = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  
   svg {
     margin-right: 8px;
     color: ${props => props.colors.cardIcon.beneficiaires.color};
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 8px;
+    
+    svg {
+      margin-right: 6px;
+      font-size: 14px;
+    }
+  }
+`;
+
+const BeneficiaireDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  
+  .beneficiaire-name {
+    font-weight: 500;
+    word-break: break-word;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 3px;
+    
+    .beneficiaire-name {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -515,11 +834,11 @@ const QualiteTag = styled.span`
   display: inline-block;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  margin-left: 8px;
   transition: all 0.3s ease;
   border: 1px solid;
+  align-self: flex-start;
   
   ${props => {
     switch(props.qualite) {
@@ -555,6 +874,11 @@ const QualiteTag = styled.span`
         `;
     }
   }}
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
 `;
 
 const EmptyBeneficiaires = styled.div`
@@ -565,6 +889,11 @@ const EmptyBeneficiaires = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 13px;
+  }
 `;
 
 const Loading = styled.div`
@@ -574,6 +903,11 @@ const Loading = styled.div`
   background-color: ${props => props.colors.surface};
   border-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+    font-size: 14px;
+  }
 `;
 
 const Error = styled.div`
@@ -584,6 +918,11 @@ const Error = styled.div`
   border: 1px solid ${props => props.colors.error}40;
   border-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+    font-size: 14px;
+  }
 `;
 
 const Empty = styled.div`
@@ -593,6 +932,11 @@ const Empty = styled.div`
   background-color: ${props => props.colors.surfaceHover};
   border-radius: 4px;
   transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+    font-size: 14px;
+  }
 `;
 
 export default AffaireTree;

@@ -1109,6 +1109,11 @@ const TableTitle = styled.div`
   font-weight: 600;
   letter-spacing: 0.5px;
   margin: 0;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+    font-size: 14px;
+  }
 `;
 
 const PercentageBadge = styled.span`
@@ -1137,11 +1142,8 @@ const TablesRow = styled.div`
   }
   
   @media (max-width: 992px) {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-  
-  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 `;
 
@@ -1155,13 +1157,13 @@ const TableCard = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: ${props => props.colors.shadowHover};
   }
   
+  /* Scroll horizontal sur mobile pour les tableaux */
   @media (max-width: 768px) {
     overflow-x: auto;
   }
@@ -1174,6 +1176,12 @@ const CompactTable = styled.table`
   background-color: ${props => props.colors.surface};
   flex: 1;
   
+  /* Largeur minimale pour forcer le scroll horizontal sur mobile */
+  @media (max-width: 768px) {
+    min-width: 400px;
+    font-size: 12px;
+  }
+  
   thead {
     background-color: ${props => props.colors.surfaceHover};
     
@@ -1181,12 +1189,17 @@ const CompactTable = styled.table`
       padding: 16px 12px;
       font-weight: 600;
       color: ${props => props.colors.textPrimary};
-      text-align: left; // ← Garder seulement celui-ci
+      text-align: left;
       border-bottom: 2px solid ${props => props.colors.borderLight};
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      // text-align: center; ← SUPPRIMER cette ligne
+      white-space: nowrap;
+      
+      @media (max-width: 768px) {
+        padding: 12px 8px;
+        font-size: 11px;
+      }
     }
   }
   
@@ -1203,7 +1216,7 @@ const CompactTable = styled.table`
       transform: scale(1.01);
     }
     
-    // Style spécial pour la ligne TOTAL
+    /* Style spécial pour la ligne TOTAL */
     &:last-child {
       background-color: ${props => props.colors.surfaceHover} !important;
       font-weight: 600;
@@ -1212,32 +1225,6 @@ const CompactTable = styled.table`
         background-color: ${props => props.colors.surfaceHover} !important;
         transform: none;
       }
-    }
-    
-    // Effet de ligne animée au survol (sauf pour TOTAL)
-    &:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, ${props => props.colors.primary}, transparent);
-      transition: width 0.3s ease;
-    }
-    
-    &:not(:last-child):hover::after {
-      width: 100%;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    min-width: 450px;
-    font-size: 13px;
-    
-    thead th {
-      padding: 12px 8px;
-      font-size: 12px;
     }
   }
 `;
@@ -1258,8 +1245,9 @@ const YearCell = styled.td`
   border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
-  // Style spécial pour la cellule TOTAL
+  /* Style spécial pour la cellule TOTAL */
   tr:last-child & {
     border-top: 2px solid ${props => props.colors.border};
     font-weight: 600;
@@ -1277,9 +1265,6 @@ const Td = styled.td`
   color: ${props => props.colors.textPrimary};
   border-bottom: 1px solid ${props => props.colors.borderLight};
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: all 0.3s ease;
   
   &.text-center {
@@ -1292,15 +1277,27 @@ const Td = styled.td`
     align-items: center;
     flex-wrap: nowrap;
     justify-content: flex-start;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
   }
   
   /* Valeur numérique */
   .value {
     font-weight: 500;
     margin-right: 4px;
+    white-space: nowrap;
+    
+    @media (max-width: 768px) {
+      margin-right: 0;
+      font-size: 13px;
+    }
   }
   
-  // Style spécial pour les cellules TOTAL
+  /* Style spécial pour les cellules TOTAL */
   tr:last-child & {
     border-top: 2px solid ${props => props.colors.border};
     font-weight: 600;
@@ -1460,14 +1457,15 @@ const VariationUp = styled.span`
   margin-left: 4px;
   display: inline-flex;
   align-items: center;
-  min-width: unset;
+  white-space: nowrap;
   
   &.significant {
     font-weight: 600;
   }
   
-  @media (max-width: 1400px) {
+  @media (max-width: 768px) {
     font-size: 10px;
+    margin-left: 0;
   }
 `;
 
@@ -1478,14 +1476,15 @@ const VariationDown = styled.span`
   margin-left: 4px;
   display: inline-flex;
   align-items: center;
-  min-width: unset;
+  white-space: nowrap;
   
   &.significant {
     font-weight: 600;
   }
   
-  @media (max-width: 1400px) {
+  @media (max-width: 768px) {
     font-size: 10px;
+    margin-left: 0;
   }
 `;
 
@@ -1553,15 +1552,13 @@ const SummaryTableHeader = styled.th`
   font-weight: 600;
   font-size: 13px;
   border-bottom: 2px solid ${props => props.colors.borderLight};
-  text-align: left; // ← Garder seulement celui-ci
+  text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: all 0.3s ease;
-  // text-align: center; ← SUPPRIMER cette ligne
   
+  /* Texte complet par défaut */
   .full-text {
     display: inline;
   }
@@ -1570,7 +1567,8 @@ const SummaryTableHeader = styled.th`
     display: none;
   }
   
-  @media (max-width: 1400px) {
+  /* Tablettes et écrans moyens */
+  @media (max-width: 1200px) {
     padding: 12px 8px;
     font-size: 12px;
     
@@ -1583,10 +1581,13 @@ const SummaryTableHeader = styled.th`
     }
   }
   
+  /* Mobile */
   @media (max-width: 768px) {
-    padding: 12px 8px;
-    font-size: 12px;
+    padding: 10px 6px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
   }
 `;
+
 
 export default Statistiques;

@@ -327,9 +327,9 @@ router.get('/:id', authMiddleware, isAdmin, async (req, res) => {
 /**
  * @route   POST /api/logs/cookie-consent
  * @desc    Logger l'acceptation ou le refus des cookies
- * @access  Public
+ * @access  Private (utilisateur connecté)
  */
-router.post('/cookie-consent', async (req, res) => {
+router.post('/cookie-consent', authMiddleware, async (req, res) => {
   try {
     const { action, userAgent, timestamp } = req.body;
     
@@ -341,9 +341,10 @@ router.post('/cookie-consent', async (req, res) => {
       });
     }
 
-    // Logger l'action sans authentification (public)
+    // Logger l'action avec l'utilisateur connecté
     await LogService.logUserAction({
       action,
+      user: req.user,
       req,
       resourceType: 'system',
       success: true,

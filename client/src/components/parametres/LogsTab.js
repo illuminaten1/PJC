@@ -4,7 +4,7 @@ import {
   FaSearch, 
   FaFilter, 
   FaDownload, 
-  FaRefresh, 
+  FaSync, 
   FaEye,
   FaExclamationTriangle,
   FaInfoCircle,
@@ -193,7 +193,7 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
             <FaFilter /> Filtres
           </ActionButton>
           <ActionButton onClick={loadLogs} colors={colors} disabled={loading}>
-            <FaRefresh /> Actualiser
+            <FaSync /> Actualiser
           </ActionButton>
           <ActionButton onClick={exportLogs} colors={colors}>
             <FaDownload /> Exporter

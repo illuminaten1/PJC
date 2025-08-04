@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
+const authMiddleware = require('../middleware/auth');
 
 // Middleware de vérification d'ID
 const validateObjectId = (req, res, next) => {
@@ -13,7 +14,7 @@ const validateObjectId = (req, res, next) => {
 };
 
 // GET - Récupérer tous les bénéficiaires avec filtres
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { search, militaire, qualite, redacteur, annee, archive } = req.query;
     let query = {};
@@ -79,7 +80,7 @@ router.get('/', async (req, res) => {
 
 
 // GET - Récupérer un bénéficiaire spécifique
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const beneficiaire = await Beneficiaire.findById(req.params.id)
       .populate({
@@ -103,7 +104,7 @@ router.get('/:id', validateObjectId, async (req, res) => {
 });
 
 // POST - Créer un nouveau bénéficiaire
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     // Supprimer le redacteur des données reçues
     const { redacteur, ...beneficiaireData } = req.body;
@@ -131,7 +132,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT - Mettre à jour un bénéficiaire
-router.put('/:id', validateObjectId, async (req, res) => {
+router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const beneficiaireMaj = await Beneficiaire.findByIdAndUpdate(
       req.params.id,
@@ -150,7 +151,7 @@ router.put('/:id', validateObjectId, async (req, res) => {
 });
 
 // DELETE - Supprimer un bénéficiaire (avec mot de passe)
-router.delete('/:id', validateObjectId, async (req, res) => {
+router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     // Supprimer la vérification du mot de passe
     // const { password } = req.body;
@@ -177,7 +178,7 @@ router.delete('/:id', validateObjectId, async (req, res) => {
 });
 
 // POST - Ajouter une convention d'honoraires
-router.post('/:id/conventions', validateObjectId, async (req, res) => {
+router.post('/:id/conventions', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const beneficiaire = await Beneficiaire.findById(req.params.id);
     
@@ -195,7 +196,7 @@ router.post('/:id/conventions', validateObjectId, async (req, res) => {
 });
 
 // PUT - Mettre à jour une convention d'honoraires
-router.put('/:id/conventions/:index', validateObjectId, async (req, res) => {
+router.put('/:id/conventions/:index', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { id, index } = req.params;
     const conventionIndex = parseInt(index);
@@ -235,7 +236,7 @@ router.put('/:id/conventions/:index', validateObjectId, async (req, res) => {
 });
 
 // DELETE - Supprimer une convention d'honoraires
-router.delete('/:id/conventions/:index', validateObjectId, async (req, res) => {
+router.delete('/:id/conventions/:index', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { id, index } = req.params;
     const conventionIndex = parseInt(index);
@@ -270,7 +271,7 @@ router.delete('/:id/conventions/:index', validateObjectId, async (req, res) => {
 });
 
 // POST - Ajouter un paiement
-router.post('/:id/paiements', validateObjectId, async (req, res) => {
+router.post('/:id/paiements', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const beneficiaire = await Beneficiaire.findById(req.params.id);
     
@@ -288,7 +289,7 @@ router.post('/:id/paiements', validateObjectId, async (req, res) => {
 });
 
 // PUT - Mettre à jour un paiement
-router.put('/:id/paiements/:index', validateObjectId, async (req, res) => {
+router.put('/:id/paiements/:index', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { id, index } = req.params;
     const paiementIndex = parseInt(index);
@@ -328,7 +329,7 @@ router.put('/:id/paiements/:index', validateObjectId, async (req, res) => {
 });
 
 // DELETE - Supprimer un paiement
-router.delete('/:id/paiements/:index', validateObjectId, async (req, res) => {
+router.delete('/:id/paiements/:index', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { id, index } = req.params;
     const paiementIndex = parseInt(index);

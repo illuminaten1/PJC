@@ -3,6 +3,7 @@ const router = express.Router();
 const Affaire = require('../models/affaire');
 const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
+const authMiddleware = require('../middleware/auth');
 
 // Middleware de vérification d'ID valide
 const validateObjectId = (req, res, next) => {
@@ -14,7 +15,7 @@ const validateObjectId = (req, res, next) => {
 };
 
 // GET - Récupérer toutes les affaires avec filtres
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { search, year, archived, redacteur } = req.query;
     let query = {};
@@ -51,7 +52,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET - Récupérer une affaire avec ses militaires
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const affaire = await Affaire.findById(req.params.id);
     if (!affaire) {
@@ -71,7 +72,7 @@ router.get('/:id', validateObjectId, async (req, res) => {
 });
 
 // POST - Créer une nouvelle affaire
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const nouvelleAffaire = new Affaire(req.body);
     const affaireSauvegardee = await nouvelleAffaire.save();
@@ -82,7 +83,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT - Mettre à jour une affaire
-router.put('/:id', validateObjectId, async (req, res) => {
+router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const affaireMaj = await Affaire.findByIdAndUpdate(
       req.params.id, 
@@ -101,7 +102,7 @@ router.put('/:id', validateObjectId, async (req, res) => {
 });
 
 // DELETE - Supprimer une affaire (avec mot de passe)
-router.delete('/:id', validateObjectId, async (req, res) => {
+router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { password } = req.body;
     
@@ -194,7 +195,7 @@ router.patch('/:id/archive', validateObjectId, async (req, res) => {
 });
 
 // GET - Récupérer toute l'arborescence d'une affaire (militaires + bénéficiaires)
-router.get('/:id/arborescence', validateObjectId, async (req, res) => {
+router.get('/:id/arborescence', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const affaire = await Affaire.findById(req.params.id);
     

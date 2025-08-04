@@ -4,8 +4,9 @@ const documentGenerator = require('../utils/DocumentGenerator');
 const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
 const Affaire = require('../models/affaire');
+const authMiddleware = require('../middleware/auth');
 
-router.get('/health', (req, res) => {
+router.get('/health', authMiddleware, (req, res) => {
   res.status(200).send('OK');
 });
 
@@ -34,7 +35,7 @@ const validateObjectId = (req, res, next) => {
 };
 
 // POST - Générer une convention d'honoraires (avec support DOCX)
-router.post('/convention/:beneficiaireId/:conventionIndex', validateMongoId('beneficiaireId'), async (req, res) => {
+router.post('/convention/:beneficiaireId/:conventionIndex', authMiddleware, validateMongoId('beneficiaireId'), async (req, res) => {
   try {
     const { beneficiaireId, conventionIndex } = req.params;
     const { format = 'pdf' } = req.query; // Nouveau paramètre pour spécifier le format
@@ -136,7 +137,7 @@ router.post('/convention/:beneficiaireId/:conventionIndex', validateMongoId('ben
 });
 
 // POST - Générer une fiche de règlement (avec support DOCX)
-router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('beneficiaireId'), async (req, res) => {
+router.post('/reglement/:beneficiaireId/:paiementIndex', authMiddleware, validateMongoId('beneficiaireId'), async (req, res) => {
   try {
     const { beneficiaireId, paiementIndex } = req.params;
     const { format = 'pdf' } = req.query;
@@ -271,7 +272,7 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', validateMongoId('benefi
 });
 
 // POST - Générer une synthèse d'affaire complète
-router.post('/synthese-affaire/:id', validateMongoId('id'), async (req, res) => {
+router.post('/synthese-affaire/:id', authMiddleware, validateMongoId('id'), async (req, res) => {
   try {
     const { id } = req.params;
     const { format = 'pdf' } = req.query; // Format pdf ou docx

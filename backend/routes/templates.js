@@ -3,6 +3,20 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const authMiddleware = require('../middleware/auth');
+
+/**
+ * Middleware pour vérifier les droits administrateur
+ */
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'administrateur') {
+    return next();
+  }
+  return res.status(403).json({ 
+    success: false, 
+    message: 'Accès refusé: droits administrateur requis' 
+  });
+};
 
 // Configuration pour multer (gestion des uploads de fichiers)
 const storage = multer.diskStorage({
@@ -28,7 +42,7 @@ const upload = multer({
 });
 
 // Vérifier le statut des templates (personnalisé ou par défaut)
-router.get('/status', (req, res) => {
+router.get('/status', authMiddleware, isAdmin, (req, res) => {
   try {
     const templatesPath = path.join(__dirname, '../templates');
     const templateStatus = {
@@ -44,7 +58,7 @@ router.get('/status', (req, res) => {
 });
 
 // Télécharger un template
-router.get('/download/:templateType', (req, res) => {
+router.get('/download/:templateType', authMiddleware, isAdmin, (req, res) => {
   try {
     const { templateType } = req.params;
     
@@ -77,7 +91,7 @@ router.get('/download/:templateType', (req, res) => {
 });
 
 // Uploader un template personnalisé
-router.post('/upload/:templateType', upload.single('template'), (req, res) => {
+router.post('/upload/:templateType', authMiddleware, isAdmin, upload.single('template'), (req, res) => {
   try {
     const { templateType } = req.params;
     
@@ -102,7 +116,7 @@ router.post('/upload/:templateType', upload.single('template'), (req, res) => {
 });
 
 // Restaurer un template par défaut
-router.post('/restore/:templateType', (req, res) => {
+router.post('/restore/:templateType', authMiddleware, isAdmin, (req, res) => {
   try {
     const { templateType } = req.params;
     

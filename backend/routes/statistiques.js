@@ -4,9 +4,10 @@ const router = express.Router();
 const Affaire = require('../models/affaire');
 const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
+const authMiddleware = require('../middleware/auth');
 
 // GET - Statistiques globales
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { annee } = req.query;
     let query = {};
@@ -159,7 +160,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET - Statistiques par année
-router.get('/annee/:annee', async (req, res) => {
+router.get('/annee/:annee', authMiddleware, async (req, res) => {
   try {
     const { annee } = req.params;
     const anneeInt = parseInt(annee);
@@ -359,7 +360,7 @@ const statsByRedacteur = await Beneficiaire.aggregate([
 });
 
 // GET - Statistiques par affaire
-router.get('/affaire/:id', async (req, res) => {
+router.get('/affaire/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -441,7 +442,7 @@ router.get('/affaire/:id', async (req, res) => {
 });
 
 // GET - Statistiques par militaire
-router.get('/militaire/:id', async (req, res) => {
+router.get('/militaire/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -513,7 +514,7 @@ router.get('/militaire/:id', async (req, res) => {
 });
 
 // GET - Statistiques budgétaires par année
-router.get('/budget/:annee', async (req, res) => {
+router.get('/budget/:annee', authMiddleware, async (req, res) => {
   try {
     const { annee } = req.params;
     const anneeInt = parseInt(annee);

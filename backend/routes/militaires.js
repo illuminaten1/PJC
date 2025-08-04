@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
+const authMiddleware = require('../middleware/auth');
 const Affaire = require('../models/affaire');
 
 // Middleware de vérification d'ID
@@ -14,7 +15,7 @@ const validateObjectId = (req, res, next) => {
 };
 
 // GET - Récupérer tous les militaires avec filtres
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { search, affaire, redacteur, region, departement, archive } = req.query;
     let query = {};
@@ -103,7 +104,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET - Récupérer un militaire spécifique avec ses bénéficiaires
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const militaire = await Militaire.findById(req.params.id).populate('affaire');
     
@@ -125,7 +126,7 @@ router.get('/:id', validateObjectId, async (req, res) => {
 });
 
 // POST - Créer un nouveau militaire
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const nouveauMilitaire = new Militaire(req.body);
     const militaireSauvegarde = await nouveauMilitaire.save();
@@ -143,7 +144,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT - Mettre à jour un militaire
-router.put('/:id', validateObjectId, async (req, res) => {
+router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const militaireMaj = await Militaire.findByIdAndUpdate(
       req.params.id,
@@ -162,7 +163,7 @@ router.put('/:id', validateObjectId, async (req, res) => {
 });
 
 // DELETE - Supprimer un militaire
-router.delete('/:id', validateObjectId, async (req, res) => {
+router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
         
     // Supprimer les bénéficiaires associés

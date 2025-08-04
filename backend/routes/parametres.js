@@ -3,9 +3,23 @@ const router = express.Router();
 const Parametre = require('../models/parametre');
 const Affaire = require('../models/affaire');
 const TransfertHistorique = require('../models/transfertHistorique');
+const authMiddleware = require('../middleware/auth');
+
+/**
+ * Middleware pour vérifier les droits administrateur
+ */
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'administrateur') {
+    return next();
+  }
+  return res.status(403).json({ 
+    success: false, 
+    message: 'Accès refusé: droits administrateur requis' 
+  });
+};
 
 // GET - Récupérer tous les paramètres
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, isAdmin, async (req, res) => {
   try {
     const parametres = await Parametre.find();
     
@@ -26,7 +40,7 @@ router.get('/', async (req, res) => {
  * Cette route met à jour toutes les affaires qui référencent le rédacteur source
  * pour les faire pointer vers le rédacteur cible
  */
-router.post('/transfert-portefeuille', async (req, res) => {
+router.post('/transfert-portefeuille', authMiddleware, isAdmin, async (req, res) => {
   try {
     console.log('Requête reçue:', req.body);
     const { sourceRedacteur, targetRedacteur } = req.body;
@@ -91,7 +105,7 @@ router.post('/transfert-portefeuille', async (req, res) => {
 /**
  * GET - Récupérer l'historique des transferts des 30 derniers jours
  */
-router.get('/historique-transferts', async (req, res) => {
+router.get('/historique-transferts', authMiddleware, isAdmin, async (req, res) => {
   console.log('Requête d\'historique reçue');
   
   try {
@@ -120,7 +134,7 @@ router.get('/historique-transferts', async (req, res) => {
 });
 
 // GET - Récupérer un type de paramètre spécifique
-router.get('/:type', async (req, res) => {
+router.get('/:type', authMiddleware, isAdmin, async (req, res) => {
   try {
     const { type } = req.params;
     
@@ -143,7 +157,7 @@ router.get('/:type', async (req, res) => {
 });
 
 // POST - Ajouter une valeur à un type de paramètre
-router.post('/:type', async (req, res) => {
+router.post('/:type', authMiddleware, isAdmin, async (req, res) => {
   try {
     const { type } = req.params;
     const { valeur } = req.body;
@@ -190,7 +204,7 @@ router.post('/:type', async (req, res) => {
 });
 
 // DELETE - Supprimer une valeur d'un type de paramètre
-router.delete('/:type/:index', async (req, res) => {
+router.delete('/:type/:index', authMiddleware, isAdmin, async (req, res) => {
   try {
     const { type, index } = req.params;
     const idx = parseInt(index);

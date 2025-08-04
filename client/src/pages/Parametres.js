@@ -51,7 +51,6 @@ const ParametresContent = () => {
     ...(isAdmin() ? [
       { id: 'templates', label: 'Templates', icon: FaFileAlt, shortLabel: 'Temp' },
       { id: 'utilisateurs', label: 'Utilisateurs', icon: FaUsers, shortLabel: 'Users' },
-      { id: 'logs', label: 'Logs', icon: FaClipboardList, shortLabel: 'Logs' },
       { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit, shortLabel: 'Réd' },
     ] : [
       { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit, shortLabel: 'Réd' },
@@ -60,6 +59,9 @@ const ParametresContent = () => {
     { id: 'circonstances', label: 'Circonstances', icon: FaGavel, shortLabel: 'Circ' },
     { id: 'regions', label: 'Régions', icon: FaMapMarkerAlt, shortLabel: 'Rég' },
     { id: 'departements', label: 'Départements', icon: FaMap, shortLabel: 'Dép' },
+    ...(isAdmin() ? [
+      { id: 'logs', label: 'Logs', icon: FaClipboardList, shortLabel: 'Logs' },
+    ] : []),
   ];
 
   // Si l'utilisateur n'est pas admin et qu'aucun onglet par défaut n'est disponible

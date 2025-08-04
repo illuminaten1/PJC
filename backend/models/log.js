@@ -89,7 +89,11 @@ const logSchema = new mongoose.Schema({
       
       // Système
       'SYSTEM_ERROR',
-      'SYSTEM_WARNING'
+      'SYSTEM_WARNING',
+      
+      // Cookies
+      'COOKIE_ACCEPT',
+      'COOKIE_DECLINE'
     ]
   },
   userId: {

@@ -286,11 +286,13 @@ export const exportToExcel = async (data, options) => {
     // Si les statistiques annuelles sont demandées
     if (options.includeAnnualStats && data.annual) {
       // Créer une nouvelle feuille pour l'année sélectionnée
-      const annualSheet = workbook.addWorksheet(`Statistiques ${options.annee}`);
+      const anneeSheetName = options.annee === -1 ? 'Statistiques Toutes Années' : `Statistiques ${options.annee}`;
+      const annualSheet = workbook.addWorksheet(anneeSheetName);
       
       // Titre
       annualSheet.mergeCells('A1:D1');
-      annualSheet.getCell('A1').value = `Statistiques pour l'année ${options.annee}`;
+      const anneeText = options.annee === -1 ? 'toutes les années' : `l'année ${options.annee}`;
+      annualSheet.getCell('A1').value = `Statistiques pour ${anneeText}`;
       annualSheet.getCell('A1').font = { bold: true, size: 16 };
       annualSheet.getCell('A1').alignment = { horizontal: 'center' };
       
@@ -435,11 +437,13 @@ export const exportToExcel = async (data, options) => {
       
       // Ajouter une nouvelle feuille pour les données budgétaires si disponibles
       if (data.annual.budget && data.annual.budget.parMois && data.annual.budget.parMois.length > 0) {
-        const budgetSheet = workbook.addWorksheet(`Budget ${options.annee}`);
+        const budgetSheetName = options.annee === -1 ? 'Budget Toutes Années' : `Budget ${options.annee}`;
+        const budgetSheet = workbook.addWorksheet(budgetSheetName);
         
         // Titre
         budgetSheet.mergeCells('A1:E1');
-        budgetSheet.getCell('A1').value = `Suivi budgétaire ${options.annee}`;
+        const budgetAnneeText = options.annee === -1 ? 'toutes années' : options.annee;
+        budgetSheet.getCell('A1').value = `Suivi budgétaire ${budgetAnneeText}`;
         budgetSheet.getCell('A1').font = { bold: true, size: 16 };
         budgetSheet.getCell('A1').alignment = { horizontal: 'center' };
         
@@ -448,7 +452,8 @@ export const exportToExcel = async (data, options) => {
         
         // Synthèse annuelle
         budgetSheet.mergeCells('A3:C3');
-        budgetSheet.getCell('A3').value = `Synthèse annuelle ${options.annee}`;
+        const syntheseAnneeText = options.annee === -1 ? 'toutes années' : options.annee;
+        budgetSheet.getCell('A3').value = `Synthèse annuelle ${syntheseAnneeText}`;
         budgetSheet.getCell('A3').font = { bold: true, size: 14 };
         
         // Données de synthèse

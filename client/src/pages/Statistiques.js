@@ -850,7 +850,7 @@ const Statistiques = () => {
             <ResponsiveTable colors={colors}>
               <thead>
                 <tr>
-                  <th>Département</th>
+                  <th>Dép.</th>
                   <th>Militaires</th>
                   <th>Bénéficiaires</th>
                   <th>%</th>

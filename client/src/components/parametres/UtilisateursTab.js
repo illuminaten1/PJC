@@ -357,6 +357,20 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
             />
           </FormGroup>
           
+          {(currentUtilisateur.password.trim() || !currentUtilisateur.id) && (
+            <FormGroup>
+              <FormLabel colors={colors}>Confirmer le mot de passe</FormLabel>
+              <FormInput 
+                type="password" 
+                value={currentUtilisateur.confirmPassword} 
+                onChange={(e) => setCurrentUtilisateur({...currentUtilisateur, confirmPassword: e.target.value})}
+                placeholder="Confirmer le mot de passe"
+                required={!currentUtilisateur.id || currentUtilisateur.password.trim()}
+                colors={colors}
+              />
+            </FormGroup>
+          )}
+          
           <FormGroup>
             <FormLabel colors={colors}>Nom complet</FormLabel>
             <FormInput 
@@ -412,6 +426,18 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
               value={passwordChangeData.password} 
               onChange={(e) => setPasswordChangeData({...passwordChangeData, password: e.target.value})}
               placeholder="Nouveau mot de passe"
+              required
+              colors={colors}
+            />
+          </FormGroup>
+          
+          <FormGroup>
+            <FormLabel colors={colors}>Confirmer le nouveau mot de passe</FormLabel>
+            <FormInput 
+              type="password" 
+              value={passwordChangeData.confirmPassword} 
+              onChange={(e) => setPasswordChangeData({...passwordChangeData, confirmPassword: e.target.value})}
+              placeholder="Confirmer le nouveau mot de passe"
               required
               colors={colors}
             />

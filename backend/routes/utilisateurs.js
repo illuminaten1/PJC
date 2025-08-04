@@ -79,13 +79,21 @@ router.get('/:id', authMiddleware, isAdmin, async (req, res) => {
  */
 router.post('/', authMiddleware, isAdmin, async (req, res) => {
   try {
-    const { username, password, nom, role } = req.body;
+    const { username, password, confirmPassword, nom, role } = req.body;
     
     // Vérifier que tous les champs requis sont présents
     if (!username || !password || !nom || !role) {
       return res.status(400).json({ 
         success: false, 
         message: 'Tous les champs sont requis' 
+      });
+    }
+    
+    // Vérifier que les mots de passe correspondent
+    if (password !== confirmPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Les mots de passe ne correspondent pas' 
       });
     }
     
@@ -212,6 +220,15 @@ router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
     // Mettre à jour les champs
     if (username) utilisateur.username = username;
     if (password) {
+      // Vérifier que les mots de passe correspondent si un nouveau mot de passe est fourni
+      const { confirmPassword } = req.body;
+      if (confirmPassword && password !== confirmPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Les mots de passe ne correspondent pas' 
+        });
+      }
+      
       // Hacher le nouveau mot de passe
       const salt = await bcrypt.genSalt(10);
       utilisateur.password = await bcrypt.hash(password, salt);
@@ -307,12 +324,26 @@ router.delete('/:id', authMiddleware, isAdmin, async (req, res) => {
  */
 router.patch('/:id/password', authMiddleware, isAdmin, async (req, res) => {
   try {
-    const { password } = req.body;
+    const { password, confirmPassword } = req.body;
     
     if (!password) {
       return res.status(400).json({ 
         success: false, 
         message: 'Le nouveau mot de passe est requis' 
+      });
+    }
+    
+    if (!confirmPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'La confirmation du mot de passe est requise' 
+      });
+    }
+    
+    if (password !== confirmPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Les mots de passe ne correspondent pas' 
       });
     }
     

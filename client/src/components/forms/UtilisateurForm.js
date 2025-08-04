@@ -10,6 +10,7 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
   const [formData, setFormData] = useState({
     username: '',
     password: '',
+    confirmPassword: '',
     nom: '',
     role: 'redacteur'
   });
@@ -21,6 +22,7 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
       setFormData({
         username: initialData.username || '',
         password: '',
+        confirmPassword: '',
         nom: initialData.nom || '',
         role: initialData.role || 'redacteur'
       });
@@ -51,6 +53,16 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
     
     if (!initialData?._id && !formData.password.trim()) {
       newErrors.password = "Le mot de passe est requis";
+    }
+    
+    // Vérifier la correspondance des mots de passe si un mot de passe est fourni
+    if (formData.password.trim() && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+    }
+    
+    // Vérifier que la confirmation est fournie si un mot de passe est fourni
+    if (formData.password.trim() && !formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = "La confirmation du mot de passe est requise";
     }
     
     if (!formData.nom.trim()) {
@@ -94,6 +106,20 @@ const UtilisateurForm = ({ initialData, onSubmit, onCancel, loading = false }) =
         required={!initialData?._id}
         disabled={loading}
       />
+      
+      {(formData.password.trim() || !initialData?._id) && (
+        <FormField
+          label="Confirmer le mot de passe"
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          error={errors.confirmPassword}
+          required={!initialData?._id || formData.password.trim()}
+          disabled={loading}
+        />
+      )}
       
       <FormField
         label="Nom complet"

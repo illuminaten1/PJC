@@ -362,7 +362,7 @@ const Login = () => {
           <SecurityNotice darkMode={darkMode}>
             <strong>CONFIDENTIEL</strong><br />
             Accès réservé au personnel autorisé (BRPF).<br />
-            Toutes les connexions sont enregistrées.
+            Toutes les connexions sont enregistrées et conservées pendant 3 ans.
           </SecurityNotice>
         </LoginForm>
       </LoginCard>

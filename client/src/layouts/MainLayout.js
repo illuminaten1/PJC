@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { AuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../utils/api';
 
 const MainLayout = () => {
   const location = useLocation();
@@ -26,17 +27,39 @@ const MainLayout = () => {
   }, []);
   
   // Fonction pour accepter les cookies
-  const acceptCookies = () => {
-    localStorage.setItem('pjc_cookies_accepted', 'true');
-    localStorage.setItem('pjc_cookies_date', new Date().toISOString());
-    setShowCookieBanner(false);
+  const acceptCookies = async () => {
+    try {
+      localStorage.setItem('pjc_cookies_accepted', 'true');
+      localStorage.setItem('pjc_cookies_date', new Date().toISOString());
+      setShowCookieBanner(false);
+      
+      // Logger l'acceptation des cookies
+      await api.post('/logs/cookie-consent', {
+        action: 'COOKIE_ACCEPT',
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Erreur lors du logging de l\'acceptation des cookies:', error);
+    }
   };
   
   // Fonction pour refuser les cookies (optionnel)
-  const declineCookies = () => {
-    localStorage.setItem('pjc_cookies_accepted', 'false');
-    localStorage.setItem('pjc_cookies_date', new Date().toISOString());
-    setShowCookieBanner(false);
+  const declineCookies = async () => {
+    try {
+      localStorage.setItem('pjc_cookies_accepted', 'false');
+      localStorage.setItem('pjc_cookies_date', new Date().toISOString());
+      setShowCookieBanner(false);
+      
+      // Logger le refus des cookies
+      await api.post('/logs/cookie-consent', {
+        action: 'COOKIE_DECLINE',
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Erreur lors du logging du refus des cookies:', error);
+    }
   };
   
   const handleLogout = () => {
@@ -757,8 +780,6 @@ const CookieBannerOverlay = styled.div`
   right: 0;
   z-index: 10000;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(2px);
   
   @media (max-width: 768px) {
     padding: 0.5rem;

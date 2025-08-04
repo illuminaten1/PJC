@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Log = require('../models/log');
+const LogService = require('../services/logService');
 const authMiddleware = require('../middleware/auth');
 
 /**
@@ -319,6 +320,50 @@ router.get('/:id', authMiddleware, isAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erreur serveur'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/logs/cookie-consent
+ * @desc    Logger l'acceptation ou le refus des cookies
+ * @access  Public
+ */
+router.post('/cookie-consent', async (req, res) => {
+  try {
+    const { action, userAgent, timestamp } = req.body;
+    
+    // Validation des données
+    if (!action || !['COOKIE_ACCEPT', 'COOKIE_DECLINE'].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Action invalide. Doit être COOKIE_ACCEPT ou COOKIE_DECLINE'
+      });
+    }
+
+    // Logger l'action sans authentification (public)
+    await LogService.logUserAction({
+      action,
+      req,
+      resourceType: 'system',
+      success: true,
+      details: {
+        cookieConsent: true,
+        userAgent: userAgent || req.headers['user-agent'],
+        timestamp: timestamp || new Date().toISOString()
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Choix de cookies enregistré'
+    });
+
+  } catch (error) {
+    console.error('Erreur lors du logging du choix de cookies:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur lors de l\'enregistrement'
     });
   }
 });

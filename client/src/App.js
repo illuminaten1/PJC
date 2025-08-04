@@ -52,8 +52,14 @@ function App() {
                   <Route path="/beneficiaires/:id" element={<DetailBeneficiaire />} />
                   <Route path="/avocats" element={<Avocats />} />
                   <Route path="/statistiques" element={<Statistiques />} />
-                  <Route path="/parametres" element={<Parametres />} />
                   <Route path="/documentation" element={<Documentation />} />
+                </Route>
+              </Route>
+              
+              {/* Routes administrateur uniquement */}
+              <Route element={<PrivateRoute requireAdmin={true} />}>
+                <Route element={<MainLayout />}>
+                  <Route path="/parametres" element={<Parametres />} />
                 </Route>
               </Route>
               

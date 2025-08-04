@@ -197,13 +197,15 @@ const MainLayout = () => {
                 {activeTab === 'documentation' && <ActiveIndicator colors={colors} />}
               </NavItem>
               
-              <NavItem active={activeTab === 'parametres'} colors={colors}>
-                <StyledLink to="/parametres" colors={colors}>
-                  <NavIcon><FaCog /></NavIcon>
-                  <NavText>Paramètres</NavText>
-                </StyledLink>
-                {activeTab === 'parametres' && <ActiveIndicator colors={colors} />}
-              </NavItem>
+              {isAdmin() && (
+                <NavItem active={activeTab === 'parametres'} colors={colors}>
+                  <StyledLink to="/parametres" colors={colors}>
+                    <NavIcon><FaCog /></NavIcon>
+                    <NavText>Paramètres</NavText>
+                  </StyledLink>
+                  {activeTab === 'parametres' && <ActiveIndicator colors={colors} />}
+                </NavItem>
+              )}
             </NavList>
           </DesktopNav>
 
@@ -252,11 +254,13 @@ const MainLayout = () => {
                 </MobileStyledLink>
               </MobileNavItem>
               
-              <MobileNavItem active={activeTab === 'parametres'} colors={colors}>
-                <MobileStyledLink to="/parametres" colors={colors} onClick={closeMobileMenu}>
-                  <FaCog />
-                </MobileStyledLink>
-              </MobileNavItem>
+              {isAdmin() && (
+                <MobileNavItem active={activeTab === 'parametres'} colors={colors}>
+                  <MobileStyledLink to="/parametres" colors={colors} onClick={closeMobileMenu}>
+                    <FaCog />
+                  </MobileStyledLink>
+                </MobileNavItem>
+              )}
             </MobileNavList>
           </MobileNav>
         </Nav>
@@ -313,12 +317,14 @@ const MainLayout = () => {
               </MobileMenuLink>
             </MobileMenuItem>
             
-            <MobileMenuItem active={activeTab === 'parametres'} colors={colors}>
-              <MobileMenuLink to="/parametres" colors={colors} onClick={closeMobileMenu}>
-                <FaCog />
-                <span>Paramètres</span>
-              </MobileMenuLink>
-            </MobileMenuItem>
+            {isAdmin() && (
+              <MobileMenuItem active={activeTab === 'parametres'} colors={colors}>
+                <MobileMenuLink to="/parametres" colors={colors} onClick={closeMobileMenu}>
+                  <FaCog />
+                  <span>Paramètres</span>
+                </MobileMenuLink>
+              </MobileMenuItem>
+            )}
           </MobileMenuList>
         </MobileMenuOverlay>
       </Header>

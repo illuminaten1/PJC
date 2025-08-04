@@ -179,6 +179,25 @@ router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
       });
     }
     
+    // Vérifier que l'administrateur ne change pas son rôle s'il est le dernier admin
+    if (req.user.id === utilisateur._id.toString() && 
+        utilisateur.role === 'administrateur' && 
+        role === 'redacteur') {
+      
+      // Compter le nombre d'administrateurs actifs
+      const nombreAdmins = await Utilisateur.countDocuments({ 
+        role: 'administrateur', 
+        actif: true 
+      });
+      
+      if (nombreAdmins <= 1) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Vous ne pouvez pas changer votre rôle car vous êtes le dernier administrateur actif' 
+        });
+      }
+    }
+    
     // Vérifier si le nouveau nom d'utilisateur existe déjà (si modifié)
     if (username !== utilisateur.username) {
       const utilisateurExistant = await Utilisateur.findOne({ username });

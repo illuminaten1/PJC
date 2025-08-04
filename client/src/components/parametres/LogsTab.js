@@ -631,7 +631,15 @@ const LogLevel = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: ${props => getLevelColor(props.level)};
+  color: ${props => {
+    switch (props.level) {
+      case 'error': return '#e74c3c';
+      case 'warn': return '#f39c12';
+      case 'info': return '#3498db';
+      case 'debug': return '#95a5a6';
+      default: return props.colors?.textPrimary || '#333';
+    }
+  }};
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;

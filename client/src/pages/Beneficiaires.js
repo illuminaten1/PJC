@@ -914,15 +914,15 @@ const SheetIcon = styled.div`
   }
   
   &.beneficiaires {
-    background-color: ${props => props.colors.primary};
+    background-color: ${props => props.colors?.primary || '#5c6bc0'};
   }
   
   &.conventions {
-    background-color: ${props => props.colors.warning};
+    background-color: ${props => props.colors?.warning || '#ffc107'};
   }
   
   &.paiements {
-    background-color: ${props => props.colors.success};
+    background-color: ${props => props.colors?.success || '#28a745'};
   }
 `;
 

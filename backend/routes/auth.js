@@ -112,7 +112,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 
     // Logger la connexion réussie
-    await LogService.logLogin(username, true, req);
+    await LogService.logLogin(username, true, req, null, utilisateur);
 
     res.json({
       success: true,

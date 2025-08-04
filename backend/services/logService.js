@@ -126,10 +126,10 @@ class LogService {
   /**
    * Log une tentative de connexion
    */
-  static async logLogin(username, success, req, error = null) {
+  static async logLogin(username, success, req, error = null, user = null) {
     await this.logUserAction({
       action: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILURE',
-      user: success ? null : { username }, // Pour les échecs, on n'a pas l'objet user complet
+      user: success && user ? user : (success ? null : { username }), // Utiliser l'utilisateur complet si disponible
       req,
       success,
       error,
@@ -200,15 +200,57 @@ class LogService {
    * Log une action CRUD générique
    */
   static async logCRUD(operation, resourceType, user, req, resourceId = null, resourceName = null, success = true, error = null, details = null) {
-    const actionMap = {
-      'create': `${resourceType.toUpperCase()}_CREATE`,
-      'read': `${resourceType.toUpperCase()}_VIEW`,
-      'update': `${resourceType.toUpperCase()}_UPDATE`,
-      'delete': `${resourceType.toUpperCase()}_DELETE`
+    // Mapping spécifique pour correspondre aux actions définies dans le schéma Log
+    const actionMappings = {
+      'utilisateur': {
+        'create': 'USER_CREATE',
+        'read': 'USER_VIEW',
+        'update': 'USER_UPDATE',
+        'delete': 'USER_DELETE'
+      },
+      'affaire': {
+        'create': 'AFFAIRE_CREATE',
+        'read': 'AFFAIRE_VIEW',
+        'update': 'AFFAIRE_UPDATE',
+        'delete': 'AFFAIRE_DELETE'
+      },
+      'militaire': {
+        'create': 'MILITAIRE_CREATE',
+        'read': 'MILITAIRE_VIEW',
+        'update': 'MILITAIRE_UPDATE',
+        'delete': 'MILITAIRE_DELETE'
+      },
+      'beneficiaire': {
+        'create': 'BENEFICIAIRE_CREATE',
+        'read': 'BENEFICIAIRE_VIEW',
+        'update': 'BENEFICIAIRE_UPDATE',
+        'delete': 'BENEFICIAIRE_DELETE'
+      },
+      'avocat': {
+        'create': 'AVOCAT_CREATE',
+        'read': 'AVOCAT_VIEW',
+        'update': 'AVOCAT_UPDATE',
+        'delete': 'AVOCAT_DELETE'
+      },
+      'convention': {
+        'create': 'CONVENTION_ADD',
+        'read': 'CONVENTION_VIEW',
+        'update': 'CONVENTION_UPDATE',
+        'delete': 'CONVENTION_DELETE'
+      },
+      'paiement': {
+        'create': 'PAIEMENT_ADD',
+        'read': 'PAIEMENT_VIEW',
+        'update': 'PAIEMENT_UPDATE',
+        'delete': 'PAIEMENT_DELETE'
+      }
     };
 
+    // Utiliser le mapping spécifique ou fallback sur l'ancien système
+    const action = actionMappings[resourceType]?.[operation] || `${resourceType.toUpperCase()}_${operation.toUpperCase()}`;
+
     await this.logUserAction({
-      action: actionMap[operation],
+      action,
       user,
       req,
       resourceType,

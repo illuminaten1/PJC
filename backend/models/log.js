@@ -23,6 +23,7 @@ const logSchema = new mongoose.Schema({
       
       // Gestion des utilisateurs
       'USER_CREATE',
+      'USER_VIEW',
       'USER_UPDATE',
       'USER_DELETE',
       'USER_ACTIVATE',
@@ -48,9 +49,11 @@ const logSchema = new mongoose.Schema({
       'BENEFICIAIRE_UPDATE',
       'BENEFICIAIRE_DELETE',
       'CONVENTION_ADD',
+      'CONVENTION_VIEW',
       'CONVENTION_UPDATE',
       'CONVENTION_DELETE',
       'PAIEMENT_ADD',
+      'PAIEMENT_VIEW',
       'PAIEMENT_UPDATE',
       'PAIEMENT_DELETE',
       
@@ -109,7 +112,7 @@ const logSchema = new mongoose.Schema({
   },
   resourceType: {
     type: String,
-    enum: ['affaire', 'militaire', 'beneficiaire', 'avocat', 'utilisateur', 'document', 'parametre', 'template', 'system'],
+    enum: ['affaire', 'militaire', 'beneficiaire', 'avocat', 'utilisateur', 'document', 'parametre', 'template', 'system', 'convention', 'paiement'],
     required: false
   },
   resourceId: {

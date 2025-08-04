@@ -111,19 +111,15 @@ class LogService {
       // Créer le log en base
       await Log.createLog(logData);
 
-      // Log aussi avec winston (pour la console et autres transports)
-      const logMessage = `${action} - User: ${logData.username || 'Anonymous'} - Resource: ${resourceType}${resourceId ? `(${resourceId})` : ''}`;
-      
-      if (success) {
-        logger.info(logMessage, logData);
-      } else {
-        logger.error(logMessage, logData);
+      // Log aussi dans la console en développement
+      if (process.env.NODE_ENV === 'development') {
+        const logMessage = `${action} - User: ${logData.username || 'Anonymous'} - Resource: ${resourceType}${resourceId ? `(${resourceId})` : ''}`;
+        console.log(`[LOG] ${logMessage}`);
       }
 
     } catch (err) {
       // Log l'erreur sans interrompre le processus principal
       console.error('Erreur lors du logging:', err);
-      logger.error('Logging service error', { error: err.message, originalAction: action });
     }
   }
 

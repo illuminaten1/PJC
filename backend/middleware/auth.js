@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
 
-// Clé secrète pour les tokens JWT (à mettre dans .env en production)
-// Assurez-vous que c'est la même clé que dans routes/auth.js
-const JWT_SECRET = 'pjc_secret_key';
+// Clé secrète pour les tokens JWT depuis les variables d'environnement
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Vérifier que JWT_SECRET est défini
+if (!JWT_SECRET) {
+  console.error('❌ ERREUR CRITIQUE: JWT_SECRET n\'est pas défini dans les variables d\'environnement');
+  console.error('💡 Solution: Copiez .env.example vers .env et générez un secret avec: openssl rand -base64 48');
+  process.exit(1);
+}
 
 /**
  * Middleware d'authentification

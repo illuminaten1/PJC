@@ -8,8 +8,8 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-CHANGEME_UNSAFE_DEFAULT}
     networks:
       - pjc-network
       
@@ -20,11 +20,11 @@ services:
     ports:
       - "5002:5002"
     environment:
-      - NODE_ENV=production
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/protection-juridique?authSource=admin
-      - JWT_SECRET=pjc_secret_key
-      - PORT=5002
-      - SKIP_DATA_INIT=false
+      - NODE_ENV=${NODE_ENV:-production}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://admin:CHANGEME_UNSAFE_DEFAULT@mongodb:27017/protection-juridique?authSource=admin}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${PORT:-5002}
+      - SKIP_DATA_INIT=${SKIP_DATA_INIT:-false}
     depends_on:
       - mongodb
     volumes:
@@ -38,11 +38,11 @@ services:
     container_name: pjc-frontend
     restart: always
     ports:
-      - "80:80"  # Écoute sur port 3000
+      - "80:80"  # Écoute sur port 80
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=/api  # Changé : utilise le proxy
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}  # Utilise le proxy
     networks:
       - pjc-network
       

@@ -121,6 +121,75 @@ PJC/
 - **Génération de documents** : Carbone, libreoffice
 - **Authentification** : JWT (JSON Web Token)
 
+## ⚙️ Configuration et Déploiement
+
+### Prérequis
+
+- Docker et Docker Compose
+- Node.js 20+ (pour développement local)
+- MongoDB (si développement sans Docker)
+
+### Configuration des Variables d'Environnement
+
+**IMPORTANT** : Avant le premier déploiement, vous DEVEZ configurer les variables d'environnement :
+
+1. **Copiez le fichier exemple** :
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Générez des secrets sécurisés** :
+   ```bash
+   # Générer JWT_SECRET (secret pour les tokens d'authentification)
+   openssl rand -base64 48
+   
+   # Générer un mot de passe pour MongoDB
+   openssl rand -base64 24
+   ```
+
+3. **Éditez le fichier .env** avec vos valeurs :
+   ```env
+   # Remplacez par votre secret JWT généré
+   JWT_SECRET=votre_secret_jwt_genere_48_caracteres_minimum
+   
+   # Configurez MongoDB avec un mot de passe fort
+   MONGODB_URI=mongodb://admin:votre_mot_de_passe_mongodb@mongodb:27017/protection-juridique?authSource=admin
+   MONGO_INITDB_ROOT_USERNAME=admin
+   MONGO_INITDB_ROOT_PASSWORD=votre_mot_de_passe_mongodb
+   
+   # Configuration application
+   NODE_ENV=production
+   PORT=5002
+   ```
+
+### Démarrage avec Docker
+
+```bash
+# Construire et démarrer tous les services
+docker-compose up -d
+
+# Vérifier les logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+### ⚠️ Sécurité - Premier Déploiement
+
+1. **Changez le mot de passe administrateur par défaut** :
+   - Username : `admin`
+   - Mot de passe initial : `admin`
+   - **CHANGEZ IMMÉDIATEMENT** ce mot de passe après la première connexion
+
+2. **Vérifiez que le fichier .env n'est PAS commité** :
+   ```bash
+   git status  # .env ne doit PAS apparaître
+   ```
+
+3. **Variables sensibles** :
+   - Tous les secrets sont dans .env (non versionné)
+   - docker-compose.yml utilise des variables d'environnement
+   - Aucun secret en dur dans le code source
+
 ## Modèles de données
 
 ### Utilisateurs (nouveau)

@@ -812,7 +812,7 @@ const HighlightBox = styled.div`
 `;
 
 const WarningBox = styled.div`
-  background: linear-gradient(135deg, ${props => props.colors.warningBg}, #fff8e1);
+  background-color: ${props => props.colors.warningBg};
   border-left: 4px solid ${props => props.colors.warning};
   padding: 16px 20px;
   margin: 20px 0;
@@ -854,7 +854,7 @@ const WarningBox = styled.div`
 `;
 
 const StructureCard = styled.div`
-  background: linear-gradient(135deg, ${props => props.colors.successBg}, #e8f5e9);
+  background-color: ${props => props.colors.successBg};
   border: 1px solid ${props => props.colors.success};
   border-radius: 8px;
   padding: 20px;

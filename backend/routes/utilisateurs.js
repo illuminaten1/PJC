@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const Utilisateur = require('../models/utilisateur');
 const authMiddleware = require('../middleware/auth');
+const LogService = require('../services/logService');
 
 /**
  * Middleware pour vérifier les droits administrateur
@@ -122,6 +123,10 @@ router.post('/', authMiddleware, isAdmin, async (req, res) => {
     
     await nouvelUtilisateur.save();
     
+    // Logger la création
+    await LogService.logCRUD('create', 'utilisateur', req.user, req, nouvelUtilisateur._id,
+      nouvelUtilisateur.username, true, null, { role: nouvelUtilisateur.role });
+    
     res.status(201).json({
       success: true,
       message: 'Utilisateur créé avec succès',
@@ -135,6 +140,11 @@ router.post('/', authMiddleware, isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Erreur lors de la création de l\'utilisateur:', err);
+    
+    // Logger l'erreur
+    await LogService.logCRUD('create', 'utilisateur', req.user, req, null,
+      req.body.username, false, err);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur serveur lors de la création de l\'utilisateur' 
@@ -194,6 +204,10 @@ router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
     
     await utilisateur.save();
     
+    // Logger la mise à jour
+    await LogService.logCRUD('update', 'utilisateur', req.user, req, utilisateur._id,
+      utilisateur.username, true, null, { role: utilisateur.role, actif: utilisateur.actif });
+    
     res.json({
       success: true,
       message: 'Utilisateur mis à jour avec succès',
@@ -207,6 +221,11 @@ router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Erreur lors de la mise à jour de l\'utilisateur:', err);
+    
+    // Logger l'erreur
+    await LogService.logCRUD('update', 'utilisateur', req.user, req, req.params.id,
+      'Utilisateur', false, err);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur serveur lors de la mise à jour de l\'utilisateur' 
@@ -240,12 +259,21 @@ router.delete('/:id', authMiddleware, isAdmin, async (req, res) => {
     
     await Utilisateur.findByIdAndDelete(req.params.id);
     
+    // Logger la suppression
+    await LogService.logCRUD('delete', 'utilisateur', req.user, req, req.params.id,
+      utilisateur.username, true);
+    
     res.json({
       success: true,
       message: 'Utilisateur supprimé avec succès'
     });
   } catch (err) {
     console.error('Erreur lors de la suppression de l\'utilisateur:', err);
+    
+    // Logger l'erreur
+    await LogService.logCRUD('delete', 'utilisateur', req.user, req, req.params.id,
+      'Utilisateur', false, err);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur serveur lors de la suppression de l\'utilisateur' 
@@ -285,12 +313,36 @@ router.patch('/:id/password', authMiddleware, isAdmin, async (req, res) => {
     
     await utilisateur.save();
     
+    // Logger le changement de mot de passe
+    await LogService.logUserAction({
+      action: 'PASSWORD_CHANGE',
+      user: req.user,
+      req,
+      resourceType: 'utilisateur',
+      resourceId: utilisateur._id,
+      resourceName: utilisateur.username,
+      success: true,
+      details: { targetUser: utilisateur.username }
+    });
+    
     res.json({
       success: true,
       message: 'Mot de passe changé avec succès'
     });
   } catch (err) {
     console.error('Erreur lors du changement de mot de passe:', err);
+    
+    // Logger l'erreur
+    await LogService.logUserAction({
+      action: 'PASSWORD_CHANGE',
+      user: req.user,
+      req,
+      resourceType: 'utilisateur',
+      resourceId: req.params.id,
+      success: false,
+      error: err
+    });
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur serveur lors du changement de mot de passe' 
@@ -325,6 +377,18 @@ router.patch('/:id/toggle-actif', authMiddleware, isAdmin, async (req, res) => {
     utilisateur.actif = !utilisateur.actif;
     await utilisateur.save();
     
+    // Logger l'activation/désactivation
+    await LogService.logUserAction({
+      action: utilisateur.actif ? 'USER_ACTIVATE' : 'USER_DEACTIVATE',
+      user: req.user,
+      req,
+      resourceType: 'utilisateur',
+      resourceId: utilisateur._id,
+      resourceName: utilisateur.username,
+      success: true,
+      details: { newStatus: utilisateur.actif ? 'active' : 'inactive' }
+    });
+    
     res.json({
       success: true,
       message: `Utilisateur ${utilisateur.actif ? 'activé' : 'désactivé'} avec succès`,
@@ -332,6 +396,18 @@ router.patch('/:id/toggle-actif', authMiddleware, isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Erreur lors du changement de statut de l\'utilisateur:', err);
+    
+    // Logger l'erreur
+    await LogService.logUserAction({
+      action: 'USER_ACTIVATE',
+      user: req.user,
+      req,
+      resourceType: 'utilisateur',
+      resourceId: req.params.id,
+      success: false,
+      error: err
+    });
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur serveur lors du changement de statut de l\'utilisateur' 

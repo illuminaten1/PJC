@@ -4,6 +4,7 @@ const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
 const authMiddleware = require('../middleware/auth');
 const Affaire = require('../models/affaire');
+const LogService = require('../services/logService');
 
 // Middleware de vérification d'ID
 const validateObjectId = (req, res, next) => {
@@ -137,8 +138,14 @@ router.post('/', authMiddleware, async (req, res) => {
       { $push: { militaires: militaireSauvegarde._id } }
     );
     
+    // Logger la création
+    await LogService.logCRUD('create', 'militaire', req.user, req, militaireSauvegarde._id,
+      `${militaireSauvegarde.grade} ${militaireSauvegarde.prenom} ${militaireSauvegarde.nom}`);
+    
     res.status(201).json(militaireSauvegarde);
   } catch (error) {
+    // Logger l'erreur
+    await LogService.logCRUD('create', 'militaire', req.user, req, null, 'Militaire', false, error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -156,8 +163,14 @@ router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
       return res.status(404).json({ message: 'Militaire non trouvé' });
     }
     
+    // Logger la mise à jour
+    await LogService.logCRUD('update', 'militaire', req.user, req, militaireMaj._id,
+      `${militaireMaj.grade} ${militaireMaj.prenom} ${militaireMaj.nom}`);
+    
     res.json(militaireMaj);
   } catch (error) {
+    // Logger l'erreur
+    await LogService.logCRUD('update', 'militaire', req.user, req, req.params.id, 'Militaire', false, error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -182,8 +195,14 @@ router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
       { $pull: { militaires: req.params.id } }
     );
     
+    // Logger la suppression
+    await LogService.logCRUD('delete', 'militaire', req.user, req, req.params.id,
+      `${militaireSupprime.grade} ${militaireSupprime.prenom} ${militaireSupprime.nom}`);
+    
     res.json({ message: 'Militaire et bénéficiaires associés supprimés avec succès' });
   } catch (error) {
+    // Logger l'erreur
+    await LogService.logCRUD('delete', 'militaire', req.user, req, req.params.id, 'Militaire', false, error);
     res.status(500).json({ message: error.message });
   }
 });

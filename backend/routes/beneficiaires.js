@@ -3,6 +3,7 @@ const router = express.Router();
 const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
 const authMiddleware = require('../middleware/auth');
+const LogService = require('../services/logService');
 
 // Middleware de vérification d'ID
 const validateObjectId = (req, res, next) => {
@@ -125,8 +126,13 @@ router.post('/', authMiddleware, async (req, res) => {
       { $push: { beneficiaires: beneficiaireSauvegarde._id } }
     );
     
+    // Log de l'opération de création
+    LogService.logCRUD('create', 'beneficiaire', req.user, req, beneficiaireSauvegarde._id, `${beneficiaireSauvegarde.prenom} ${beneficiaireSauvegarde.nom}`);
+    
     res.status(201).json(beneficiaireSauvegarde);
   } catch (error) {
+    // Log de l'erreur
+    LogService.logCRUD('create', 'beneficiaire', req.user, req, null, null, false, error.message);
     res.status(400).json({ message: error.message });
   }
 });
@@ -144,8 +150,13 @@ router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
       return res.status(404).json({ message: 'Bénéficiaire non trouvé' });
     }
     
+    // Log de l'opération de mise à jour
+    LogService.logCRUD('update', 'beneficiaire', req.user, req, beneficiaireMaj._id, `${beneficiaireMaj.prenom} ${beneficiaireMaj.nom}`);
+    
     res.json(beneficiaireMaj);
   } catch (error) {
+    // Log de l'erreur
+    LogService.logCRUD('update', 'beneficiaire', req.user, req, req.params.id, null, false, error.message);
     res.status(400).json({ message: error.message });
   }
 });
@@ -171,8 +182,13 @@ router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
       { $pull: { beneficiaires: req.params.id } }
     );
     
+    // Log de l'opération de suppression
+    LogService.logCRUD('delete', 'beneficiaire', req.user, req, beneficiaireSupprime._id, `${beneficiaireSupprime.prenom} ${beneficiaireSupprime.nom}`);
+    
     res.json({ message: 'Bénéficiaire supprimé avec succès' });
   } catch (error) {
+    // Log de l'erreur
+    LogService.logCRUD('delete', 'beneficiaire', req.user, req, req.params.id, null, false, error.message);
     res.status(500).json({ message: error.message });
   }
 });
@@ -188,6 +204,9 @@ router.post('/:id/conventions', authMiddleware, validateObjectId, async (req, re
     
     beneficiaire.conventions.push(req.body);
     const beneficiaireMaj = await beneficiaire.save();
+    
+    // Log de l'ajout de convention
+    LogService.logCRUD('create', 'convention', req.user, req, beneficiaire._id, `Convention pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
     
     res.status(201).json(beneficiaireMaj);
   } catch (error) {
@@ -228,6 +247,9 @@ router.put('/:id/conventions/:index', authMiddleware, validateObjectId, async (r
     // Sauvegarder les modifications
     await beneficiaire.save();
     
+    // Log de la mise à jour de convention
+    LogService.logCRUD('update', 'convention', req.user, req, beneficiaire._id, `Convention pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
+    
     res.json(beneficiaire);
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la convention:", error);
@@ -263,6 +285,9 @@ router.delete('/:id/conventions/:index', authMiddleware, validateObjectId, async
     // Sauvegarder les modifications
     await beneficiaire.save();
     
+    // Log de la suppression de convention
+    LogService.logCRUD('delete', 'convention', req.user, req, beneficiaire._id, `Convention pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
+    
     res.json({ message: 'Convention supprimée avec succès' });
   } catch (error) {
     console.error("Erreur lors de la suppression de la convention:", error);
@@ -281,6 +306,9 @@ router.post('/:id/paiements', authMiddleware, validateObjectId, async (req, res)
     
     beneficiaire.paiements.push(req.body);
     const beneficiaireMaj = await beneficiaire.save();
+    
+    // Log de l'ajout de paiement
+    LogService.logCRUD('create', 'paiement', req.user, req, beneficiaire._id, `Paiement pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
     
     res.status(201).json(beneficiaireMaj);
   } catch (error) {
@@ -321,6 +349,9 @@ router.put('/:id/paiements/:index', authMiddleware, validateObjectId, async (req
     // Sauvegarder les modifications
     await beneficiaire.save();
     
+    // Log de la mise à jour de paiement
+    LogService.logCRUD('update', 'paiement', req.user, req, beneficiaire._id, `Paiement pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
+    
     res.json(beneficiaire);
   } catch (error) {
     console.error("Erreur lors de la mise à jour du paiement:", error);
@@ -355,6 +386,9 @@ router.delete('/:id/paiements/:index', authMiddleware, validateObjectId, async (
     
     // Sauvegarder les modifications
     await beneficiaire.save();
+    
+    // Log de la suppression de paiement
+    LogService.logCRUD('delete', 'paiement', req.user, req, beneficiaire._id, `Paiement pour ${beneficiaire.prenom} ${beneficiaire.nom}`);
     
     res.json({ message: 'Paiement supprimé avec succès' });
   } catch (error) {

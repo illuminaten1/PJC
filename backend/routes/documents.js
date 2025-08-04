@@ -5,6 +5,7 @@ const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
 const Affaire = require('../models/affaire');
 const authMiddleware = require('../middleware/auth');
+const LogService = require('../services/logService');
 
 router.get('/health', authMiddleware, (req, res) => {
   res.status(200).send('OK');
@@ -112,6 +113,10 @@ router.post('/convention/:beneficiaireId/:conventionIndex', authMiddleware, vali
     // Générer le document dans le format demandé
     const documentBuffer = await documentGenerator.genererConventionHonoraires(data, format);
     
+    // Logger la génération du document
+    await LogService.logDocumentGeneration('convention', req.user, req, beneficiaireId, 
+      `Convention ${beneficiaire.nom} ${beneficiaire.prenom}`, true);
+    
     // Configuration des en-têtes selon le format
     let contentType;
     let fileName = `convention_${beneficiaire.numeroDecision || 'sans_numero'}.${format}`;
@@ -128,6 +133,11 @@ router.post('/convention/:beneficiaireId/:conventionIndex', authMiddleware, vali
     res.send(documentBuffer);
   } catch (error) {
     console.error("Erreur détaillée lors de la génération de la convention:", error);
+    
+    // Logger l'erreur
+    await LogService.logDocumentGeneration('convention', req.user, req, 
+      req.params.beneficiaireId, 'Convention', false, error);
+    
     res.status(500).json({ 
       message: "Erreur lors de la génération du document", 
       details: error.message,
@@ -236,6 +246,10 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', authMiddleware, validat
       const buffer = await documentGenerator.genererFicheReglement(data, format);
       console.log(`Document généré avec succès (taille: ${buffer.length} octets)`);
       
+      // Logger la génération du document
+      await LogService.logDocumentGeneration('reglement', req.user, req, beneficiaireId,
+        `Règlement ${beneficiaire.nom} ${beneficiaire.prenom}`, true);
+      
       // Configurer l'en-tête et renvoyer le document
       const fileName = `reglement_${beneficiaire.numeroDecision || 'sans_numero'}.${format}`;
       
@@ -257,6 +271,11 @@ router.post('/reglement/:beneficiaireId/:paiementIndex', authMiddleware, validat
     }
   } catch (error) {
     console.error('Erreur détaillée lors de la génération de la fiche de règlement:', error);
+    
+    // Logger l'erreur
+    await LogService.logDocumentGeneration('reglement', req.user, req,
+      req.params.beneficiaireId, 'Règlement', false, error);
+    
     res.status(500).json({ 
       message: 'Erreur lors de la génération du document', 
       error: error.message,
@@ -306,6 +325,10 @@ router.post('/synthese-affaire/:id', authMiddleware, validateMongoId('id'), asyn
     // Générer le document
     const documentBuffer = await documentGenerator.genererSyntheseAffaire(data, format);
     
+    // Logger la génération du document
+    await LogService.logDocumentGeneration('synthese', req.user, req, id,
+      `Synthèse ${affaire.nom}`, true);
+    
     // Configuration des en-têtes selon le format
     let contentType;
     let fileName = `synthese_${affaire.nom.replace(/\s+/g, '_')}.${format}`;
@@ -322,6 +345,11 @@ router.post('/synthese-affaire/:id', authMiddleware, validateMongoId('id'), asyn
     res.send(documentBuffer);
   } catch (error) {
     console.error("Erreur détaillée lors de la génération de la synthèse:", error);
+    
+    // Logger l'erreur
+    await LogService.logDocumentGeneration('synthese', req.user, req,
+      req.params.id, 'Synthèse', false, error);
+    
     res.status(500).json({ 
       message: "Erreur lors de la génération du document", 
       details: error.message,

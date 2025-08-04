@@ -8,8 +8,8 @@
         "dev": "nodemon app.js"
     },
     "dependencies": {
-        "bcrypt": "^5.1.1",
         "@faker-js/faker": "^9.7.0",
+        "bcrypt": "^5.1.1",
         "carbone": "^3.5.6",
         "cors": "^2.8.5",
         "dotenv": "^16.5.0",
@@ -22,7 +22,9 @@
         "mongoose": "^7.0.0",
         "multer": "^1.4.2",
         "multer-gridfs-storage": "^5.0.2",
-        "nodemailer-fetch": "^2.1.0"
+        "nodemailer-fetch": "^2.1.0",
+        "winston": "^3.17.0",
+        "winston-mongodb": "^7.0.0"
     },
     "devDependencies": {
         "nodemon": "^2.0.20"

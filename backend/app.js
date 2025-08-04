@@ -47,6 +47,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/utilisateurs', require('./routes/utilisateurs'));
 app.use('/api/fichiers', require('./routes/fichiers'));
 app.use('/api/export', exportRoutes); // Ajout de la route d'export Excel
+app.use('/api/logs', require('./routes/logs'));
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

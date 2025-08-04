@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // ou bcryptjs
 const Utilisateur = require('../models/utilisateur');
+const LogService = require('../services/logService');
 
 // Clé secrète pour les tokens JWT (à mettre dans .env en production)
 const JWT_SECRET = process.env.JWT_SECRET || 'pjc_secret_key';
@@ -29,6 +30,7 @@ router.post('/login', async (req, res) => {
 
     // Vérifier si l'utilisateur existe
     if (!utilisateur) {
+      await LogService.logLogin(username, false, req, new Error('Utilisateur non trouvé'));
       return res.status(401).json({ 
         success: false, 
         message: 'Identifiants incorrects' 
@@ -37,6 +39,7 @@ router.post('/login', async (req, res) => {
 
     // Vérifier si le compte est actif
     if (!utilisateur.actif) {
+      await LogService.logLogin(username, false, req, new Error('Compte désactivé'));
       return res.status(401).json({ 
         success: false, 
         message: 'Ce compte a été désactivé' 
@@ -66,6 +69,7 @@ router.post('/login', async (req, res) => {
     }
     
     if (!isMatch) {
+      await LogService.logLogin(username, false, req, new Error('Mot de passe incorrect'));
       return res.status(401).json({ 
         success: false, 
         message: 'Identifiants incorrects' 
@@ -99,6 +103,9 @@ router.post('/login', async (req, res) => {
 
     // Générer le token (expire après 24h)
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+
+    // Logger la connexion réussie
+    await LogService.logLogin(username, true, req);
 
     res.json({
       success: true,
@@ -143,6 +150,13 @@ router.get('/verify', async (req, res) => {
       const utilisateur = await Utilisateur.findById(decoded.id).select('-password -passwordNeedsHash');
       
       if (!utilisateur || !utilisateur.actif) {
+        await LogService.logUserAction({
+          action: 'TOKEN_VERIFICATION_FAILURE',
+          req,
+          success: false,
+          error: new Error('Utilisateur invalide ou désactivé'),
+          details: { reason: 'user_invalid_or_disabled' }
+        });
         return res.status(401).json({ 
           success: false, 
           message: 'Utilisateur invalide ou désactivé' 

@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/auth');
 const Beneficiaire = require('../models/beneficiaire');
 const Militaire = require('../models/militaire');
 const Affaire = require('../models/affaire');
+const LogService = require('../services/logService');
 
 /**
  * @route   GET /api/export/beneficiaires
@@ -268,6 +269,13 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     // Appliquer les styles aux cellules de données
     applyDataStyles(wsPaiements);
     
+    // Logger l'export
+    await LogService.logExport('excel_beneficiaires', req.user, req, true, null, {
+      totalBeneficiaires: beneficiaires.length,
+      totalConventions: beneficiaires.reduce((acc, b) => acc + (b.conventions?.length || 0), 0),
+      totalPaiements: beneficiaires.reduce((acc, b) => acc + (b.paiements?.length || 0), 0)
+    });
+    
     // Générer le fichier et l'envoyer comme réponse HTTP
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=beneficiaires-export.xlsx');
@@ -276,6 +284,10 @@ router.get('/beneficiaires', authMiddleware, async (req, res) => {
     res.end();
   } catch (error) {
     console.error('Erreur lors de l\'export Excel:', error);
+    
+    // Logger l'erreur
+    await LogService.logExport('excel_beneficiaires', req.user, req, false, error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Erreur lors de la génération du fichier Excel' 

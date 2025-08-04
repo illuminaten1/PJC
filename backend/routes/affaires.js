@@ -4,6 +4,7 @@ const Affaire = require('../models/affaire');
 const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
 const authMiddleware = require('../middleware/auth');
+const LogService = require('../services/logService');
 
 // Middleware de vérification d'ID valide
 const validateObjectId = (req, res, next) => {
@@ -76,8 +77,14 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const nouvelleAffaire = new Affaire(req.body);
     const affaireSauvegardee = await nouvelleAffaire.save();
+    
+    // Log de l'opération de création
+    LogService.logCRUD('create', 'affaire', req.user, req, affaireSauvegardee._id, affaireSauvegardee.nom);
+    
     res.status(201).json(affaireSauvegardee);
   } catch (error) {
+    // Log de l'erreur
+    LogService.logCRUD('create', 'affaire', req.user, req, null, null, false, error.message);
     res.status(400).json({ message: error.message });
   }
 });
@@ -95,8 +102,13 @@ router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
       return res.status(404).json({ message: 'Affaire non trouvée' });
     }
     
+    // Log de l'opération de mise à jour
+    LogService.logCRUD('update', 'affaire', req.user, req, affaireMaj._id, affaireMaj.nom);
+    
     res.json(affaireMaj);
   } catch (error) {
+    // Log de l'erreur
+    LogService.logCRUD('update', 'affaire', req.user, req, req.params.id, null, false, error.message);
     res.status(400).json({ message: error.message });
   }
 });
@@ -132,9 +144,14 @@ router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
       return res.status(404).json({ message: 'Affaire non trouvée' });
     }
     
+    // Log de l'opération de suppression
+    LogService.logCRUD('delete', 'affaire', req.user, req, affaireSupprimee._id, affaireSupprimee.nom);
+    
     res.json({ message: 'Affaire et données associées supprimées avec succès' });
   } catch (error) {
     console.error("Erreur lors de la suppression:", error);
+    // Log de l'erreur
+    LogService.logCRUD('delete', 'affaire', req.user, req, req.params.id, null, false, error.message);
     res.status(500).json({ message: error.message });
   }
 });

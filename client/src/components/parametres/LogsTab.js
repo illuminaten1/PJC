@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { 
-  FaSearch, 
   FaFilter, 
   FaDownload, 
   FaSync, 
@@ -160,16 +159,6 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
     });
   };
 
-  const getLevelColor = (level) => {
-    switch (level) {
-      case 'error': return '#e74c3c';
-      case 'warn': return '#f39c12';
-      case 'info': return '#3498db';
-      case 'debug': return '#95a5a6';
-      default: return colors.textPrimary;
-    }
-  };
-
   const getLevelIcon = (level) => {
     switch (level) {
       case 'error': return <FaExclamationTriangle />;
@@ -180,8 +169,16 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
     }
   };
 
+  if (loading && logs.length === 0) {
+    return (
+      <LoadingContainer colors={colors}>
+        Chargement des logs...
+      </LoadingContainer>
+    );
+  }
+
   return (
-    <Container colors={colors}>
+    <Container>
       <Header>
         <Title colors={colors}>Journal des Actions</Title>
         <HeaderActions>
@@ -203,22 +200,22 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
 
       {/* Statistiques rapides */}
       {stats && (
-        <StatsContainer colors={colors}>
+        <StatsContainer>
           <StatCard colors={colors}>
-            <StatValue>{stats.summary.totalLogs}</StatValue>
-            <StatLabel>Total des logs</StatLabel>
+            <StatValue colors={colors}>{stats.summary.totalLogs}</StatValue>
+            <StatLabel colors={colors}>Total des logs</StatLabel>
           </StatCard>
           <StatCard colors={colors}>
-            <StatValue style={{ color: '#e74c3c' }}>
+            <StatValue colors={colors} style={{ color: '#e74c3c' }}>
               {stats.recentErrors?.length || 0}
             </StatValue>
-            <StatLabel>Erreurs récentes (24h)</StatLabel>
+            <StatLabel colors={colors}>Erreurs récentes (24h)</StatLabel>
           </StatCard>
           <StatCard colors={colors}>
-            <StatValue style={{ color: '#27ae60' }}>
+            <StatValue colors={colors} style={{ color: '#27ae60' }}>
               {stats.charts.byLevel?.find(l => l._id === 'info')?.count || 0}
             </StatValue>
-            <StatLabel>Actions réussies</StatLabel>
+            <StatLabel colors={colors}>Actions réussies</StatLabel>
           </StatCard>
         </StatsContainer>
       )}
@@ -322,9 +319,7 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
 
       {/* Liste des logs */}
       <LogsContainer colors={colors}>
-        {loading ? (
-          <LoadingMessage colors={colors}>Chargement des logs...</LoadingMessage>
-        ) : logs.length === 0 ? (
+        {logs.length === 0 ? (
           <EmptyMessage colors={colors}>Aucun log trouvé</EmptyMessage>
         ) : (
           <LogsList>
@@ -420,7 +415,7 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
                 <FaTimes />
               </CloseButton>
             </ModalHeader>
-            <ModalBody>
+            <ModalBody colors={colors}>
               <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
             </ModalBody>
           </ModalContent>
@@ -435,6 +430,15 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+`;
+
+const LoadingContainer = styled.div`
+  padding: 40px;
+  text-align: center;
+  color: ${props => props.colors.textMuted};
+  background-color: ${props => props.colors.surfaceHover};
+  border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Header = styled.div`
@@ -588,12 +592,6 @@ const LogsContainer = styled.div`
   overflow: hidden;
 `;
 
-const LoadingMessage = styled.div`
-  padding: 40px;
-  text-align: center;
-  color: ${props => props.colors.textMuted};
-`;
-
 const EmptyMessage = styled.div`
   padding: 40px;
   text-align: center;
@@ -637,7 +635,7 @@ const LogLevel = styled.div`
       case 'warn': return '#f39c12';
       case 'info': return '#3498db';
       case 'debug': return '#95a5a6';
-      default: return props.colors?.textPrimary || '#333';
+      default: return props.colors.textPrimary;
     }
   }};
   font-weight: 600;

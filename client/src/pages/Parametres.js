@@ -13,6 +13,7 @@ import RegionsTab from '../components/parametres/RegionsTab';
 import DepartementsTab from '../components/parametres/DepartementsTab';
 import RedacteursTab from '../components/parametres/RedacteursTab';
 import GradesTab from '../components/parametres/GradesTab';
+import LogsTab from '../components/parametres/LogsTab';
 import { 
   FaFileAlt, 
   FaUsers, 
@@ -23,7 +24,8 @@ import {
   FaMedal,
   FaChevronLeft,
   FaChevronRight,
-  FaBars
+  FaBars,
+  FaClipboardList
 } from 'react-icons/fa';
 
 const ParametresContent = () => {
@@ -49,6 +51,7 @@ const ParametresContent = () => {
     ...(isAdmin() ? [
       { id: 'templates', label: 'Templates', icon: FaFileAlt, shortLabel: 'Temp' },
       { id: 'utilisateurs', label: 'Utilisateurs', icon: FaUsers, shortLabel: 'Users' },
+      { id: 'logs', label: 'Logs', icon: FaClipboardList, shortLabel: 'Logs' },
       { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit, shortLabel: 'Réd' },
     ] : [
       { id: 'redacteurs', label: 'Rédacteurs', icon: FaUserEdit, shortLabel: 'Réd' },
@@ -119,6 +122,8 @@ const ParametresContent = () => {
         return isAdmin() ? <TemplatesTab {...commonProps} /> : null;
       case 'utilisateurs':
         return isAdmin() ? <UtilisateursTab {...commonProps} /> : null;
+      case 'logs':
+        return isAdmin() ? <LogsTab {...commonProps} /> : null;
       case 'redacteurs':
         return <RedacteursTab {...commonProps} />;
       case 'grades':

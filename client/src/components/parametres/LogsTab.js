@@ -330,28 +330,31 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
                     {getLevelIcon(log.level)}
                     <span>{log.level.toUpperCase()}</span>
                   </LogLevel>
-                  <LogAction colors={colors}>{log.action}</LogAction>
+                  <LogAction colors={colors}>{log.action || log.metadata?.action}</LogAction>
                   <LogTime colors={colors}>{formatDate(log.timestamp)}</LogTime>
                 </LogHeader>
                 
                 <LogBody>
                   <LogUser colors={colors}>
-                    {log.username || 'Système'} 
-                    {log.userRole && <span> ({log.userRole})</span>}
+                    {log.username || log.metadata?.username || 'Système'} 
+                    {(log.userRole || log.metadata?.userRole) && 
+                      <span> ({log.userRole || log.metadata?.userRole})</span>
+                    }
                   </LogUser>
-                  {log.resourceName && (
+                  {(log.resourceName || log.metadata?.resourceName) && (
                     <LogResource colors={colors}>
-                      → {log.resourceType}: {log.resourceName}
+                      → {log.resourceType || log.metadata?.resourceType}: {log.resourceName || log.metadata?.resourceName}
                     </LogResource>
                   )}
-                  {log.error && (
+                  {(log.error || log.metadata?.error) && (
                     <LogError colors={colors}>
-                      Erreur: {log.error.message}
+                      Erreur: {log.error?.message || log.metadata?.error?.message}
                     </LogError>
                   )}
-                  {log.details && typeof log.details === 'object' && (
+                  {((log.details && typeof log.details === 'object') || 
+                    (log.metadata?.details && typeof log.metadata.details === 'object')) && (
                     <LogDetails colors={colors}>
-                      {Object.entries(log.details).map(([key, value]) => (
+                      {Object.entries(log.details || log.metadata?.details || {}).map(([key, value]) => (
                         <span key={key}>{key}: {String(value)}</span>
                       ))}
                     </LogDetails>
@@ -359,12 +362,12 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
                 </LogBody>
 
                 <LogFooter>
-                  {log.ipAddress && (
-                    <LogIP colors={colors}>IP: {log.ipAddress}</LogIP>
+                  {(log.ipAddress || log.metadata?.ipAddress) && (
+                    <LogIP colors={colors}>IP: {log.ipAddress || log.metadata?.ipAddress}</LogIP>
                   )}
-                  {log.duration && (
+                  {(log.duration || log.metadata?.duration) && (
                     <LogDuration colors={colors}>
-                      Durée: {log.duration}ms
+                      Durée: {log.duration || log.metadata?.duration}ms
                     </LogDuration>
                   )}
                   <ViewButton

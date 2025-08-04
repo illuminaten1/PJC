@@ -238,7 +238,7 @@ router.delete('/:id', authMiddleware, isAdmin, async (req, res) => {
       });
     }
     
-    await utilisateur.remove();
+    await Utilisateur.findByIdAndDelete(req.params.id);
     
     res.json({
       success: true,

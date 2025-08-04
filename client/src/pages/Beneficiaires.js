@@ -305,7 +305,7 @@ const Beneficiaires = () => {
         
         <ExportSheets>
           <SheetInfo colors={colors}>
-            <SheetIcon className="beneficiaires">
+            <SheetIcon className="beneficiaires" colors={colors}>
               <FaTable />
             </SheetIcon>
             <SheetDetails>
@@ -318,7 +318,7 @@ const Beneficiaires = () => {
           </SheetInfo>
           
           <SheetInfo colors={colors}>
-            <SheetIcon className="conventions">
+            <SheetIcon className="conventions" colors={colors}>
               <FaFileContract />
             </SheetIcon>
             <SheetDetails>
@@ -331,7 +331,7 @@ const Beneficiaires = () => {
           </SheetInfo>
           
           <SheetInfo colors={colors}>
-            <SheetIcon className="paiements">
+            <SheetIcon className="paiements" colors={colors}>
               <FaMoneyBillWave />
             </SheetIcon>
             <SheetDetails>

@@ -19,7 +19,7 @@ const isAdmin = (req, res, next) => {
 };
 
 // GET - Récupérer tous les paramètres
-router.get('/', authMiddleware, isAdmin, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const parametres = await Parametre.find();
     
@@ -134,7 +134,7 @@ router.get('/historique-transferts', authMiddleware, isAdmin, async (req, res) =
 });
 
 // GET - Récupérer un type de paramètre spécifique
-router.get('/:type', authMiddleware, isAdmin, async (req, res) => {
+router.get('/:type', authMiddleware, async (req, res) => {
   try {
     const { type } = req.params;
     

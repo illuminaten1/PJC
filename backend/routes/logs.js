@@ -57,10 +57,16 @@ router.get('/', authMiddleware, isAdmin, async (req, res) => {
     if (dateStart || dateEnd) {
       query.timestamp = {};
       if (dateStart) {
-        query.timestamp.$gte = new Date(dateStart);
+        // Début de la journée pour dateStart
+        const startDate = new Date(dateStart);
+        startDate.setHours(0, 0, 0, 0);
+        query.timestamp.$gte = startDate;
       }
       if (dateEnd) {
-        query.timestamp.$lte = new Date(dateEnd);
+        // Fin de la journée pour dateEnd (23:59:59.999)
+        const endDate = new Date(dateEnd);
+        endDate.setHours(23, 59, 59, 999);
+        query.timestamp.$lte = endDate;
       }
     }
 
@@ -128,8 +134,16 @@ router.get('/stats', authMiddleware, isAdmin, async (req, res) => {
     let dateFilter = {};
     if (dateStart || dateEnd) {
       dateFilter.timestamp = {};
-      if (dateStart) dateFilter.timestamp.$gte = new Date(dateStart);
-      if (dateEnd) dateFilter.timestamp.$lte = new Date(dateEnd);
+      if (dateStart) {
+        const startDate = new Date(dateStart);
+        startDate.setHours(0, 0, 0, 0);
+        dateFilter.timestamp.$gte = startDate;
+      }
+      if (dateEnd) {
+        const endDate = new Date(dateEnd);
+        endDate.setHours(23, 59, 59, 999);
+        dateFilter.timestamp.$lte = endDate;
+      }
     }
 
     // Agrégations pour les statistiques

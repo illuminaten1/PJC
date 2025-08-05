@@ -57,15 +57,19 @@ router.get('/', authMiddleware, isAdmin, async (req, res) => {
     if (dateStart || dateEnd) {
       query.timestamp = {};
       if (dateStart) {
-        // Parser la date en tant que date locale (non UTC)
-        const [year, month, day] = dateStart.split('-');
-        const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+        // Créer la date de début en UTC pour matcher les timestamps MongoDB
+        const startDate = new Date(dateStart + 'T00:00:00.000Z');
+        // Ajuster pour le fuseau horaire local (soustraire le décalage)
+        const offsetMinutes = startDate.getTimezoneOffset();
+        startDate.setMinutes(startDate.getMinutes() - offsetMinutes);
         query.timestamp.$gte = startDate;
       }
       if (dateEnd) {
-        // Parser la date en tant que date locale (non UTC)
-        const [year, month, day] = dateEnd.split('-');
-        const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 23, 59, 59, 999);
+        // Créer la date de fin en UTC pour matcher les timestamps MongoDB
+        const endDate = new Date(dateEnd + 'T23:59:59.999Z');
+        // Ajuster pour le fuseau horaire local (soustraire le décalage)
+        const offsetMinutes = endDate.getTimezoneOffset();
+        endDate.setMinutes(endDate.getMinutes() - offsetMinutes);
         query.timestamp.$lte = endDate;
       }
     }
@@ -135,13 +139,15 @@ router.get('/stats', authMiddleware, isAdmin, async (req, res) => {
     if (dateStart || dateEnd) {
       dateFilter.timestamp = {};
       if (dateStart) {
-        const [year, month, day] = dateStart.split('-');
-        const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+        const startDate = new Date(dateStart + 'T00:00:00.000Z');
+        const offsetMinutes = startDate.getTimezoneOffset();
+        startDate.setMinutes(startDate.getMinutes() - offsetMinutes);
         dateFilter.timestamp.$gte = startDate;
       }
       if (dateEnd) {
-        const [year, month, day] = dateEnd.split('-');
-        const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 23, 59, 59, 999);
+        const endDate = new Date(dateEnd + 'T23:59:59.999Z');
+        const offsetMinutes = endDate.getTimezoneOffset();
+        endDate.setMinutes(endDate.getMinutes() - offsetMinutes);
         dateFilter.timestamp.$lte = endDate;
       }
     }

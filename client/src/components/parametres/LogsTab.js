@@ -128,8 +128,7 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
       );
 
       const response = await axios.get('/api/logs', { 
-        params: { ...params, limit: 10000 },
-        responseType: 'blob'
+        params: { ...params, limit: 10000 }
       });
       
       const blob = new Blob([JSON.stringify(response.data, null, 2)], {
@@ -137,10 +136,13 @@ const LogsTab = ({ colors, showSuccessMessage, setErrorMessage }) => {
       });
       
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.getElementById('download-link') || document.createElement('a');
+      link.id = 'download-link';
       link.href = url;
       link.download = `logs_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       showSuccessMessage('Export des logs terminé');

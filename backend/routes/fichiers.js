@@ -5,6 +5,7 @@ const multer = require('multer');
 const { GridFsStorage } = require('multer-gridfs-storage');
 const authMiddleware = require('../middleware/auth');
 const Fichier = require('../models/fichier');
+const LogService = require('../services/logService');
 
 // Création du storage engine pour multer avec GridFS
 const storage = new GridFsStorage({
@@ -97,8 +98,13 @@ router.get('/debug-public', async (req, res) => {
 
 // Route pour télécharger un fichier
 router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (req, res) => {
+  const startTime = Date.now();
+  let fichier = null;
+  
   try {
     if (!req.file) {
+      await LogService.logCRUD('create', 'fichier', req.user, req, null, null, false, 
+        new Error('Aucun fichier téléchargé'), { beneficiaireId: req.params.beneficiaireId });
       return res.status(400).json({ message: 'Aucun fichier téléchargé' });
     }
     
@@ -110,6 +116,8 @@ router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (
       fileId = new mongoose.Types.ObjectId(req.file.id);
     } catch (err) {
       console.error('Erreur de conversion d\'ObjectId:', err);
+      await LogService.logCRUD('create', 'fichier', req.user, req, null, req.file.originalname, false, err, 
+        { beneficiaireId: req.params.beneficiaireId, error: 'ObjectId conversion error' });
       return res.status(500).json({ message: 'Erreur de format d\'ID', error: err.message });
     }
     
@@ -119,11 +127,14 @@ router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (
     });
     
     if (!fileExists) {
+      const error = new Error('Le fichier n\'a pas été correctement enregistré dans GridFS');
+      await LogService.logCRUD('create', 'fichier', req.user, req, null, req.file.originalname, false, error, 
+        { beneficiaireId: req.params.beneficiaireId, fileId: fileId.toString() });
       return res.status(500).json({ message: 'Erreur: Le fichier n\'a pas été correctement enregistré dans GridFS' });
     }
     
     // Créer une entrée de métadonnées
-    const fichier = new Fichier({
+    fichier = new Fichier({
       filename: req.file.filename,
       originalname: req.file.originalname,
       contentType: req.file.contentType || req.file.mimetype,
@@ -134,9 +145,30 @@ router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (
     });
     
     await fichier.save();
+    
+    // Logger le succès
+    await LogService.logCRUD('create', 'fichier', req.user, req, fichier._id.toString(), req.file.originalname, true, null, {
+      beneficiaireId: req.params.beneficiaireId,
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      contentType: req.file.contentType || req.file.mimetype,
+      size: req.file.size,
+      duration: Date.now() - startTime
+    });
+    
     res.json(fichier);
   } catch (error) {
     console.error('Erreur détaillée lors du téléchargement du fichier:', error);
+    
+    // Logger l'erreur
+    await LogService.logCRUD('create', 'fichier', req.user, req, 
+      fichier ? fichier._id.toString() : null, 
+      req.file ? req.file.originalname : 'unknown', 
+      false, error, {
+        beneficiaireId: req.params.beneficiaireId,
+        duration: Date.now() - startTime
+      });
+    
     res.status(500).json({ 
       message: 'Erreur lors du téléchargement du fichier', 
       error: error.message,
@@ -256,16 +288,22 @@ router.patch('/:id/description', authMiddleware, async (req, res) => {
 
 // Route pour supprimer un fichier
 router.delete('/:id', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  let fichier = null;
+  
   try {
     console.log('Suppression demandée pour ID:', req.params.id);
     
-    const fichier = await Fichier.findById(req.params.id);
+    fichier = await Fichier.findById(req.params.id);
     if (!fichier) {
+      await LogService.logCRUD('delete', 'fichier', req.user, req, req.params.id, null, false, 
+        new Error('Fichier non trouvé'), { fileId: req.params.id });
       return res.status(404).json({ message: 'Fichier non trouvé' });
     }
     
     console.log('Fichier trouvé, fileId:', fichier.fileId);
     
+    let gridfsError = null;
     try {
       // Supprimer les chunks
       const chunksDeleted = await mongoose.connection.db.collection('uploads.chunks').deleteMany({
@@ -284,8 +322,9 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       if (fileDeleted.deletedCount === 0) {
         console.log('Aucun fichier GridFS trouvé, possible que le fichier ait déjà été supprimé');
       }
-    } catch (gridfsError) {
-      console.error('Erreur lors de la suppression des données GridFS:', gridfsError);
+    } catch (err) {
+      gridfsError = err;
+      console.error('Erreur lors de la suppression des données GridFS:', err);
       // Continuer quand même pour supprimer les métadonnées
     }
     
@@ -293,9 +332,29 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     await Fichier.deleteOne({ _id: req.params.id });
     console.log('Métadonnées du fichier supprimées avec succès');
     
+    // Logger le succès (même si il y a eu des erreurs GridFS mineures)
+    await LogService.logCRUD('delete', 'fichier', req.user, req, req.params.id, fichier.originalname, true, gridfsError, {
+      filename: fichier.filename,
+      originalname: fichier.originalname,
+      beneficiaire: fichier.beneficiaire,
+      contentType: fichier.contentType,
+      size: fichier.size,
+      duration: Date.now() - startTime,
+      gridfsWarning: gridfsError ? 'Erreur lors de la suppression GridFS mais métadonnées supprimées' : null
+    });
+    
     res.json({ message: 'Fichier supprimé avec succès' });
   } catch (error) {
     console.error('Erreur lors de la suppression du fichier:', error);
+    
+    // Logger l'erreur
+    await LogService.logCRUD('delete', 'fichier', req.user, req, req.params.id, 
+      fichier ? fichier.originalname : 'unknown', false, error, {
+        filename: fichier ? fichier.filename : 'unknown',
+        beneficiaire: fichier ? fichier.beneficiaire : 'unknown',
+        duration: Date.now() - startTime
+      });
+    
     res.status(500).json({ message: 'Erreur lors de la suppression du fichier', error: error.message });
   }
 });

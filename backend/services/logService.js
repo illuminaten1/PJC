@@ -243,6 +243,13 @@ class LogService {
         'read': 'PAIEMENT_VIEW',
         'update': 'PAIEMENT_UPDATE',
         'delete': 'PAIEMENT_DELETE'
+      },
+      'fichier': {
+        'create': 'FILE_UPLOAD',
+        'read': 'FILE_VIEW',
+        'update': 'FILE_UPDATE',
+        'delete': 'FILE_DELETE',
+        'download': 'FILE_DOWNLOAD'
       }
     };
 
@@ -357,6 +364,12 @@ class LogService {
       
       // Exports
       { pattern: /^\/api\/export\/beneficiaires/, method: 'GET', action: 'EXPORT_EXCEL_BENEFICIAIRES', resourceType: 'system' },
+      
+      // Fichiers
+      { pattern: /^\/api\/fichiers\/([^\/]+)$/, method: 'POST', action: 'FILE_UPLOAD', resourceType: 'fichier' },
+      { pattern: /^\/api\/fichiers\/([^\/]+)$/, method: 'DELETE', action: 'FILE_DELETE', resourceType: 'fichier' },
+      { pattern: /^\/api\/fichiers\/download\/([^\/]+)$/, method: 'GET', action: 'FILE_DOWNLOAD', resourceType: 'fichier' },
+      { pattern: /^\/api\/fichiers\/preview\/([^\/]+)$/, method: 'GET', action: 'FILE_VIEW', resourceType: 'fichier' },
     ];
     
     for (const mapping of routeMappings) {

@@ -87,6 +87,13 @@ const logSchema = new mongoose.Schema({
       // Statistiques
       'STATISTICS_VIEW',
       
+      // Fichiers
+      'FILE_UPLOAD',
+      'FILE_DELETE',
+      'FILE_VIEW',
+      'FILE_DOWNLOAD',
+      'FILE_UPDATE',
+      
       // Système
       'SYSTEM_ERROR',
       'SYSTEM_WARNING',
@@ -116,7 +123,7 @@ const logSchema = new mongoose.Schema({
   },
   resourceType: {
     type: String,
-    enum: ['affaire', 'militaire', 'beneficiaire', 'avocat', 'utilisateur', 'document', 'parametre', 'template', 'system', 'convention', 'paiement'],
+    enum: ['affaire', 'militaire', 'beneficiaire', 'avocat', 'utilisateur', 'document', 'parametre', 'template', 'system', 'convention', 'paiement', 'fichier'],
     required: false
   },
   resourceId: {

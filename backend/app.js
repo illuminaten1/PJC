@@ -22,13 +22,23 @@ const app = express();
 // Rate limiting pour l'authentification
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 15, // 15 tentatives max par IP
+  max: 15, // 15 tentatives max par utilisateur
   message: { 
     success: false, 
     message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' 
   },
   standardHeaders: true, // Retourne les headers `RateLimit-*`
   legacyHeaders: false, // Désactive les headers `X-RateLimit-*` legacy
+  // Limitation par username au lieu de l'IP (proxy partagé)
+  keyGenerator: (req) => {
+    // Utiliser le username si fourni, sinon fallback sur IP
+    const username = req.body?.username;
+    if (username && username.trim()) {
+      return `user:${username.trim()}`;
+    }
+    // Fallback sur IP si pas de username (pour autres endpoints)
+    return `ip:${req.ip}`;
+  },
   // Personnalisation pour le réseau local
   skipSuccessfulRequests: false, // Compter même les connexions réussies
   skipFailedRequests: false, // Compter aussi les connexions échouées

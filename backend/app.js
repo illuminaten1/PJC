@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const affairesRoutes = require('./routes/affaires');
@@ -17,6 +18,21 @@ const fichiersRoutes = require('./routes/fichiers');
 const exportRoutes = require('./routes/export'); // Nouvelle route d'export Excel
 
 const app = express();
+
+// Rate limiting pour l'authentification
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // 15 tentatives max par IP
+  message: { 
+    success: false, 
+    message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' 
+  },
+  standardHeaders: true, // Retourne les headers `RateLimit-*`
+  legacyHeaders: false, // Désactive les headers `X-RateLimit-*` legacy
+  // Personnalisation pour le réseau local
+  skipSuccessfulRequests: false, // Compter même les connexions réussies
+  skipFailedRequests: false, // Compter aussi les connexions échouées
+});
 
 // Configuration des headers de sécurité avec Helmet
 app.use(helmet({
@@ -71,7 +87,7 @@ app.use('/api/parametres', parametresRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/statistiques', statistiquesRoutes);
 app.use('/api/templates', templatesRoutes);
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/utilisateurs', require('./routes/utilisateurs'));
 app.use('/api/fichiers', require('./routes/fichiers'));
 app.use('/api/export', exportRoutes); // Ajout de la route d'export Excel

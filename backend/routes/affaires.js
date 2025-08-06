@@ -118,9 +118,8 @@ router.delete('/:id', authMiddleware, validateObjectId, async (req, res) => {
   try {
     const { password } = req.body;
     
-    // Log pour déboguer
-    console.log("Tentative de suppression avec mot de passe:", password);
-    console.log("Mot de passe attendu:", process.env.DELETE_PASSWORD);
+    // Log sécurisé pour audit
+    console.log("Tentative de suppression d'affaire par utilisateur:", req.user?.username || 'inconnu');
     
     // Vérification du mot de passe (BRPF)
     //if (password !== process.env.DELETE_PASSWORD) {

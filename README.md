@@ -244,6 +244,7 @@ Utilisateurs de l'application avec authentification
 - dateCreation
 - dernierLogin
 - actif (booléen)
+- passwordNeedsHash (flag technique pour migration des mots de passe)
 
 ### Affaires
 
@@ -258,6 +259,8 @@ Regroupements de cas (ex: accident de l'autoroute A13)
 - notes (stockage de texte formaté en Markdown)
 - archive
 - redacteur
+- dateCreation
+- militaires (références aux militaires impliqués)
 
 ### Militaires
 
@@ -276,6 +279,9 @@ Les militaires blessés ou décédés en service
 - natureDesBlessures
 - itt
 - decede (oui/non)
+- archive
+- dateCreation
+- beneficiaires (références aux bénéficiaires liés)
 
 ### Bénéficiaires
 
@@ -285,7 +291,7 @@ Le militaire lui-même (si blessé) ou ses ayants-droits
 
 - prenom
 - nom
-- qualite (militaire/conjoint/enfant/parent)
+- qualite (Militaire/Conjoint/Enfant/Parent/Autre)
 - militaire
 - numeroDecision (non unique)
 - dateDecision (date associée au numéro de décision)
@@ -293,6 +299,7 @@ Le militaire lui-même (si blessé) ou ses ayants-droits
 - conventions
 - paiements
 - archive
+- dateCreation
 
 ### Avocats
 
@@ -323,12 +330,36 @@ Fichiers associés aux bénéficiaires (PDF, ODT, EML)
 
 - filename (nom du fichier dans GridFS)
 - originalname (nom original du fichier)
-- contentType (type MIME du fichier)
+- contentType (type MIME du fichier : application/pdf, application/vnd.oasis.opendocument.text, message/rfc822)
 - size (taille en octets)
-- uploadDate (date d'upload)
-- beneficiaire (référence au bénéficiaire)
-- description (description optionnelle)
-- fileId (référence à l'ID stocké dans GridFS)
+- uploadDate (date d'upload, par défaut Date.now)
+- beneficiaire (référence au bénéficiaire, requis)
+- description (description optionnelle, par défaut vide)
+- fileId (référence à l'ID stocké dans GridFS, requis)
+
+### Logs (nouveau)
+
+Logs système et utilisateur avec expiration automatique
+
+**Champs**:
+
+- timestamp (date/heure, expire automatiquement après 3 ans)
+- level (info/warn/error/debug)
+- action (énumération des actions possibles : LOGIN_SUCCESS, USER_CREATE, AFFAIRE_VIEW, etc.)
+- success (booléen)
+- userId (ID de l'utilisateur)
+- username (nom d'utilisateur)
+- userRole (rôle utilisateur)
+- method (méthode HTTP)
+- url (URL de la requête)
+- ipAddress (adresse IP)
+- userAgent (navigateur)
+- resourceType (type de ressource)
+- resourceId (ID de la ressource)
+- resourceName (nom de la ressource)
+- details (détails supplémentaires)
+- error (informations d'erreur si applicable)
+- duration (durée de l'opération)
 
 ### Conventions
 
@@ -358,20 +389,20 @@ Sous-documents des bénéficiaires
 - adresseDestinataire
 - siretRidet
 - titulaireCompte
-- codeEtablissement (5 chiffres)
-- codeGuichet (5 chiffres)
-- numeroCompte (11 caractères alphanumériques)
-- cleVerification (2 chiffres)
+- codeEtablissement (5 chiffres, validation conditionnelle)
+- codeGuichet (5 chiffres, validation conditionnelle)  
+- numeroCompte (11 caractères alphanumériques, validation conditionnelle)
+- cleVerification (2 chiffres, validation conditionnelle)
 
 ### Paramètres
 
 Configuration des listes utilisées dans l'application
 
-**Types**:
+**Champs**:
 
-- circonstances
-- redacteurs
-- templateConvention (modèle pour la génération de documents)
+- type (énumération : circonstances, redacteurs, regions, departements, templateConvention, grades)
+- valeurs (tableau de valeurs mixtes)
+- derniereMiseAJour (date de dernière modification)
 
 ## Routes API principales
 

@@ -17,10 +17,8 @@ if (!JWT_SECRET) {
  */
 const authMiddleware = (req, res, next) => {
   try {
-    // Récupérer le token depuis les headers ou depuis les paramètres de requête
-    const tokenHeader = req.header('x-auth-token');
-    const tokenQuery = req.query.token;
-    const token = tokenHeader || tokenQuery;
+    // Récupérer le token depuis les headers uniquement (sécurisé)
+    const token = req.header('x-auth-token');
     
     // Si pas de token, refuser l'accès
     if (!token) {

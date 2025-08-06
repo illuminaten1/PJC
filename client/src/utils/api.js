@@ -182,16 +182,34 @@ export const fichiersAPI = {
 
 // API pour les exports
 export const exportAPI = {
-  // Méthode pour obtenir l'URL d'export avec le token
+  // Méthode pour obtenir l'URL d'export (sans token dans l'URL)
   getBeneficiairesExcelUrl: () => {
-    const token = localStorage.getItem('token');
-    return `/api/export/beneficiaires?token=${token}`;
+    return `/api/export/beneficiaires`;
   },
   
-  // Méthode alternative si vous préférez utiliser une fonction JavaScript pour déclencher l'export
-  exportBeneficiairesExcel: () => {
-    const token = localStorage.getItem('token');
-    window.location.href = `/api/export/beneficiaires?token=${token}`;
+  // Méthode sécurisée pour télécharger le fichier Excel
+  exportBeneficiairesExcel: async () => {
+    try {
+      const response = await api.get('/export/beneficiaires', {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+      });
+      
+      // Créer un lien de téléchargement
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `beneficiaires_${new Date().toISOString().slice(0,10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors de l\'export:', error);
+      throw error;
+    }
   }
 };
 

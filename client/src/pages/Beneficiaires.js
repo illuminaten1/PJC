@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { FaFilter, FaUserTie, FaFileExcel, FaInfoCircle, FaTable, FaFileContract, FaMoneyBillWave } from 'react-icons/fa';
-import { beneficiairesAPI, parametresAPI } from '../utils/api';
+import { beneficiairesAPI, parametresAPI, exportAPI } from '../utils/api';
 import PageHeader from '../components/common/PageHeader';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
@@ -189,16 +189,13 @@ const Beneficiaires = () => {
   };
   
   // Fonction pour exporter les données en Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     setExportLoading(true);
     handleCloseExportModal();
     
     try {
-      // Récupérer le token d'authentification
-      const token = localStorage.getItem('token');
-      
-      // Rediriger vers l'URL d'export avec le token
-      window.location.href = `/api/export/beneficiaires?token=${token}`;
+      // Utiliser la méthode sécurisée d'export
+      await exportAPI.exportBeneficiairesExcel();
       
       // Réinitialiser l'état après un délai pour permettre le téléchargement
       setTimeout(() => {

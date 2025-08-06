@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { FaBook, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 import { useTheme } from '../contexts/ThemeContext';
 import PageHeader from '../components/common/PageHeader';
+import documentationContent from '../assets/documentation.md';
 
 const Documentation = () => {
   const { colors } = useTheme();
@@ -10,6 +13,15 @@ const Documentation = () => {
   const [activeSection, setActiveSection] = useState('introduction');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [markdownContent, setMarkdownContent] = useState('');
+
+  // Charger le contenu markdown
+  useEffect(() => {
+    fetch(documentationContent)
+      .then(response => response.text())
+      .then(text => setMarkdownContent(text))
+      .catch(error => console.error('Erreur lors du chargement du markdown:', error));
+  }, []);
 
   // Gestion du scroll pour le bouton "retour en haut"
   useEffect(() => {
@@ -211,231 +223,36 @@ const Documentation = () => {
         </Sidebar>
 
         <Content colors={colors}>
-          <Section id="introduction" className="doc-section" colors={colors}>
-            <SectionTitle colors={colors}>Introduction</SectionTitle>
-            <HighlightBox colors={colors}>
-              <p><strong>Bienvenue dans l'application de gestion de Protection Juridique Complémentaire</strong></p>
-              <p>Cette application permet la gestion des dossiers de protection juridique complémentaire pour les militaires ou leurs ayants-droits.</p>
-            </HighlightBox>
-            
-            <p>L'application offre une interface complète pour gérer l'ensemble du processus, depuis la création des dossiers jusqu'au suivi des paiements, en passant par la génération automatique de documents.</p>
-          </Section>
-
-          <Section id="structure" className="doc-section" colors={colors}>
-            <SectionTitle colors={colors}>Structure des données</SectionTitle>
-            
-            <StructureCard colors={colors}>
-              <p>L'application s'organise autour de trois entités principales qui forment une hiérarchie logique :</p>
-            </StructureCard>
-
-            <FeatureGrid>
-              <FeatureCard id="affaires" colors={colors}>
-                <h4>🗂️ Affaires</h4>
-                <p>Regroupements des affaires par événement ou circonstance</p>
-                <em>Exemple : "Accident de l'autoroute A13"</em>
-              </FeatureCard>
-
-              <FeatureCard id="militaires" colors={colors}>
-                <h4>🎖️ Militaires</h4>
-                <p>Les militaires blessés ou décédés en service qui génèrent le droit à cette protection juridique complémentaire</p>
-              </FeatureCard>
-
-              <FeatureCard id="beneficiaires" colors={colors}>
-                <h4>👥 Bénéficiaires</h4>
-                <p>Soit le militaire lui-même (s'il est blessé), soit ses ayants-droits (famille)</p>
-              </FeatureCard>
-            </FeatureGrid>
-          </Section>
-
-          <Section id="fonctionnalites" className="doc-section" colors={colors}>
-            <SectionTitle colors={colors}>Fonctionnalités principales</SectionTitle>
-            
-            <SubsectionTitle colors={colors}>Gestion hiérarchique</SubsectionTitle>
-            <p>L'application permet de naviguer facilement entre les différents niveaux : affaires → militaires → bénéficiaires, tout en conservant les liens logiques entre ces entités.</p>
-
-            <SubsectionTitle colors={colors}>Suivi financier</SubsectionTitle>
-            <p>Gestion complète des conventions d'honoraires et du suivi des paiements avec calcul automatique des ratios et des montants restants à payer.</p>
-
-            <SubsectionTitle colors={colors}>Génération de documents</SubsectionTitle>
-            <p>Création automatique de documents personnalisés :</p>
-            <ul>
-              <li>Conventions d'honoraires</li>
-              <li>Fiches de règlement</li>
-              <li>Fiches de suivi</li>
-            </ul>
-
-            <SubsectionTitle colors={colors}>Statistiques et tableaux de bord</SubsectionTitle>
-            <p>Vue d'ensemble avec indicateurs clés de performance et analyses financières détaillées.</p>
-          </Section>
-
-          <Section id="gestion-parametres" className="doc-section" colors={colors}>
-            <SectionTitle colors={colors}>Gestion des paramètres</SectionTitle>
-            
-            <WarningBox colors={colors}>
-              <p><strong>⚠️ Important :</strong> Consultez cette documentation avant de modifier les circonstances ou les rédacteurs.</p>
-            </WarningBox>
-
-            <SubsectionTitle id="circonstances" colors={colors}>Modification des circonstances</SubsectionTitle>
-            <p>Pour modifier une circonstance existante :</p>
-            <ol>
-              <li>Ajoutez d'abord la nouvelle circonstance <strong>sans supprimer l'ancienne</strong></li>
-              <li>Modifiez les dossiers concernés pour qu'ils utilisent la nouvelle circonstance</li>
-              <li>Une fois tous les dossiers mis à jour, supprimez l'ancienne circonstance</li>
-            </ol>
-            
-            <HighlightBox colors={colors}>
-              <p><strong>Note :</strong> La suppression d'une circonstance ne supprime pas la valeur dans les dossiers déjà créés.</p>
-            </HighlightBox>
-
-            <SubsectionTitle id="redacteurs" colors={colors}>Modification des rédacteurs</SubsectionTitle>
-            <p>Pour remplacer un rédacteur :</p>
-            <ol>
-              <li>Ajoutez le nouveau rédacteur</li>
-              <li>Utilisez l'option <strong>"Transférer un portefeuille"</strong> pour réaffecter tous les dossiers</li>
-              <li>Supprimez l'ancien rédacteur une fois le transfert terminé</li>
-            </ol>
-          </Section>
-
-          <Section id="templates" className="doc-section" colors={colors}>
-            <SectionTitle colors={colors}>Templates de documents</SectionTitle>
-            
-            <SubsectionTitle id="personnalisation" colors={colors}>Personnalisation des templates</SubsectionTitle>
-            
-            <WarningBox colors={colors}>
-              <p><strong>⚠️ Attention :</strong> Ne modifiez jamais les variables entre accolades comme <code>{`{d.beneficiaire.nom}`}</code> - elles seront remplacées automatiquement par les données.</p>
-            </WarningBox>
-
-            <p>Processus de personnalisation :</p>
-            <ol>
-              <li><strong>Téléchargez</strong> le template existant pour voir sa structure</li>
-              <li>Utilisez LibreOffice ou Microsoft Word pour modifier le template (format DOCX)</li>
-              <li>Conservez toutes les variables de données intactes</li>
-              <li><strong>Uploadez</strong> le template personnalisé</li>
-              <li>Testez la génération sur un dossier exemple</li>
-            </ol>
-
-            <p>Vous pouvez toujours <strong>restaurer</strong> le template par défaut si nécessaire.</p>
-
-            <SubsectionTitle id="variables-convention" colors={colors}>Variables pour les conventions d'honoraires</SubsectionTitle>
-            
-            <VariablesGrid>
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>👤 Bénéficiaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.prenom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.qualite}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.numeroDecision}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.dateDecision}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>🎖️ Militaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.militaire.grade}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.prenom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.unite}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>📁 Affaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.affaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.lieu}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.dateFaits}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.redacteur}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>⚖️ Avocat</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.avocat.prenom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.avocat.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.avocat.email}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>📄 Convention</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.convention.montant}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.convention.pourcentageResultats}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>📅 Autres</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.dateDocument}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-            </VariablesGrid>
-
-            <SubsectionTitle id="variables-reglement" colors={colors}>Variables pour les fiches de règlement</SubsectionTitle>
-            
-            <VariablesGrid>
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>💰 Paiement</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.paiement.montant}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.type}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.date}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.referencePiece}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.qualiteDestinataire}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.identiteDestinataire}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.adresseDestinataire}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.siretRidet}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.titulaireCompte}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.codeEtablissement}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.codeGuichet}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.numeroCompte}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.paiement.cleVerification}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>👤 Bénéficiaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.prenom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.qualite}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.numeroDecision}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.beneficiaire.dateDecision}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>🎖️ Militaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.militaire.grade}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.prenom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.militaire.unite}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>📁 Affaire</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.affaire.nom}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.lieu}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.dateFaits}`}</VariableItem>
-                  <VariableItem colors={colors}>{`{d.affaire.redacteur}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-              
-              <VariableGroup colors={colors}>
-                <VariableGroupTitle colors={colors}>📅 Autres</VariableGroupTitle>
-                <VariableList>
-                  <VariableItem colors={colors}>{`{d.dateDocument}`}</VariableItem>
-                </VariableList>
-              </VariableGroup>
-            </VariablesGrid>
-          </Section>
+          <MarkdownContainer colors={colors}>
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Personnalisation des composants Markdown
+                h1: ({node, ...props}) => <SectionTitle colors={colors} {...props} />,
+                h2: ({node, ...props}) => <SectionTitle colors={colors} {...props} />,
+                h3: ({node, ...props}) => <SubsectionTitle colors={colors} {...props} />,
+                h4: ({node, ...props}) => <SubsectionTitle colors={colors} {...props} />,
+                blockquote: ({node, ...props}) => {
+                  const text = node?.children?.[0]?.children?.[0]?.value || '';
+                  if (text.includes('⚠️')) {
+                    return <WarningBox colors={colors} {...props} />;
+                  }
+                  return <HighlightBox colors={colors} {...props} />;
+                },
+                code: ({node, inline, ...props}) => (
+                  inline 
+                    ? <InlineCode colors={colors} {...props} />
+                    : <CodeBlock colors={colors} {...props} />
+                ),
+                ul: ({node, ...props}) => <StyledList colors={colors} {...props} />,
+                ol: ({node, ...props}) => <StyledOrderedList colors={colors} {...props} />,
+                li: ({node, ...props}) => <StyledListItem colors={colors} {...props} />,
+                p: ({node, ...props}) => <StyledParagraph colors={colors} {...props} />
+              }}
+            >
+              {markdownContent}
+            </ReactMarkdown>
+          </MarkdownContainer>
         </Content>
       </DocumentationLayout>
 
@@ -697,40 +514,6 @@ const Content = styled.main`
   }
 `;
 
-const Section = styled.section`
-  margin-bottom: 48px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-  
-  p {
-    margin-bottom: 16px;
-    line-height: 1.7;
-    color: ${props => props.colors.textPrimary};
-    transition: color 0.3s ease;
-  }
-  
-  ul, ol {
-    margin: 16px 0;
-    padding-left: 24px;
-    
-    li {
-      margin-bottom: 8px;
-      line-height: 1.6;
-      color: ${props => props.colors.textPrimary};
-      transition: color 0.3s ease;
-    }
-    
-    @media (max-width: 480px) {
-      padding-left: 16px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    margin-bottom: 32px;
-  }
-`;
 
 const SectionTitle = styled.h2`
   font-size: 28px;
@@ -853,166 +636,6 @@ const WarningBox = styled.div`
   }
 `;
 
-const StructureCard = styled.div`
-  background-color: ${props => props.colors.successBg};
-  border: 1px solid ${props => props.colors.success};
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: ${props => props.colors.shadow};
-  transition: all 0.3s ease;
-  
-  p {
-    margin: 0;
-    color: ${props => props.colors.textPrimary};
-  }
-  
-  @media (max-width: 480px) {
-    padding: 16px;
-    margin: 16px 0;
-  }
-`;
-
-const FeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin: 20px 0;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 8px;
-    margin: 16px 0;
-  }
-`;
-
-const FeatureCard = styled.div`
-  background-color: ${props => props.colors.surface};
-  border: 1px solid ${props => props.colors.border};
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: ${props => props.colors.shadow};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${props => props.colors.shadowHover};
-    border-color: ${props => props.colors.primary};
-  }
-  
-  h4 {
-    color: ${props => props.colors.primary};
-    margin-bottom: 12px;
-    font-size: 18px;
-    
-    @media (max-width: 480px) {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-  }
-  
-  p {
-    color: ${props => props.colors.textPrimary};
-    margin-bottom: 8px;
-    
-    @media (max-width: 480px) {
-      font-size: 14px;
-    }
-  }
-  
-  em {
-    color: ${props => props.colors.textSecondary};
-    font-size: 14px;
-    
-    @media (max-width: 480px) {
-      font-size: 12px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    padding: 16px;
-  }
-`;
-
-const VariablesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  margin: 20px 0;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
-  }
-  
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin: 16px 0;
-  }
-`;
-
-const VariableGroup = styled.div`
-  background-color: ${props => props.colors.surfaceHover};
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid ${props => props.colors.borderLight};
-  transition: all 0.3s ease;
-  
-  @media (max-width: 480px) {
-    padding: 12px;
-  }
-`;
-
-const VariableGroupTitle = styled.h5`
-  font-size: 16px;
-  font-weight: 600;
-  color: ${props => props.colors.primary};
-  margin-bottom: 12px;
-  border-bottom: 1px solid ${props => props.colors.borderLight};
-  padding-bottom: 4px;
-  transition: color 0.3s ease;
-  
-  @media (max-width: 480px) {
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-`;
-
-const VariableList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const VariableItem = styled.li`
-  background-color: ${props => props.colors.surface};
-  border: 1px solid ${props => props.colors.borderLight};
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin-bottom: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  color: ${props => props.colors.primaryDark};
-  transition: all 0.3s ease;
-  word-break: break-all;
-  
-  &:hover {
-    background-color: ${props => props.colors.primary};
-    color: white;
-    transform: translateX(4px);
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 11px;
-    padding: 6px 8px;
-  }
-`;
 
 const ScrollToTopButton = styled.button`
   position: fixed;
@@ -1050,6 +673,87 @@ const ScrollToTopButton = styled.button`
     width: 40px;
     height: 40px;
     font-size: 14px;
+  }
+`;
+
+// Nouveaux styled-components pour ReactMarkdown
+const MarkdownContainer = styled.div`
+  color: ${props => props.colors.textPrimary};
+  line-height: 1.7;
+  
+  & > * {
+    margin-bottom: 16px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`;
+
+const StyledParagraph = styled.p`
+  color: ${props => props.colors.textPrimary};
+  margin-bottom: 16px;
+  line-height: 1.7;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const StyledList = styled.ul`
+  color: ${props => props.colors.textPrimary};
+  margin: 16px 0;
+  padding-left: 24px;
+  
+  @media (max-width: 480px) {
+    padding-left: 16px;
+  }
+`;
+
+const StyledOrderedList = styled.ol`
+  color: ${props => props.colors.textPrimary};
+  margin: 16px 0;
+  padding-left: 24px;
+  
+  @media (max-width: 480px) {
+    padding-left: 16px;
+  }
+`;
+
+const StyledListItem = styled.li`
+  color: ${props => props.colors.textPrimary};
+  margin-bottom: 8px;
+  line-height: 1.6;
+`;
+
+const InlineCode = styled.code`
+  background-color: ${props => props.colors.surfaceHover};
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: ${props => props.colors.primary};
+  word-break: break-all;
+  
+  @media (max-width: 480px) {
+    font-size: 11px;
+  }
+`;
+
+const CodeBlock = styled.pre`
+  background-color: ${props => props.colors.surfaceHover};
+  padding: 16px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: ${props => props.colors.textPrimary};
+  border: 1px solid ${props => props.colors.borderLight};
+  overflow-x: auto;
+  margin: 16px 0;
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+    font-size: 11px;
   }
 `;
 

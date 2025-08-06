@@ -420,17 +420,23 @@ Configuration des listes utilisées dans l'application
 - **PUT /api/beneficiaires/:id** - Modifier un bénéficiaire
 - **DELETE /api/beneficiaires/:id** - Supprimer un bénéficiaire (avec mot de passe)
 - **POST /api/beneficiaires/:id/conventions** - Ajouter une convention
-- **PUT /api/beneficiaires/:id/conventions/:conventionId** - Modifier une convention
+- **PUT /api/beneficiaires/:id/conventions/:index** - Modifier une convention par index
+- **DELETE /api/beneficiaires/:id/conventions/:index** - Supprimer une convention par index
 - **POST /api/beneficiaires/:id/paiements** - Ajouter un paiement
+- **PUT /api/beneficiaires/:id/paiements/:index** - Modifier un paiement par index
+- **DELETE /api/beneficiaires/:id/paiements/:index** - Supprimer un paiement par index
 
 ### Fichiers (nouveau)
 
 - **POST /api/fichiers/:beneficiaireId** - Télécharger un fichier pour un bénéficiaire
 - **GET /api/fichiers/beneficiaire/:beneficiaireId** - Récupérer tous les fichiers d'un bénéficiaire
 - **GET /api/fichiers/preview/:id** - Prévisualiser un fichier
+- **GET /api/fichiers/preview-email/:id** - Prévisualiser un email EML avec pièces jointes
 - **GET /api/fichiers/download/:id** - Télécharger un fichier
+- **GET /api/fichiers/email-attachment/:fileId/:attachmentId** - Télécharger une pièce jointe d'email
 - **DELETE /api/fichiers/:id** - Supprimer un fichier
 - **PATCH /api/fichiers/:id/description** - Mettre à jour la description d'un fichier
+- **GET /api/fichiers/clean-orphans** - Nettoyer les fichiers orphelins (admin)
 
 ### Militaires
 
@@ -442,17 +448,16 @@ Configuration des listes utilisées dans l'application
 
 ### Documents
 
-- **POST /api/documents/convention/:id/:conventionId** - Générer une convention
-- **POST /api/documents/reglement/:id/:paiementId** - Générer un règlement
-- **POST /api/documents/fiche-information** - Générer fiche d'information
+- **POST /api/documents/convention/:beneficiaireId/:conventionIndex** - Générer une convention
+- **POST /api/documents/reglement/:beneficiaireId/:paiementIndex** - Générer un règlement
+- **POST /api/documents/synthese-affaire/:id** - Générer synthèse d'affaire
 
 ### Templates
 
-- **GET /api/templates** - Liste des templates
-- **GET /api/templates/:id** - Détails d'un template
-- **POST /api/templates** - Créer un template
-- **PUT /api/templates/:id** - Modifier un template
-- **DELETE /api/templates/:id** - Supprimer un template
+- **GET /api/templates/status** - Vérifier le statut des templates (personnalisé ou par défaut)
+- **GET /api/templates/download/:templateType** - Télécharger un template
+- **POST /api/templates/upload/:templateType** - Uploader un template personnalisé
+- **POST /api/templates/restore/:templateType** - Restaurer le template par défaut
 
 ### Statistiques
 
@@ -461,6 +466,30 @@ Configuration des listes utilisées dans l'application
 - **GET /api/statistiques/affaire/:id** - Statistiques par affaire
 - **GET /api/statistiques/militaire/:id** - Statistiques par militaire
 - **GET /api/statistiques/budget/:annee** - Statistiques budgétaires par année
+
+### Export
+
+- **GET /api/export/beneficiaires** - Export Excel des bénéficiaires avec filtres
+
+### Logs (nouveau)
+
+- **GET /api/logs** - Liste des logs système avec filtres
+- **GET /api/logs/stats** - Statistiques des logs
+- **GET /api/logs/actions** - Logs des actions utilisateur
+- **GET /api/logs/users** - Logs filtrés par utilisateur
+- **GET /api/logs/:id** - Détails d'un log spécifique
+- **DELETE /api/logs/cleanup** - Nettoyage des anciens logs (admin)
+- **POST /api/logs/cookie-consent** - Enregistrer consentement cookies
+
+### Paramètres
+
+- **GET /api/parametres** - Liste de tous les paramètres
+- **GET /api/parametres/:type** - Paramètres par type (circonstances, redacteurs, etc.)
+- **POST /api/parametres/:type** - Ajouter un paramètre
+- **DELETE /api/parametres/:type/:index** - Supprimer un paramètre par index
+- **PATCH /api/parametres/:type/reorder** - Réorganiser l'ordre des paramètres
+- **POST /api/parametres/transfert-portefeuille** - Transférer un portefeuille d'affaires
+- **GET /api/parametres/historique-transferts** - Historique des transferts de portefeuille
 
 ## Modifications et améliorations
 

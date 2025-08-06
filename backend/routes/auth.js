@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // ou bcryptjs
 const Utilisateur = require('../models/utilisateur');
 const LogService = require('../services/logService');
+// const { sendErrorResponse } = require('../utils/errorHandler'); // Disponible si nécessaire
 
 // Clé secrète pour les tokens JWT depuis les variables d'environnement
 const JWT_SECRET = process.env.JWT_SECRET;

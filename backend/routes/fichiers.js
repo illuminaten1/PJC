@@ -6,6 +6,7 @@ const { GridFsStorage } = require('multer-gridfs-storage');
 const authMiddleware = require('../middleware/auth');
 const Fichier = require('../models/fichier');
 const LogService = require('../services/logService');
+const { sendErrorResponse } = require('../utils/errorHandler');
 
 // Création du storage engine pour multer avec GridFS
 const storage = new GridFsStorage({
@@ -169,11 +170,7 @@ router.post('/:beneficiaireId', [authMiddleware, upload.single('file')], async (
         duration: Date.now() - startTime
       });
     
-    res.status(500).json({ 
-      message: 'Erreur lors du téléchargement du fichier', 
-      error: error.message,
-      stack: error.stack // Pour le débogage uniquement, à retirer en production
-    });
+    sendErrorResponse(res, error, 'Erreur lors du téléchargement du fichier');
   }
 });
 

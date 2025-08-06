@@ -2,17 +2,13 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FaBook, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 import { useTheme } from '../contexts/ThemeContext';
 import PageHeader from '../components/common/PageHeader';
 import documentationContent from '../assets/documentation.md';
 
 const Documentation = () => {
   const { colors } = useTheme();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeSection, setActiveSection] = useState('introduction');
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [markdownContent, setMarkdownContent] = useState('');
 
   // Charger le contenu markdown
@@ -27,114 +23,16 @@ const Documentation = () => {
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
-      updateActiveNav();
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mise à jour de la navigation active basée sur la position de scroll
-  const updateActiveNav = () => {
-    const sections = document.querySelectorAll('.doc-section');
-    let current = 'introduction';
-    
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 150;
-      if (window.scrollY >= sectionTop) {
-        current = section.getAttribute('id');
-      }
-    });
-    
-    setActiveSection(current);
-  };
-
-  // Navigation vers une section
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveSection(sectionId);
-      setShowMobileSidebar(false); // Fermer la sidebar mobile après navigation
-    }
-  };
-
   // Retour en haut
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  // Toggle sidebar mobile
-  const toggleMobileSidebar = () => {
-    setShowMobileSidebar(!showMobileSidebar);
-  };
-
-  // Filtrage du contenu
-  const filterContent = (term) => {
-    setSearchTerm(term);
-    
-    if (!term.trim()) {
-      // Réinitialiser l'affichage
-      const sections = document.querySelectorAll('.doc-section');
-      sections.forEach(section => {
-        section.style.display = 'block';
-        // Supprimer les surlignages
-        section.innerHTML = section.innerHTML.replace(/<mark class="highlight"[^>]*>(.*?)<\/mark>/gi, '$1');
-      });
-      return;
-    }
-
-    const sections = document.querySelectorAll('.doc-section');
-    sections.forEach(section => {
-      const text = section.textContent.toLowerCase();
-      if (text.includes(term.toLowerCase())) {
-        section.style.display = 'block';
-        highlightText(section, term);
-      } else {
-        section.style.display = 'none';
-      }
-    });
-  };
-
-  // Surlignage du texte
-  const highlightText = (element, term) => {
-    // Simple implementation - in production, you might want a more robust solution
-    const text = element.innerHTML;
-    const regex = new RegExp(`(${term})`, 'gi');
-    const highlightedText = text.replace(regex, '<mark class="highlight" style="background-color: yellow; padding: 2px 4px; border-radius: 2px;">$1</mark>');
-    element.innerHTML = highlightedText;
-  };
-
-  const tableOfContentsItems = [
-    { id: 'introduction', label: 'Introduction' },
-    { 
-      id: 'structure', 
-      label: 'Structure des données',
-      children: [
-        { id: 'affaires', label: 'Affaires' },
-        { id: 'militaires', label: 'Militaires' },
-        { id: 'beneficiaires', label: 'Bénéficiaires' }
-      ]
-    },
-    { id: 'fonctionnalites', label: 'Fonctionnalités' },
-    { 
-      id: 'gestion-parametres', 
-      label: 'Gestion des paramètres',
-      children: [
-        { id: 'circonstances', label: 'Circonstances' },
-        { id: 'redacteurs', label: 'Rédacteurs' }
-      ]
-    },
-    { 
-      id: 'templates', 
-      label: 'Templates de documents',
-      children: [
-        { id: 'personnalisation', label: 'Personnalisation' },
-        { id: 'variables-convention', label: 'Variables convention' },
-        { id: 'variables-reglement', label: 'Variables règlement' }
-      ]
-    }
-  ];
 
   return (
     <Container colors={colors}>
@@ -144,85 +42,7 @@ const Documentation = () => {
         backButton
       />
 
-      <DocumentationLayout>
-        {/* Mobile Sidebar Toggle */}
-        <MobileSidebarToggle 
-          onClick={toggleMobileSidebar}
-          colors={colors}
-        >
-          {showMobileSidebar ? <FaTimes /> : <FaBars />}
-          <span>Sommaire</span>
-        </MobileSidebarToggle>
-
-        {/* Sidebar avec overlay mobile */}
-        <SidebarOverlay 
-          isOpen={showMobileSidebar} 
-          onClick={() => setShowMobileSidebar(false)}
-          colors={colors}
-        />
-        
-        <Sidebar colors={colors} isOpen={showMobileSidebar}>
-          <SidebarContent>
-            <SidebarHeader>
-              <SidebarTitle colors={colors}>
-                <FaBook style={{ marginRight: '8px' }} />
-                Sommaire
-              </SidebarTitle>
-              
-              <MobileCloseButton 
-                onClick={() => setShowMobileSidebar(false)}
-                colors={colors}
-              >
-                <FaTimes />
-              </MobileCloseButton>
-            </SidebarHeader>
-            
-            <SearchBox>
-              <SearchIcon colors={colors}>
-                <FaSearch />
-              </SearchIcon>
-              <SearchInput
-                type="text"
-                placeholder="Rechercher dans la documentation..."
-                value={searchTerm}
-                onChange={(e) => filterContent(e.target.value)}
-                colors={colors}
-              />
-            </SearchBox>
-            
-            <TableOfContents>
-              {tableOfContentsItems.map(item => (
-                <TocItem key={item.id}>
-                  <TocLink 
-                    active={activeSection === item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    colors={colors}
-                  >
-                    {item.label}
-                  </TocLink>
-                  {item.children && (
-                    <SubMenu>
-                      {item.children.map(child => (
-                        <TocItem key={child.id}>
-                          <TocLink 
-                            active={activeSection === child.id}
-                            onClick={() => scrollToSection(child.id)}
-                            colors={colors}
-                            submenu={true}
-                          >
-                            {child.label}
-                          </TocLink>
-                        </TocItem>
-                      ))}
-                    </SubMenu>
-                  )}
-                </TocItem>
-              ))}
-            </TableOfContents>
-          </SidebarContent>
-        </Sidebar>
-
-        <Content colors={colors}>
+      <Content colors={colors}>
           <MarkdownContainer colors={colors}>
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
@@ -253,8 +73,7 @@ const Documentation = () => {
               {markdownContent}
             </ReactMarkdown>
           </MarkdownContainer>
-        </Content>
-      </DocumentationLayout>
+      </Content>
 
       {showScrollTop && (
         <ScrollToTopButton onClick={scrollToTop} colors={colors}>
@@ -276,225 +95,6 @@ const Container = styled.div`
   @media (max-width: 768px) {
     padding: 10px;
   }
-`;
-
-const DocumentationLayout = styled.div`
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
-  align-items: start;
-  position: relative;
-  
-  @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-`;
-
-// Toggle button pour mobile
-const MobileSidebarToggle = styled.button`
-  display: none;
-  align-items: center;
-  gap: 8px;
-  background-color: ${props => props.colors.surface};
-  border: 1px solid ${props => props.colors.border};
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: ${props => props.colors.textPrimary};
-  box-shadow: ${props => props.colors.shadow};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background-color: ${props => props.colors.surfaceHover};
-    border-color: ${props => props.colors.primary};
-  }
-  
-  @media (max-width: 968px) {
-    display: flex;
-  }
-`;
-
-// Overlay pour fermer la sidebar mobile
-const SidebarOverlay = styled.div`
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  
-  @media (max-width: 968px) {
-    display: ${props => props.isOpen ? 'block' : 'none'};
-  }
-`;
-
-const Sidebar = styled.nav`
-  background-color: ${props => props.colors.surface};
-  border-radius: 8px;
-  box-shadow: ${props => props.colors.shadow};
-  border: 1px solid ${props => props.colors.border};
-  transition: all 0.3s ease;
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  overflow: hidden;
-  
-  @media (max-width: 968px) {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    transform: translate(-50%, -50%) scale(${props => props.isOpen ? '1' : '0.8'});
-    max-height: 80vh;
-    width: 90%;
-    max-width: 400px;
-    z-index: 999;
-    opacity: ${props => props.isOpen ? '1' : '0'};
-    visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
-    pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
-  }
-`;
-
-const SidebarContent = styled.div`
-  padding: 20px;
-  height: 100%;
-  overflow-y: auto;
-  
-  @media (max-width: 968px) {
-    padding: 16px;
-  }
-`;
-
-const SidebarHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  
-  @media (min-width: 969px) {
-    justify-content: flex-start;
-  }
-`;
-
-const SidebarTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  color: ${props => props.colors.textPrimary};
-  border-bottom: 2px solid ${props => props.colors.primary};
-  padding-bottom: 8px;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
-  flex: 1;
-  
-  @media (max-width: 968px) {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-`;
-
-const MobileCloseButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  color: ${props => props.colors.textSecondary};
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background-color: ${props => props.colors.surfaceHover};
-    color: ${props => props.colors.textPrimary};
-  }
-  
-  @media (max-width: 968px) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-`;
-
-const SearchBox = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 12px;
-  color: ${props => props.colors.textSecondary};
-  z-index: 1;
-  transition: color 0.3s ease;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 12px 16px 12px 40px;
-  border: 1px solid ${props => props.colors.border};
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: ${props => props.colors.surface};
-  color: ${props => props.colors.textPrimary};
-  transition: all 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: ${props => props.colors.primary};
-    box-shadow: 0 0 0 2px ${props => props.colors.primary}20;
-  }
-  
-  &::placeholder {
-    color: ${props => props.colors.textMuted};
-  }
-`;
-
-const TableOfContents = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const TocItem = styled.li`
-  margin-bottom: 4px;
-`;
-
-const TocLink = styled.button`
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: ${props => props.submenu ? '6px 12px' : '8px 12px'};
-  color: ${props => props.active ? 'white' : props.colors.textSecondary};
-  background-color: ${props => props.active ? props.colors.primary : 'transparent'};
-  border: none;
-  border-radius: 4px;
-  font-size: ${props => props.submenu ? '13px' : '14px'};
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background-color: ${props => props.active ? props.colors.primaryDark : props.colors.primary};
-    color: white;
-    transform: translateX(4px);
-  }
-`;
-
-const SubMenu = styled.ul`
-  list-style: none;
-  margin-left: 16px;
-  margin-top: 4px;
-  padding: 0;
 `;
 
 const Content = styled.main`

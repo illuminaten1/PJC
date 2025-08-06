@@ -8,7 +8,8 @@ L'application est une application web full-stack avec séparation claire entre f
 PJC/
 ├── backend/     # Code du serveur Express
 │   ├── middleware/     # Middlewares Express
-│   │   └── auth.js            # Middleware d'authentification JWT
+│   │   ├── auth.js            # Middleware d'authentification JWT
+│   │   └── validation.js      # Middlewares de validation express-validator
 │   ├── models/         # Modèles MongoDB
 │   │   ├── affaire.js         # Modèle des affaires
 │   │   ├── avocat.js          # Modèle des avocats (enrichi avec infos géographiques et contacts)
@@ -33,11 +34,13 @@ PJC/
 │   │   └── utilisateurs.js    # Gestion des utilisateurs (admin uniquement)
 │   ├── scripts/        # Scripts utilitaires
 │   │   └── init-admin.js      # Script pour initialiser le premier administrateur
+│   ├── services/       # Services métier
+│   │   └── logService.js      # Service de logging avec Winston
 │   ├── temp/           # Dossier temporaire
 │   ├── templates/      # Templates pour les documents
 │   ├── utils/          # Utilitaires
 │   │   └── DocumentGenerator.js  # Génération de documents (PDFs, etc.)
-│   ├── .env            # Variables d'environnement
+│   ├── .env            # Variables d'environnement (À CRÉER - voir section Configuration)
 │   ├── app.js          # Point d'entrée du serveur
 │   ├── package-lock.json  # Versions verrouillées des dépendances
 │   └── package.json    # Dépendances du backend
@@ -117,9 +120,11 @@ PJC/
 
 - **Frontend** : React, styled-components, react-router-dom, axios, Chart.js, react-markdown, react-simplemde-editor
 - **Backend** : Node.js, Express.js, MongoDB/Mongoose
+- **Sécurité** : Helmet (CSP, HSTS), express-rate-limit, express-validator, bcrypt
+- **Authentification** : JWT (JSON Web Token)
+- **Logging** : Winston, winston-mongodb
 - **Stockage de fichiers** : MongoDB GridFS
 - **Génération de documents** : Carbone, libreoffice
-- **Authentification** : JWT (JSON Web Token)
 
 ## ⚙️ Configuration et Déploiement
 
@@ -190,6 +195,14 @@ docker-compose logs -f frontend
    - docker-compose.yml utilise des variables d'environnement
    - Aucun secret en dur dans le code source
 
+4. **Mesures de sécurité actives** :
+   - **Rate limiting** : 15 tentatives de connexion par utilisateur/15 minutes
+   - **Validation stricte** : Tous les inputs sont validés avec express-validator
+   - **Headers sécurisés** : Helmet avec CSP, HSTS, XSS protection
+   - **Upload sécurisé** : Limites de taille (5-10MB) et types de fichiers autorisés
+   - **Logging complet** : Toutes les actions utilisateur sont tracées
+   - **Hachage bcrypt** : Mots de passe hachés avec salt (10 rounds)
+
 ## Modèles de données
 
 ### Utilisateurs (nouveau)
@@ -199,7 +212,7 @@ Utilisateurs de l'application avec authentification
 **Champs**:
 
 - username (unique)
-- password (stocké en clair pour simplicité)
+- password (haché avec bcrypt + salt pour sécurité)
 - nom (nom complet)
 - role (administrateur/redacteur)
 - dateCreation

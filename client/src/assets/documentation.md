@@ -167,9 +167,10 @@ L'application propose trois types de templates personnalisables :
 2. Utilisez **LibreOffice** ou **Microsoft Word** pour modifier le template (format DOCX uniquement)
 3. **Conservez absolument** toutes les variables de données intactes
 4. Modifiez uniquement le **formatage, la mise en page et le texte fixe**
-5. **Uploadez** le template personnalisé via l'interface
-6. **Testez immédiatement** la génération sur un dossier exemple
-7. En cas de problème, utilisez **"Restaurer le template par défaut"**
+5. **Enregistrez impérativement au format .docx** (pas .odt même avec LibreOffice)
+6. **Uploadez** le template personnalisé via l'interface
+7. **Testez immédiatement** la génération sur un dossier exemple
+8. En cas de problème, utilisez **"Restaurer le template par défaut"**
 
 ### 🔄 Gestion des versions
 - **Status des templates** : Voir si un template est personnalisé ou par défaut

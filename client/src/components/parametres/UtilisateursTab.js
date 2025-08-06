@@ -15,6 +15,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
     id: '',
     username: '',
     password: '',
+    confirmPassword: '',
     nom: '',
     role: 'redacteur'
   });
@@ -22,7 +23,8 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
   const [passwordChangeData, setPasswordChangeData] = useState({
     id: '',
     username: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   
   const [utilisateurToDelete, setUtilisateurToDelete] = useState(null);
@@ -60,6 +62,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
         id: utilisateur._id,
         username: utilisateur.username,
         password: '',
+        confirmPassword: '',
         nom: utilisateur.nom,
         role: utilisateur.role
       });
@@ -68,6 +71,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
         id: '',
         username: '',
         password: '',
+        confirmPassword: '',
         nom: '',
         role: 'redacteur'
       });
@@ -92,6 +96,18 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
       return;
     }
     
+    // Vérification de la correspondance des mots de passe pour la création
+    if (!currentUtilisateur.id && currentUtilisateur.password !== currentUtilisateur.confirmPassword) {
+      setErrorMessage("Les mots de passe ne correspondent pas");
+      return;
+    }
+    
+    // Vérification de la correspondance des mots de passe pour la modification (si un mot de passe est fourni)
+    if (currentUtilisateur.id && currentUtilisateur.password.trim() && currentUtilisateur.password !== currentUtilisateur.confirmPassword) {
+      setErrorMessage("Les mots de passe ne correspondent pas");
+      return;
+    }
+    
     try {
       if (currentUtilisateur.id) {
         const requestBody = {
@@ -102,6 +118,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
         
         if (currentUtilisateur.password.trim()) {
           requestBody.password = currentUtilisateur.password;
+          requestBody.confirmPassword = currentUtilisateur.confirmPassword;
         }
         
         const response = await fetch(`/api/utilisateurs/${currentUtilisateur.id}`, {
@@ -129,6 +146,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
           body: JSON.stringify({
             username: currentUtilisateur.username,
             password: currentUtilisateur.password,
+            confirmPassword: currentUtilisateur.confirmPassword,
             nom: currentUtilisateur.nom,
             role: currentUtilisateur.role
           })
@@ -158,6 +176,11 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
       return;
     }
     
+    if (passwordChangeData.password !== passwordChangeData.confirmPassword) {
+      setErrorMessage("Les mots de passe ne correspondent pas");
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/utilisateurs/${passwordChangeData.id}/password`, {
         method: 'PATCH',
@@ -166,7 +189,8 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
           'x-auth-token': localStorage.getItem('token')
         },
         body: JSON.stringify({
-          password: passwordChangeData.password
+          password: passwordChangeData.password,
+          confirmPassword: passwordChangeData.confirmPassword
         })
       });
       
@@ -357,6 +381,7 @@ const UtilisateursTab = ({ showSuccessMessage, setErrorMessage, colors }) => {
             />
           </FormGroup>
           
+          {/* Champ de confirmation du mot de passe */}
           {(currentUtilisateur.password.trim() || !currentUtilisateur.id) && (
             <FormGroup>
               <FormLabel colors={colors}>Confirmer le mot de passe</FormLabel>

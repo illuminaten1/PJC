@@ -15,6 +15,7 @@ PJC/
 │   │   ├── avocat.js          # Modèle des avocats (enrichi avec infos géographiques et contacts)
 │   │   ├── beneficiaire.js    # Modèle des bénéficiaires
 │   │   ├── fichier.js         # Modèle des fichiers (PDF, ODT, EML)
+│   │   ├── log.js             # Modèle des logs système et utilisateur
 │   │   ├── militaire.js       # Modèle des militaires
 │   │   ├── parametre.js       # Modèle des paramètres
 │   │   ├── transfertHistorique.js # Modèle pour l'historique des transferts
@@ -26,22 +27,29 @@ PJC/
 │   │   ├── avocats.js         # Gestion des avocats avec nouvelles routes (utils/cabinets, utils/villes)
 │   │   ├── beneficiaires.js   # Gestion des bénéficiaires (avec populate avocats)
 │   │   ├── documents.js       # Génération de documents
+│   │   ├── export.js          # Routes d'export Excel/PDF
 │   │   ├── fichiers.js        # Gestion des fichiers (upload, download, preview)
+│   │   ├── logs.js            # Consultation des logs système
 │   │   ├── militaires.js      # Gestion des militaires (avec populate avocats pour bénéficiaires)
 │   │   ├── parametres.js      # Gestion des paramètres
 │   │   ├── statistiques.js    # Calcul et fourniture des statistiques
 │   │   ├── templates.js       # Gestion des templates
 │   │   └── utilisateurs.js    # Gestion des utilisateurs (admin uniquement)
 │   ├── scripts/        # Scripts utilitaires
-│   │   └── init-admin.js      # Script pour initialiser le premier administrateur
+│   │   ├── init-admin.js      # Script pour initialiser le premier administrateur
+│   │   ├── init-data.js       # Script d'initialisation des données de base
+│   │   └── initRegionsDepartements.js # Script d'initialisation des régions/départements
 │   ├── services/       # Services métier
 │   │   └── logService.js      # Service de logging avec Winston
 │   ├── temp/           # Dossier temporaire
 │   ├── templates/      # Templates pour les documents
 │   ├── utils/          # Utilitaires
-│   │   └── DocumentGenerator.js  # Génération de documents (PDFs, etc.)
+│   │   ├── DocumentGenerator.js  # Génération de documents (PDFs, etc.)
+│   │   └── errorHandler.js       # Gestionnaire d'erreurs centralisé
 │   ├── .env            # Variables d'environnement (À CRÉER - voir section Configuration)
 │   ├── app.js          # Point d'entrée du serveur
+│   ├── Dockerfile      # Configuration Docker pour le backend
+│   ├── docker-entrypoint.sh # Script d'entrée Docker
 │   ├── package-lock.json  # Versions verrouillées des dépendances
 │   └── package.json    # Dépendances du backend
 └── client/      # Code de l'interface React
@@ -64,7 +72,8 @@ PJC/
         │   │   ├── MarkdownEditor.js   # Éditeur Markdown pour les notes
         │   │   ├── Modal.js            # Fenêtre modale (modifiée pour supporter le contenu d'en-tête)
         │   │   ├── PageHeader.js       # En-tête de page
-        │   │   └── StatusTag.js        # Étiquette de statut
+        │   │   ├── StatusTag.js        # Étiquette de statut
+        │   │   └── Toast.js            # Notifications toast
         │   ├── forms/      # Formulaires pour la création/édition
         │   │   ├── AffaireForm.js      # Formulaire des affaires
         │   │   ├── AvocatForm.js       # Formulaire des avocats (enrichi avec nouveaux champs)
@@ -73,18 +82,33 @@ PJC/
         │   │   ├── MilitaireForm.js    # Formulaire des militaires
         │   │   ├── PaiementForm.js     # Formulaire des paiements (+ original)
         │   │   └── UtilisateurForm.js  # Formulaire de gestion des utilisateurs
+        │   ├── parametres/  # Composants des onglets de paramètres
+        │   │   ├── CirconstancesTab.js # Onglet gestion des circonstances
+        │   │   ├── DepartementsTab.js  # Onglet gestion des départements
+        │   │   ├── GradesTab.js        # Onglet gestion des grades
+        │   │   ├── LogsTab.js          # Onglet consultation des logs
+        │   │   ├── RedacteursTab.js    # Onglet gestion des rédacteurs
+        │   │   ├── RegionsTab.js       # Onglet gestion des régions
+        │   │   ├── SimpleListTab.js    # Composant générique pour listes simples
+        │   │   ├── TemplatesTab.js     # Onglet gestion des templates
+        │   │   ├── UtilisateursTab.js  # Onglet gestion des utilisateurs
+        │   │   └── index.js            # Exports des composants parametres
         │   └── specific/   # Composants spécifiques à l'application
-        │       ├── AffaireTree.js       # Arborescence des affaires
-        │       ├── AvocatDetail.js      # Affichage détaillé d'un avocat (nouveau)
-        │       ├── ConventionsTable.js  # Tableau des conventions
-        │       ├── DashboardSummary.js  # Résumé du tableau de bord
-        │       ├── DocumentsSection.js  # Gestion et prévisualisation des fichiers
-        │       ├── PaiementsTable.js    # Tableau des paiements
-        │       ├── StatistiquesBudget.js # Budget des statistiques
-        │       └── UtilisateursTable.js  # Tableau des utilisateurs
+        │       ├── AffaireTree.js         # Arborescence des affaires
+        │       ├── AvocatDetail.js        # Affichage détaillé d'un avocat (nouveau)
+        │       ├── ConventionsTable.js    # Tableau des conventions
+        │       ├── DashboardSummary.js    # Résumé du tableau de bord
+        │       ├── DocumentsSection.js    # Gestion et prévisualisation des fichiers
+        │       ├── EmailPreview.js        # Prévisualisation des emails EML
+        │       ├── ExportModal.js         # Modal d'export Excel/PDF
+        │       ├── PaiementsTable.js      # Tableau des paiements
+        │       ├── StatistiquesBudget.js  # Budget des statistiques
+        │       ├── SyntheseDropdownButton.js # Bouton dropdown pour synthèses
+        │       └── UtilisateursTable.js   # Tableau des utilisateurs
         ├── contexts/   # Contextes React pour état global
         │   ├── AppContext.js     # Contexte global de l'application
-        │   └── AuthContext.js    # Contexte d'authentification
+        │   ├── AuthContext.js    # Contexte d'authentification
+        │   └── ThemeContext.js   # Contexte de gestion des thèmes
         ├── layouts/    # Layouts principaux
         │   └── MainLayout.js     # Layout principal (enrichi avec déconnexion et info utilisateur)
         ├── pages/      # Pages principales
@@ -95,6 +119,7 @@ PJC/
         │   ├── DetailAffaire.js     # Page détails d'une affaire
         │   ├── DetailBeneficiaire.js # Page détails d'un bénéficiaire
         │   ├── DetailMilitaire.js   # Page détails d'un militaire
+        │   ├── Documentation.js     # Page de documentation
         │   ├── Login.js             # Page de connexion
         │   ├── Militaires.js        # Page liste des militaires
         │   ├── NotFound.js          # Page 404
@@ -102,6 +127,7 @@ PJC/
         │   └── Statistiques.js      # Page des statistiques
         ├── utils/      # Utilitaires frontend
         │   ├── api.js              # Client API (axios, avec nouvelles fonctions pour authentification)
+        │   ├── exportUtils.js      # Utilitaires d'export Excel/PDF
         │   └── PrivateRoute.js     # Composant pour protéger les routes privées
         ├── App.css               # Styles CSS de l'application
         ├── App.js                # Composant racine (avec routes protégées)

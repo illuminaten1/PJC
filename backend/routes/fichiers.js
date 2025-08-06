@@ -44,8 +44,45 @@ const storage = new GridFsStorage({
   }
 });
 
-// Middleware multer configuré avec GridFS storage
-const upload = multer({ storage });
+// Middleware multer configuré avec GridFS storage et limites de sécurité
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB max par fichier
+    files: 5, // Maximum 5 fichiers par requête
+    fieldNameSize: 100, // Limite le nom des champs
+    fieldSize: 1024, // Limite la taille des champs texte
+    fields: 10 // Maximum 10 champs par requête
+  },
+  fileFilter: (req, file, cb) => {
+    const acceptedMimeTypes = [
+      'application/pdf', 
+      'application/vnd.oasis.opendocument.text', 
+      'message/rfc822',
+      'application/odt',
+      'message/eml'
+    ];
+    
+    // Vérification du type MIME
+    if (!acceptedMimeTypes.includes(file.mimetype)) {
+      return cb(new Error('Type de fichier non accepté. Seuls les fichiers PDF, ODT et EML sont autorisés.'));
+    }
+    
+    // Vérification de l'extension du fichier
+    const allowedExtensions = ['.pdf', '.odt', '.eml'];
+    const fileExtension = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+    if (!allowedExtensions.includes(fileExtension)) {
+      return cb(new Error('Extension de fichier non autorisée.'));
+    }
+    
+    // Vérification du nom de fichier (pas de caractères dangereux)
+    if (!/^[a-zA-Z0-9._-]+$/.test(file.originalname.replace(/\.[^/.]+$/, ""))) {
+      return cb(new Error('Nom de fichier invalide. Utilisez uniquement des lettres, chiffres, points, tirets et underscores.'));
+    }
+    
+    cb(null, true);
+  }
+});
 
 // Route de test simple sans authentification
 router.get('/test', (req, res) => {

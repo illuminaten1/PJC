@@ -32,11 +32,29 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 MB max pour les templates Word
+    files: 1, // Un seul fichier à la fois
+    fieldNameSize: 100,
+    fieldSize: 1024,
+    fields: 5
+  },
   fileFilter: function(req, file, cb) {
     // N'accepter que les fichiers .docx
     if (file.mimetype !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       return cb(new Error('Seuls les fichiers DOCX sont acceptés'));
     }
+    
+    // Vérification de l'extension
+    if (!file.originalname.toLowerCase().endsWith('.docx')) {
+      return cb(new Error('Extension de fichier invalide. Seuls les fichiers .docx sont autorisés.'));
+    }
+    
+    // Vérification du nom de fichier
+    if (!/^[a-zA-Z0-9._-]+$/.test(file.originalname.replace(/\.[^/.]+$/, ""))) {
+      return cb(new Error('Nom de fichier invalide. Utilisez uniquement des lettres, chiffres, points, tirets et underscores.'));
+    }
+    
     cb(null, true);
   }
 });

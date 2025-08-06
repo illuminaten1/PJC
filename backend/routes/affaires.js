@@ -5,6 +5,7 @@ const Militaire = require('../models/militaire');
 const Beneficiaire = require('../models/beneficiaire');
 const authMiddleware = require('../middleware/auth');
 const LogService = require('../services/logService');
+const { affaireValidation, mongoIdValidation, searchValidation } = require('../middleware/validation');
 
 // Middleware de vérification d'ID valide
 const validateObjectId = (req, res, next) => {
@@ -16,7 +17,7 @@ const validateObjectId = (req, res, next) => {
 };
 
 // GET - Récupérer toutes les affaires avec filtres
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, searchValidation, async (req, res) => {
   try {
     const { search, year, archived, redacteur } = req.query;
     let query = {};
@@ -73,7 +74,7 @@ router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
 });
 
 // POST - Créer une nouvelle affaire
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, affaireValidation, async (req, res) => {
   try {
     const nouvelleAffaire = new Affaire(req.body);
     const affaireSauvegardee = await nouvelleAffaire.save();
@@ -90,7 +91,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // PUT - Mettre à jour une affaire
-router.put('/:id', authMiddleware, validateObjectId, async (req, res) => {
+router.put('/:id', authMiddleware, mongoIdValidation, affaireValidation, async (req, res) => {
   try {
     const affaireMaj = await Affaire.findByIdAndUpdate(
       req.params.id, 

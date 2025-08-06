@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // ou bcryptjs
 const Utilisateur = require('../models/utilisateur');
 const LogService = require('../services/logService');
+const { loginValidation } = require('../middleware/validation');
 // const { sendErrorResponse } = require('../utils/errorHandler'); // Disponible si nécessaire
 
 // Clé secrète pour les tokens JWT depuis les variables d'environnement
@@ -21,17 +22,9 @@ if (!JWT_SECRET) {
  * @desc    Connexion utilisateur et génération de token
  * @access  Public
  */
-router.post('/login', async (req, res) => {
+router.post('/login', loginValidation, async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    // Vérifier que l'username et le mot de passe sont fournis
-    if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Nom d\'utilisateur et mot de passe requis'
-      });
-    }
 
     // Rechercher l'utilisateur dans la base de données
     const utilisateur = await Utilisateur.findOne({ username });

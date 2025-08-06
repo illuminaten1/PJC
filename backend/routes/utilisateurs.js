@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const Utilisateur = require('../models/utilisateur');
 const authMiddleware = require('../middleware/auth');
 const LogService = require('../services/logService');
+const { userValidation, mongoIdValidation } = require('../middleware/validation');
 
 /**
  * Middleware pour vérifier les droits administrateur
@@ -77,7 +78,7 @@ router.get('/:id', authMiddleware, isAdmin, async (req, res) => {
  * @desc    Créer un nouvel utilisateur
  * @access  Admin
  */
-router.post('/', authMiddleware, isAdmin, async (req, res) => {
+router.post('/', authMiddleware, isAdmin, userValidation, async (req, res) => {
   try {
     const { username, password, confirmPassword, nom, role } = req.body;
     
@@ -165,7 +166,7 @@ router.post('/', authMiddleware, isAdmin, async (req, res) => {
  * @desc    Mettre à jour un utilisateur
  * @access  Admin
  */
-router.put('/:id', authMiddleware, isAdmin, async (req, res) => {
+router.put('/:id', authMiddleware, isAdmin, mongoIdValidation, userValidation, async (req, res) => {
   try {
     const { username, password, nom, role, actif } = req.body;
     

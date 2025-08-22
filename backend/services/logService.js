@@ -38,6 +38,41 @@ const logger = winston.createLogger({
  * Service de logging pour les actions utilisateur
  */
 class LogService {
+
+  /**
+   * Récupère la vraie IP de l'utilisateur derrière un proxy
+   * @param {Object} req - Objet request Express
+   * @returns {string} IP address
+   */
+  static getRealIP(req) {
+    // Ordre de priorité pour récupérer la vraie IP derrière un proxy
+    const headers = [
+      'x-forwarded-for',      // Standard de facto pour les proxies
+      'x-real-ip',            // Nginx proxy
+      'x-client-ip',          // Apache mod_proxy
+      'cf-connecting-ip',     // Cloudflare
+      'x-cluster-client-ip',  // Cluster/load balancer
+      'x-forwarded',          // Variante
+      'forwarded-for',        // Variante
+      'forwarded'             // RFC 7239
+    ];
+
+    // Chercher dans les headers de proxy
+    for (const header of headers) {
+      const value = req.headers[header];
+      if (value) {
+        // x-forwarded-for peut contenir plusieurs IPs séparées par des virgules
+        // La première est généralement l'IP originale du client
+        const ip = value.split(',')[0].trim();
+        if (ip && ip !== 'unknown') {
+          return ip;
+        }
+      }
+    }
+
+    // Fallback vers les méthodes Express classiques
+    return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
+  }
   
   /**
    * Log une action utilisateur
@@ -84,7 +119,7 @@ class LogService {
       if (req) {
         logData.method = req.method;
         logData.url = req.originalUrl || req.url;
-        logData.ipAddress = req.ip || req.connection?.remoteAddress || req.headers['x-forwarded-for'];
+        logData.ipAddress = this.getRealIP(req);
         logData.userAgent = req.headers['user-agent'];
       }
 

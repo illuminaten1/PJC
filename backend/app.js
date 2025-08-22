@@ -19,6 +19,10 @@ const exportRoutes = require('./routes/export'); // Nouvelle route d'export Exce
 
 const app = express();
 
+// Configuration pour faire confiance au proxy (pour récupérer la vraie IP)
+// Ceci permettra à Express de correctement interpréter les headers X-Forwarded-For
+app.set('trust proxy', true);
+
 // Rate limiting pour l'authentification
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

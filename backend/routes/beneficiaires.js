@@ -98,6 +98,9 @@ router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
       return res.status(404).json({ message: 'Bénéficiaire non trouvé' });
     }
     
+    // Log de la consultation du bénéficiaire
+    LogService.logCRUD('read', 'beneficiaire', req.user, req, beneficiaire._id, `${beneficiaire.prenom} ${beneficiaire.nom}`);
+    
     res.json(beneficiaire);
   } catch (error) {
     res.status(500).json({ message: error.message });

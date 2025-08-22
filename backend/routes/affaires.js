@@ -64,6 +64,9 @@ router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
     // Récupérer les militaires associés à cette affaire
     const militaires = await Militaire.find({ affaire: req.params.id });
     
+    // Log de la consultation de l'affaire
+    LogService.logCRUD('read', 'affaire', req.user, req, affaire._id, affaire.nom);
+    
     res.json({
       ...affaire.toObject(),
       militaires
@@ -233,6 +236,9 @@ router.get('/:id/arborescence', authMiddleware, validateObjectId, async (req, re
         };
       })
     );
+    
+    // Log de la consultation de l'arborescence de l'affaire
+    LogService.logCRUD('read', 'affaire', req.user, req, affaire._id, `${affaire.nom} (arborescence complète)`);
     
     res.json({
       ...affaire.toObject(),

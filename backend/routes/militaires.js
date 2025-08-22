@@ -117,6 +117,9 @@ router.get('/:id', authMiddleware, validateObjectId, async (req, res) => {
     const beneficiaires = await Beneficiaire.find({ militaire: req.params.id })
       .populate('avocats');
     
+    // Log de la consultation du militaire
+    LogService.logCRUD('read', 'militaire', req.user, req, militaire._id, `${militaire.grade} ${militaire.prenom} ${militaire.nom}`);
+    
     res.json({
       ...militaire.toObject(),
       beneficiaires

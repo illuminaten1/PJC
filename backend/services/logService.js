@@ -73,6 +73,42 @@ class LogService {
     // Fallback vers les méthodes Express classiques
     return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
   }
+
+  /**
+   * Nettoie les messages d'erreur pour éviter la fuite d'informations sensibles
+   * @param {string} message - Message d'erreur original
+   * @returns {string} Message d'erreur nettoyé
+   */
+  static sanitizeErrorMessage(message) {
+    if (!message) return 'Erreur inconnue';
+    
+    // Patterns de données sensibles à masquer
+    const sensitivePatterns = [
+      /password[:\s]*[^\s]+/gi,           // password: xxx
+      /mot[\s]*de[\s]*passe[:\s]*[^\s]+/gi, // mot de passe: xxx
+      /token[:\s]*[^\s]+/gi,              // token: xxx
+      /secret[:\s]*[^\s]+/gi,             // secret: xxx
+      /key[:\s]*[^\s]+/gi,                // key: xxx
+      /authorization[:\s]*[^\s]+/gi,      // authorization: xxx
+      /bearer[:\s]*[^\s]+/gi,             // bearer xxx
+      /\$2[aby]\$\d+\$[a-zA-Z0-9.\/]+/g,  // hashes bcrypt
+      /jwt[:\s]*[^\s]+/gi                 // jwt: xxx
+    ];
+    
+    let sanitizedMessage = message;
+    
+    // Remplacer les patterns sensibles
+    sensitivePatterns.forEach(pattern => {
+      sanitizedMessage = sanitizedMessage.replace(pattern, '[DONNÉES SENSIBLES MASQUÉES]');
+    });
+    
+    // Limiter la longueur du message
+    if (sanitizedMessage.length > 500) {
+      sanitizedMessage = sanitizedMessage.substring(0, 500) + '...';
+    }
+    
+    return sanitizedMessage;
+  }
   
   /**
    * Log une action utilisateur
@@ -132,11 +168,14 @@ class LogService {
       if (details) logData.details = details;
       if (duration) logData.duration = duration;
 
-      // Informations d'erreur
+      // Informations d'erreur - SÉCURISÉ
       if (error) {
+        // Filtrer les mots de passe des messages d'erreur
+        const sanitizedMessage = this.sanitizeErrorMessage(error.message);
+        
         logData.error = {
-          message: error.message,
-          stack: error.stack,
+          message: sanitizedMessage,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : 'Stack trace hidden in production',
           code: error.code
         };
         logData.level = 'error';
@@ -146,15 +185,17 @@ class LogService {
       // Créer le log en base
       await Log.createLog(logData);
 
-      // Log aussi dans la console en développement
+      // Log sécurisé dans la console en développement
       if (process.env.NODE_ENV === 'development') {
-        const logMessage = `${action} - User: ${logData.username || 'Anonymous'} - Resource: ${resourceType}${resourceId ? `(${resourceId})` : ''}`;
+        const safeUsername = logData.username ? logData.username.substring(0, 20) : 'Anonymous';
+        const logMessage = `${action} - User: ${safeUsername} - Resource: ${resourceType}${resourceId ? `(${resourceId.substring(0, 24)})` : ''}`;
         console.log(`[LOG] ${logMessage}`);
       }
 
     } catch (err) {
-      // Log l'erreur sans interrompre le processus principal
-      console.error('Erreur lors du logging:', err);
+      // Log l'erreur de manière sécurisée sans interrompre le processus principal
+      const safeError = this.sanitizeErrorMessage(err.message);
+      console.error('Erreur lors du logging:', safeError);
     }
   }
 
@@ -169,7 +210,7 @@ class LogService {
       success,
       error,
       details: { 
-        username,
+        username: username ? username.substring(0, 20) + (username.length > 20 ? '...' : '') : 'unknown', // Tronquer username long
         loginAttempt: true
       }
     });

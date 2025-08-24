@@ -40,11 +40,6 @@ const utilisateurSchema = new Schema({
   actif: {
     type: Boolean,
     default: true
-  },
-  // Flag pour indiquer si le mot de passe est encore en clair
-  passwordNeedsHash: {
-    type: Boolean,
-    default: false
   }
 });
 
@@ -53,34 +48,28 @@ utilisateurSchema.methods.isAdmin = function() {
   return this.role === 'administrateur';
 };
 
-// Méthode pour vérifier un mot de passe avec meilleure détection d'erreurs
+// Méthode pour vérifier un mot de passe - SÉCURISÉ (seulement bcrypt)
 utilisateurSchema.methods.comparePassword = async function(candidatePassword) {
   if (!candidatePassword) {
     return false; // Retourner false si pas de mot de passe fourni
   }
   
-  // Si le mot de passe est en clair (migration)
-  if (this.passwordNeedsHash === true) {
-    return this.password === candidatePassword;
+  // Vérifier que le mot de passe stocké est bien haché avec bcrypt
+  if (!this.password.startsWith('$2a$') && !this.password.startsWith('$2b$') && !this.password.startsWith('$2y$')) {
+    console.error('SÉCURITÉ: Mot de passe non haché détecté pour l\'utilisateur:', this.username);
+    return false; // Refuser la connexion si le mot de passe n'est pas haché
   }
   
-  // Vérifier si le mot de passe a le format d'un hachage bcrypt
-  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$') || this.password.startsWith('$2y$')) {
-    try {
-      // Utiliser bcrypt pour comparer
-      return await bcrypt.compare(candidatePassword, this.password);
-    } catch (err) {
-      console.error('Erreur bcrypt.compare:', err);
-      // En cas d'erreur, on ne fait pas de fallback et on retourne false
-      return false;
-    }
-  } else {
-    // Si le mot de passe n'a pas le format d'un hachage bcrypt, comparer en clair
-    return this.password === candidatePassword;
+  try {
+    // Utiliser bcrypt pour comparer
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (err) {
+    console.error('Erreur bcrypt.compare pour l\'utilisateur:', this.username, '- Erreur:', err.message);
+    return false;
   }
 };
 
-// Middleware pré-sauvegarde pour hacher le mot de passe
+// Middleware pré-sauvegarde pour hacher le mot de passe - SÉCURISÉ
 utilisateurSchema.pre('save', async function(next) {
   const user = this;
   
@@ -90,24 +79,21 @@ utilisateurSchema.pre('save', async function(next) {
   }
   
   try {
-    // Si le mot de passe est marqué explicitement pour ne pas être haché
-    if (user.passwordNeedsHash === true) {
-      return next();
-    }
-    
     // Vérifier si le mot de passe est déjà haché
     if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
       // Le mot de passe est déjà haché, ne pas le hacher à nouveau
       return next();
     }
     
-    // Hacher le mot de passe
-    const salt = await bcrypt.genSalt(10);
+    // Hacher le mot de passe avec un salt sécurisé
+    const salt = await bcrypt.genSalt(12); // Augmentation du coût pour plus de sécurité
     const hashedPassword = await bcrypt.hash(user.password, salt);
     user.password = hashedPassword;
     
+    console.log('Mot de passe haché avec succès pour l\'utilisateur:', user.username);
     next();
   } catch (err) {
+    console.error('Erreur lors du hachage du mot de passe pour:', user.username, '- Erreur:', err.message);
     next(err);
   }
 });

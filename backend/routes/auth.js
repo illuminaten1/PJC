@@ -47,26 +47,16 @@ router.post('/login', loginValidation, async (req, res) => {
       });
     }
 
-    // Vérifier le mot de passe avec la méthode comparePassword
+    // Vérifier le mot de passe avec la méthode comparePassword - SÉCURISÉ
     let isMatch = false;
     
     try {
       isMatch = await utilisateur.comparePassword(password);
     } catch (error) {
-      console.error('Erreur lors de comparePassword:', error);
-      
-      // Fallback en cas d'erreur: essayer la comparaison directe avec bcrypt
-      try {
-        // Si le mot de passe a le format bcrypt, essayer bcrypt.compare directement
-        if (utilisateur.password.startsWith('$2')) {
-          isMatch = await bcrypt.compare(password, utilisateur.password);
-        } else if (utilisateur.passwordNeedsHash === true) {
-          // Si marqué explicitement comme non haché, essayer comparaison directe
-          isMatch = utilisateur.password === password;
-        }
-      } catch (innerError) {
-        console.error('Erreur secondaire lors de la vérification:', innerError);
-      }
+      // Log sécurisé sans exposer le mot de passe
+      console.error('Erreur lors de comparePassword pour utilisateur:', username, '- Erreur:', error.message);
+      // Pas de fallback non sécurisé - refus de connexion
+      isMatch = false;
     }
     
     if (!isMatch) {
@@ -77,18 +67,8 @@ router.post('/login', loginValidation, async (req, res) => {
       });
     }
 
-    // Si le mot de passe était en clair, le hacher pour les prochaines connexions
-    if (utilisateur.passwordNeedsHash === true || 
-       (!utilisateur.password.startsWith('$2a$') && 
-        !utilisateur.password.startsWith('$2b$') && 
-        !utilisateur.password.startsWith('$2y$'))) {
-      
-      // Hacher le mot de passe
-      const salt = await bcrypt.genSalt(10);
-      utilisateur.password = await bcrypt.hash(password, salt);
-      utilisateur.passwordNeedsHash = false;
-      await utilisateur.save();
-    }
+    // Note: Logique de migration supprimée pour sécurité
+    // Tous les mots de passe doivent maintenant être hachés avec bcrypt
 
     // Mettre à jour la date de dernière connexion
     utilisateur.dernierLogin = new Date();
@@ -223,7 +203,6 @@ router.post('/init', async (req, res) => {
       nom: 'Administrateur',
       dateCreation: new Date(),
       actif: true,
-      passwordNeedsHash: false
     };
     
     // Utiliser l'insertion directe pour éviter middleware
